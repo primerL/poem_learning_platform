@@ -1,3 +1,4 @@
+// 现在直接放入了scene.vue里
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { World } from './world.js';

@@ -15,9 +15,9 @@ function loadTexture(path) {
 // 中心点在原点
 const geometry = new THREE.BoxGeometry();
 const textures = {
-    dirt: loadTexture('textures/dirt.png'),
-    grass: loadTexture('textures/grass.png'),
-    grassSide: loadTexture('textures/grass_side.png'),
+    dirt: loadTexture('/textures/dirt.png'),
+    grass: loadTexture('/textures/grass.png'),
+    grassSide: loadTexture('/textures/grass_side.png'),
 }
 const grassMaterial = [
     new THREE.MeshLambertMaterial({map: textures.grassSide}),
@@ -85,20 +85,20 @@ export class WorldChunk extends THREE.Group {
         const simplex = new SimplexNoise(rng);
         for (let x = 0; x < this.size.width; x++) {
             for (let z = 0; z < this.size.width; z++) {
-                // scale 用于控制噪音的变化速度，越大变化得越平缓（慢）
-                // + this.position.x 使得每个 chunk 的噪音不同
-                const value = simplex.noise(
-                    (x + this.position.x) / this.params.terrain.scale, 
-                    (z + this.position.z) / this.params.terrain.scale
-                );
+                // // scale 用于控制噪音的变化速度，越大变化得越平缓（慢）
+                // // + this.position.x 使得每个 chunk 的噪音不同
+                // const value = simplex.noise(
+                //     (x + this.position.x) / this.params.terrain.scale, 
+                //     (z + this.position.z) / this.params.terrain.scale
+                // );
 
-                const scaledNoise = this.params.terrain.offset
-                    + this.params.terrain.magnitude * value;
+                // const scaledNoise = this.params.terrain.offset
+                //     + this.params.terrain.magnitude * value;
 
-                let height = Math.floor(this.size.height * scaledNoise);
-                height = Math.max(0, Math.min(height, this.size.height - 1));
+                // let height = Math.floor(this.size.height * scaledNoise);
+                // height = Math.max(0, Math.min(height, this.size.height - 1));
 
-                // let height = 1;
+                let height = this.size.groundHeight;
 
                 for (let y = 0; y <= height; y++) {
                     this.setBlockId(x, y, z, 1);

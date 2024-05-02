@@ -13,7 +13,8 @@ export class World extends THREE.Group {
 
     chunkSize = {
         width: 64,
-        height: 32
+        height: 32,
+        groundHeight: 1
     };
 
     // 用户可以看到的区块数量

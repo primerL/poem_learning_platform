@@ -18,8 +18,15 @@ export class Player {
     jumpSpeed = 10;
     onGround = false;
 
-    constructor(scene) {
-        this.camera.position.set(32, 16, -1);
+    constructor(scene, params) {
+        if (params.role == 0) {
+            this.camera.position.set(32, 16, -1);
+            this.camera.rotation.y += Math.PI;
+        } else if (params.role == 1) {
+            this.camera.position.set(52, 16, 45);
+        } else if (params.role == 2) {
+            this.camera.position.set(12, 16, 45);
+        }
         scene.add(this.camera);
 
         this.cameraHelper.visible = false;

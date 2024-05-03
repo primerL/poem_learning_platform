@@ -3,7 +3,9 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Scene from './scene.vue';
 import App from './App.vue';
 
-const role = 1;  // 玩家角色，0 为观战者，1 为玩家1，2 为玩家2
+const role = 2;  // 玩家角色，0 为观战者，1 为玩家1，2 为玩家2
+const name = "Player";  // 玩家名
+const id = 1;
 const router = createRouter({
     history: createWebHistory(),
     routes: [
@@ -11,14 +13,22 @@ const router = createRouter({
             path: '/', 
             redirect: {
                 name: 'Scene',
-                params: { role: role},
+                params: { 
+                    role: role,
+                    name: name,
+                    id: id
+                },
             }
         },
         { 
-            path: '/scene/:role', 
+            path: '/scene/:role/:name', 
             name: 'Scene', 
             component: Scene,
-            params: { role: role } 
+            params: { 
+                role: role,
+                name: name,
+                id: id 
+            } 
         }
     ]
 });

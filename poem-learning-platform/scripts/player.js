@@ -18,15 +18,21 @@ export class Player {
     jumpSpeed = 10;
     onGround = false;
 
-    constructor(scene, params) {
+    constructor(scene, screen, params) {
         if (params.role == 0) {
             this.camera.position.set(32, 16, -1);
-            this.camera.rotation.y += Math.PI;
         } else if (params.role == 1) {
-            this.camera.position.set(52, 16, 45);
+            this.camera.position.set(17, 16, 25);
+            screen.showState(scene, params.role, params.name, false);
         } else if (params.role == 2) {
-            this.camera.position.set(12, 16, 45);
+            this.camera.position.set(46, 16, 25);
+            screen.showState(scene, params.role, params.name, false);
         }
+        // 将用户相关信息存入
+        this.role = params.role;
+        this.name = params.name;
+        this.id = params.id;
+        this.camera.rotation.y += Math.PI;
         scene.add(this.camera);
 
         this.cameraHelper.visible = false;
@@ -49,9 +55,6 @@ export class Player {
         this.boundsHelper.position.y -= this.height / 2;
     }
 
-    /**
-     * @type {THREE.Vector3}
-     */
     get position() {
         return this.camera.position;
     }
@@ -61,21 +64,45 @@ export class Player {
             this.controls.lock();
         }
         switch (event.code) {
-            case 'KeyW':
+            case 'ArrowUp':
                 this.input.z = this.maxSpeed;
                 break;
-            case 'KeyA':
+            case 'ArrowLeft':
                 this.input.x = -this.maxSpeed;
                 break;
-            case 'KeyS':
+            case 'ArrowDown':
                 this.input.z = -this.maxSpeed;
                 break;
-            case 'KeyD':
+            case 'ArrowRight':
                 this.input.x = this.maxSpeed;
                 break;
-            case 'KeyR':
-                this.position.set(32, 16, 32);
-                this.velocity.set(0, 0, 0);
+            // case 'KeyR':
+            //     this.position.set(32, 16, 32);
+            //     this.velocity.set(0, 0, 0);
+            //     break;
+            case 'Digit1':
+                this.input.pre = true;
+                break;
+            case 'Digit2':
+                this.input.pre = false;
+                break;
+            case 'Digit0':
+                this.input.exit = true;
+                break;
+            case 'Digit3':
+                this.input.cont = true;
+                break;
+            case 'KeyA':
+                this.input.answer = 1;
+                break;
+            case 'KeyB':
+                this.input.answer = 2;
+                break;
+            case 'KeyC':
+                this.input.answer = 3;
+                break;
+            case 'KeyD':
+                this.input.answer = 4;  
                 break;
             case 'Space':
                 if (this.onGround) {
@@ -87,16 +114,16 @@ export class Player {
 
     onKeyUp(event) {
         switch (event.code) {
-            case 'KeyW':
+            case 'ArrowUp':
                 this.input.z = 0;
                 break;
-            case 'KeyA':
+            case 'ArrowLeft':
                 this.input.x = 0;
                 break;
-            case 'KeyS':
+            case 'ArrowDown':
                 this.input.z = 0;
                 break;
-            case 'KeyD':
+            case 'ArrowRight':
                 this.input.x = 0;
                 break;
         }

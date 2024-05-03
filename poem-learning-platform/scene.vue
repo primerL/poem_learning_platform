@@ -15,10 +15,15 @@ import Stats from "three/examples/jsm/libs/stats.module.js";
 import { createGUI } from "./scripts/ui.js";
 import { Player } from "./scripts/player.js";
 import { Physics } from "./scripts/physics.js";
+import { Screen } from "./scripts/screen.js";
 
 export default {
     name: "Scene",
     mounted() {
+        this.preNum = 0; // 记录准备状态的人数
+        this.topicNum = 0; // 记录已答的题目数
+        // TODO：后端传来其他用户的信息（id和位置），需要进行渲染
+        // TODO：另一玩家已答题的传输
         // 显示性能监控（FPS）
         const stats = new Stats();
         document.body.appendChild(stats.dom);
@@ -57,9 +62,12 @@ export default {
         scene.fog = new THREE.Fog(0x80a0e0, 50, 100);
 
         scene.add(orbitCameraHelper);
-        const player = new Player(scene, this.$route.params);
 
         const physics = new Physics(scene);
+
+        let screen = new Screen(scene);
+
+        const player = new Player(scene, screen, this.$route.params);
 
         const light = new THREE.DirectionalLight();
         // 添加光源，包括环境光、平行光
@@ -89,20 +97,101 @@ export default {
 
         // Render loop
         let previousTime = performance.now();
-        function animate() {
+        const animate = () => {
             let currentTime = performance.now();
             let deltaTime = (currentTime - previousTime) / 1000;
             // requestAnimationFrame 是一个浏览器提供的 API，它告诉浏览器你想要执行动画，并且请求浏览器在下一次重绘之前调用指定的回调函数。
             requestAnimationFrame(animate);
 
             if (player.controls.isLocked) {
+                const position1 = player.position;
                 physics.update(deltaTime, player, world);
-                world.update(player);
+                const position2 = player.position;
+                if (position1.x !== position2.x || position1.z !== position2.z) {
+                    // TODO：需要将位置信息发送给后端（和id）
+                    world.update(player);
 
-                // 使光源跟随玩家
-                light.position.copy(player.position);
-                light.position.sub(new THREE.Vector3(-50, -50, -50));
-                light.target.position.copy(player.position);
+                    // 使光源跟随玩家
+                    light.position.copy(player.position);
+                    light.position.sub(new THREE.Vector3(-50, -50, -50));
+                    light.target.position.copy(player.position);
+                }
+                if (player.role != 0) {
+                    // 比赛尚未开始
+                    if (this.preNum != 1) {
+                        if (player.input.pre == true) {
+                            // TODO：将玩家的状态发送给后端
+                            if (!player.pre) {
+                                player.pre = true;
+                                screen.showState(scene, player.role, player.name, true);
+                                this.preNum++;
+                            }
+                        } else if (player.input.pre == false) {
+                            // TODO：将玩家的状态发送给后端
+                            if (player.pre) {
+                                player.pre = false;
+                                screen.showState(scene, player.role, player.name, false);
+                                this.preNum--;
+                            }
+                        }
+                        if (this.preNum != 1 || this.showEnd) {
+                            if (player.input.exit == true) {
+                                // TODO：退出游戏（跳转和向后端发送信息）
+                            }
+                        }
+                    }
+                    let countdownTimer;
+                    if (this.preNum == 1 && !this.showTopic) {
+                        if (this.topicNum < 1) {
+                            this.showTopic = true;
+                            this.topicNum++;
+                            player.input.answer = null;
+                            // TODO：请求题目和其答案
+                            const topic = [this.topicNum + ". 下列有关文学文化常识的表述，不正确的一项是( )", 
+                            "A.“戊申晦”（《登泰山记》）兼用干支纪日法、月相纪日法。“晦”是指农历每月的最后一日，此类纪日法依序还有朔、既望、望。", 
+                            "B.“予左迁九江郡司马”（《琵琶行》），古有贵右贱左之说，故称贬官为“左迁”。白居易由京官贬黜至地方，因官职低而着“青衫”。",
+                            "C.中国古典诗歌包括古体诗和近体诗。“歌”“行”“吟”是古体诗的文学体裁；近体诗包括律诗和绝句，律诗二、四、六、八句押韵。", 
+                            "D.古人的名与字之间往往是有联系的，有的相同或相近，如姚鼐字姬传、白居易字乐天、苏轼字子瞻；有的含义相反，如韩愈字退之。"];
+                            screen.showCountDown(scene, 5, topic);
+                            countdownTimer = setTimeout(() => {
+                                console.log("Time out");
+                                this.showTopic = false;
+                            }, 15000);
+                        } else {
+                            if (!this.showEnd) {
+                                this.showEnd = true;
+                                screen.showEnd(scene);
+                            }
+                            if (player.input.cont == true) {
+                                screen.deleteEnd(scene);
+                                screen = new Screen(scene);
+                                screen.showState(scene, player.role, player.name, false);
+                                // 初始化参数
+                                this.preNum = 0;
+                                this.topicNum = 0;
+                                this.showTopic = false;
+                                this.showEnd = false;
+                                player.pre = false;
+                                player.input.pre = false;
+                                player.input.cont = false;
+                                clearTimeout(countdownTimer);
+                            }
+                        }
+                    } 
+                    const answer = 1;
+                    // 接收到答题结果
+                    if (this.preNum == 1) {
+                        if (player.input.answer) {
+                            if (player.input.answer < screen.topicMesh.length) {
+                                // TODO：将玩家的答题结果发送给后端
+                                screen.showResult(scene, player.name, player.input.answer == answer);
+                                this.showTopic = false;
+                                clearTimeout(countdownTimer);
+                            }
+                        }
+                    }
+                    player.input.answer = null
+                }
             }
 
             renderer.render(
@@ -123,7 +212,7 @@ export default {
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        createGUI(scene, world, player);
+        // createGUI(scene, world, player);
 
         animate();
     },

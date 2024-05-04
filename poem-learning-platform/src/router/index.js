@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
-import Scene from './scene.vue';
-import App from './App.vue';
+import Scene from '../views/scene.vue';
+import App from '../App.vue';
 
 const role = 2;  // 玩家角色，0 为观战者，1 为玩家1，2 为玩家2
 const name = "Player";  // 玩家名
@@ -9,30 +9,32 @@ const id = 1;
 const router = createRouter({
     history: createWebHistory(),
     routes: [
-        { 
-            path: '/', 
+        {
+            path: '/',
             redirect: {
                 name: 'Scene',
-                params: { 
+                params: {
                     role: role,
                     name: name,
                     id: id
                 },
             }
         },
-        { 
-            path: '/scene/:role/:name', 
-            name: 'Scene', 
+        {
+            path: '/scene/:role/:name',
+            name: 'Scene',
             component: Scene,
-            params: { 
+            params: {
                 role: role,
                 name: name,
-                id: id 
-            } 
+                id: id
+            }
+        },
+        {
+            path: '/test',
+            component: () => import('../views/LoginPage.vue')
         }
     ]
 });
 
-const app = createApp(App); 
-app.use(router); // 使用路由
-app.mount('#app'); // 将应用挂载到页面上的 #app 元素上
+export default router

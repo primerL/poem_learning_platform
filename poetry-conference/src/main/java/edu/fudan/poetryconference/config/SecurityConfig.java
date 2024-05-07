@@ -19,8 +19,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)  // 使用Lambda表达式禁用CSRF保护
                 .authorizeRequests(authorize -> authorize
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll()  // 允许无需认证访问注册和登录接口
+                        .requestMatchers("/api/question/**").permitAll()
                         .anyRequest().authenticated()  // 其他所有请求都需要认证
-                ); // 使用HTTP基本认证
+                );
 
         return http.build();
     }

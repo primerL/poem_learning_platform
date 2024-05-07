@@ -20,6 +20,7 @@ public class SecurityConfig {
                 .authorizeRequests(authorize -> authorize
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll()  // 允许无需认证访问注册和登录接口
                         .requestMatchers("/api/question/**").permitAll()
+                        .requestMatchers("/api/chat").permitAll()
                         .anyRequest().authenticated()  // 其他所有请求都需要认证
                 );
 

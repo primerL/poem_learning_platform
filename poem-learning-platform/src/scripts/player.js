@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
+import loader from './loader.js';
+import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper.js";
 
 export class Player {
     // 只有在锁定状态下才能移动
@@ -18,16 +20,44 @@ export class Player {
     jumpSpeed = 10;
     onGround = false;
 
-    constructor(scene, params) {
+    constructor(scene, screen, params) {
         if (params.role == 0) {
             this.camera.position.set(32, 16, -1);
-            this.camera.rotation.y += Math.PI;
         } else if (params.role == 1) {
-            this.camera.position.set(52, 16, 45);
+            this.camera.position.set(17, 16, 25);
+            screen.showState(scene, params.role, params.name, false);
         } else if (params.role == 2) {
-            this.camera.position.set(12, 16, 45);
+            this.camera.position.set(46, 16, 25);
+            screen.showState(scene, params.role, params.name, false);
         }
+        // 将用户相关信息存入
+        this.role = params.role;
+        this.name = params.name;
+        this.id = params.id;
+        this.camera.rotation.y += Math.PI;
         scene.add(this.camera);
+
+        // // 导入model
+        // loader.loadModel('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx').then((mmd) => {
+        //     mmd.position.copy(this.camera.position);
+        //     mmd.rotation.copy(this.camera.rotation);
+        //     scene.add(mmd);
+        //     this.model = mmd;
+
+        //     const boundingBox = new THREE.Box3().setFromObject(mmd);
+        //     this.height = boundingBox.max.y - boundingBox.min.y;
+        // });
+        loader.loadModelWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/大步走_by_安逸哟_105d0bef71b52e0a76ba77a0a00326fd.vmd').then(({ mmd, helper }) => {
+            mmd.mesh.position.copy(this.camera.position);
+            mmd.mesh.rotation.copy(this.camera.rotation);
+            scene.add(mmd.mesh);
+            this.model = mmd;
+
+            const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
+            this.height = boundingBox.max.y - boundingBox.min.y;
+            
+            this.modelHelper = helper;
+        });
 
         this.cameraHelper.visible = false;
         scene.add(this.cameraHelper);
@@ -35,23 +65,23 @@ export class Player {
         // bind 才能得知是哪个对象调用了事件
         document.addEventListener('keydown', this.onKeyDown.bind(this));
         document.addEventListener('keyup', this.onKeyUp.bind(this));
-    
-        // 辅助显示玩家的碰撞体
-        this.boundsHelper = new THREE.Mesh(
-            new THREE.CylinderGeometry(this.radius, this.radius, this.height, 16),
-            new THREE.MeshBasicMaterial({ wireframe: true })
-        );
-        scene.add(this.boundsHelper);
     }
 
-    updateBoundsHelper() {
-        this.boundsHelper.position.copy(this.position);
-        this.boundsHelper.position.y -= this.height / 2;
+    updateModel(dt) {
+        // 使模型跟随玩家
+        let position = this.position.clone();
+        position.sub(new THREE.Vector3(0, this.height, 0));
+        this.model.mesh.position.copy(position);
+        // 获取相机的欧拉角
+        const euler = new THREE.Euler();
+        euler.setFromQuaternion(this.controls.camera.quaternion, 'YXZ');
+        // 只保留 Y 方向上的旋转
+        this.model.mesh.rotation.y = euler.y + Math.PI;
+
+        // 更新动画
+        this.modelHelper.update(dt);
     }
 
-    /**
-     * @type {THREE.Vector3}
-     */
     get position() {
         return this.camera.position;
     }
@@ -61,21 +91,45 @@ export class Player {
             this.controls.lock();
         }
         switch (event.code) {
-            case 'KeyW':
+            case 'ArrowUp':
                 this.input.z = this.maxSpeed;
                 break;
-            case 'KeyA':
+            case 'ArrowLeft':
                 this.input.x = -this.maxSpeed;
                 break;
-            case 'KeyS':
+            case 'ArrowDown':
                 this.input.z = -this.maxSpeed;
                 break;
-            case 'KeyD':
+            case 'ArrowRight':
                 this.input.x = this.maxSpeed;
                 break;
-            case 'KeyR':
-                this.position.set(32, 16, 32);
-                this.velocity.set(0, 0, 0);
+            // case 'KeyR':
+            //     this.position.set(32, 16, 32);
+            //     this.velocity.set(0, 0, 0);
+            //     break;
+            case 'Digit1':
+                this.input.pre = true;
+                break;
+            case 'Digit2':
+                this.input.pre = false;
+                break;
+            case 'Digit0':
+                this.input.exit = true;
+                break;
+            case 'Digit3':
+                this.input.cont = true;
+                break;
+            case 'KeyA':
+                this.input.answer = 1;
+                break;
+            case 'KeyB':
+                this.input.answer = 2;
+                break;
+            case 'KeyC':
+                this.input.answer = 3;
+                break;
+            case 'KeyD':
+                this.input.answer = 4;  
                 break;
             case 'Space':
                 if (this.onGround) {
@@ -87,16 +141,16 @@ export class Player {
 
     onKeyUp(event) {
         switch (event.code) {
-            case 'KeyW':
+            case 'ArrowUp':
                 this.input.z = 0;
                 break;
-            case 'KeyA':
+            case 'ArrowLeft':
                 this.input.x = 0;
                 break;
-            case 'KeyS':
+            case 'ArrowDown':
                 this.input.z = 0;
                 break;
-            case 'KeyD':
+            case 'ArrowRight':
                 this.input.x = 0;
                 break;
         }

@@ -1,4 +1,3 @@
-import scene from "./scene";
 import * as THREE from "three";
 import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader.js";
 import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper.js";
@@ -7,46 +6,50 @@ import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHel
 export const helper = new MMDAnimationHelper();
 
 export class Loader {
-  loadModels() {
-    const loader = new MMDLoader();
+    loadModel(modelPath) {
+        return new Promise((resolve, reject) => {
+            const loader = new MMDLoader();
+        
+            loader.load(
+                modelPath,
+                (mmd) => {
+                    // 调整模型大小，将模型缩小为原来的0.15倍大小
+                    mmd.scale.set(0.15, 0.15, 0.15);
+                    // 返回加载的模型
+                    resolve(mmd);
+                },
+                undefined,
+                (error) => {
+                    reject(error);
+                }
+            );
+        });
+    }
 
-    // 单模型
-    loader.load(
-        '/tuopa/托帕.pmx',
-        (mmd) => {
-            // 调整模型大小，将模型缩小为原来的一半大小
-            mmd.scale.set(0.5, 0.5, 0.5);
-            // 添加模型的网格部分到场景中
-            scene.add(mmd);
-        }
-    );
+    loadModelWithAnimation(modelPath, vmdPath) {
+        return new Promise((resolve, reject) => {
+            const loader = new MMDLoader();
 
-    // 还没试下载的动画能不能成功
-    
-    // 模型 + 动画
-    // loader.loadWithAnimation(
-    //   "/public/hutao/胡桃.pmx", // called when the resource is loaded
-    //   "./public/move/ayaka-dance.vmd",
-    //   function onLoad(mmd) {
-    //     const { mesh } = mmd;
-    //     helper.add(mmd.mesh, {
-    //       animation: mmd.animation,
-    //     });
-
-    //     scene.getScene().add(mmd.mesh);
-    //   }
-    // );
-
-    // 动画 ）
-    // loader.loadAnimation(
-    //     "./public/move/ayaka-camera.vmd",
-    //     function (cameraAnimation) {
-    //       helper.add(camera.getCamera(), {
-    //         animation: cameraAnimation as THREE.AnimationClip,
-    //       });
-    //     }
-    //   );
-  }
+            loader.loadWithAnimation(
+                modelPath,
+                vmdPath,
+                (mmd) => {
+                    // 调整模型大小，将模型缩小为原来的0.15倍大小
+                    mmd.mesh.scale.set(0.15, 0.15, 0.15);
+                    helper.add(mmd.mesh, {
+                        animation: mmd.animation,
+                        physics: false // 是否添加物理效果
+                    });
+                    // 返回加载的模型
+                    resolve({mmd, helper});
+                },
+                undefined,
+                (error) => {
+                    reject(error);
+                }
+            );
+        });
+    }
 }
 
 export default new Loader();

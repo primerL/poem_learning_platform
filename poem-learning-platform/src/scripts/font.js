@@ -1,6 +1,6 @@
 import { FontLoader } from 'three/addons/loaders/FontLoader.js'
 
-const fonturl='/fonts/ali.json'
+const fonturl='../../src/fonts/ali.json'
 export class Font {
     constructor(){
         this.font=null;  // 字体

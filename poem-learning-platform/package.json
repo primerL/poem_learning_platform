@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "ammo.js": "^0.0.10",
     "axios": "^1.6.8",
     "three": "^0.163.0",
     "vue": "^3.4.21",

@@ -219,6 +219,14 @@ export class World extends THREE.Group {
                 chunk.setBlockId(x, y, z, 2);
             }
         }
+
+        // 在中间添加空气墙
+        for (let z = 4; z < this.chunkSize.width - 4; z++) {
+            for (let y = height; y < height + 5; y++) {
+                let x = this.chunkSize.width / 2;
+                chunk.setBlockId(x, y, z, 2);
+            }
+        }
     }
 
     /**

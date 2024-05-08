@@ -10,6 +10,7 @@ export class Screen {
         this.stateMesh = [];
         this.topicMesh = [];
         this.resultMesh = null;
+        this.isState = [false, false];
 
         this.font = new Font();
         this.loadFontAsync().then(() => {
@@ -46,6 +47,13 @@ export class Screen {
     async showTopic(scene, topic) {
         await this.loadFontAsync();
 
+        // 去除所有的'\n'
+        topic = topic.map(item => item.replace(/\n/g, ''));
+        let topicArray = [];
+        for (let i = 0; i < topic[0].length; i += 37) {
+            topicArray.push(topic[0].substring(i, i + 37));
+        }
+        topic[0] = topicArray.join('\n');
         const topicGeometry = new TextGeometry(topic[0], {
             font: this.font.font,
             size: 1,
@@ -72,7 +80,7 @@ export class Screen {
             bevelEnabled: false
         });
         const option1Mesh = new THREE.Mesh(option1Geometry, textMaterial);
-        option1Mesh.position.set(54.5, 26, 53.5);
+        option1Mesh.position.set(54.5, 25, 53.5);
         option1Mesh.rotation.y = Math.PI;
         scene.add(option1Mesh);
         this.topicMesh.push(option1Mesh);
@@ -90,7 +98,7 @@ export class Screen {
             bevelEnabled: false
         });
         const option2Mesh = new THREE.Mesh(option2Geometry, textMaterial);
-        option2Mesh.position.set(31.5, 26, 53.5);
+        option2Mesh.position.set(31.5, 25, 53.5);
         option2Mesh.rotation.y = Math.PI;
         scene.add(option2Mesh);
         this.topicMesh.push(option2Mesh);
@@ -113,23 +121,25 @@ export class Screen {
         scene.add(option3Mesh);
         this.topicMesh.push(option3Mesh);
 
-        optionArray = [];
-        for (let i = 0; i < topic[4].length; i += 16) {
-            optionArray.push(topic[4].substring(i, i + 16));
+        if (topic.length > 4) {
+            optionArray = [];
+            for (let i = 0; i < topic[4].length; i += 16) {
+                optionArray.push(topic[4].substring(i, i + 16));
+            }
+            topic[4] = optionArray.join('\n');
+            const option4Geometry = new TextGeometry(topic[4], {
+                font: this.font.font,
+                size: 1,
+                depth: 0.001,
+                curveSegments: 12,
+                bevelEnabled: false
+            });
+            const option4Mesh = new THREE.Mesh(option4Geometry, textMaterial);
+            option4Mesh.position.set(31.5, 17, 53.5);
+            option4Mesh.rotation.y = Math.PI;
+            scene.add(option4Mesh);
+            this.topicMesh.push(option4Mesh);
         }
-        topic[4] = optionArray.join('\n');
-        const option4Geometry = new TextGeometry(topic[4], {
-            font: this.font.font,
-            size: 1,
-            depth: 0.001,
-            curveSegments: 12,
-            bevelEnabled: false
-        });
-        const option4Mesh = new THREE.Mesh(option4Geometry, textMaterial);
-        option4Mesh.position.set(31.5, 17, 53.5);
-        option4Mesh.rotation.y = Math.PI;
-        scene.add(option4Mesh);
-        this.topicMesh.push(option4Mesh);
     }
 
     deleteTopic(scene) {
@@ -143,6 +153,7 @@ export class Screen {
 
     // state: false 未准备 true 准备
     async showState(scene, role, name, state) {
+        this.isState[role - 1] = true;
         await this.loadFontAsync();
         if (this.stateMesh[role - 1]) {
             scene.remove(this.stateMesh[role - 1]);

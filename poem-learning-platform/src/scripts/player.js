@@ -22,7 +22,7 @@ export class Player {
 
     constructor(scene, screen, params) {
         if (params.role == 0) {
-            this.camera.position.set(32, 16, -1);
+            this.camera.position.set(32, 16, 25);
         } else if (params.role == 1) {
             this.camera.position.set(17, 16, 25);
             screen.showState(scene, params.role, params.name, false);
@@ -37,19 +37,11 @@ export class Player {
         this.camera.rotation.y += Math.PI;
         scene.add(this.camera);
 
-        // // 导入model
-        // loader.loadModel('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx').then((mmd) => {
-        //     mmd.position.copy(this.camera.position);
-        //     mmd.rotation.copy(this.camera.rotation);
-        //     scene.add(mmd);
-        //     this.model = mmd;
-
-        //     const boundingBox = new THREE.Box3().setFromObject(mmd);
-        //     this.height = boundingBox.max.y - boundingBox.min.y;
-        // });
-        loader.loadModelWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/大步走_by_安逸哟_105d0bef71b52e0a76ba77a0a00326fd.vmd').then(({ mmd, helper }) => {
+        loader.loadModelWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/疾跑_by_AAAAAAA_fa76438117510229c16270320f38f58a.vmd').then(({ mmd, helper }) => {
             mmd.mesh.position.copy(this.camera.position);
             mmd.mesh.rotation.copy(this.camera.rotation);
+            mmd.mesh.castShadow = true;
+            mmd.mesh.receiveShadow = true;
             scene.add(mmd.mesh);
             this.model = mmd;
 
@@ -77,7 +69,6 @@ export class Player {
         euler.setFromQuaternion(this.controls.camera.quaternion, 'YXZ');
         // 只保留 Y 方向上的旋转
         this.model.mesh.rotation.y = euler.y + Math.PI;
-
         // 更新动画
         this.modelHelper.update(dt);
     }

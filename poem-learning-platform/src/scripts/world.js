@@ -219,6 +219,14 @@ export class World extends THREE.Group {
                 chunk.setBlockId(x, y, z, 2);
             }
         }
+
+        // 在中间添加空气墙
+        for (let z = 4; z < this.chunkSize.width - 4; z++) {
+            for (let y = height; y < height + 5; y++) {
+                let x = this.chunkSize.width / 2;
+                chunk.setBlockId(x, y, z, 2);
+            }
+        }
     }
 
     /**
@@ -233,8 +241,8 @@ export class World extends THREE.Group {
                 break;
             }
         }
-        for (let x = 12; x < this.chunkSize.width - 12; x++) {
-            for (let y = height; y < height + 15; y++) {
+        for (let x = 8; x < this.chunkSize.width - 8; x++) {
+            for (let y = height + 7; y < height + 30; y++) {
                 let z = this.chunkSize.width - 10;
                 chunk.setBlockId(x, y, z, 3);
             }
@@ -254,8 +262,8 @@ export class World extends THREE.Group {
             }
         }
 
-        for (let x = 10; x < 15; x++) {
-            for (let z = x + 30; z < x + 32; z++) {
+        for (let x = 15; x < 20; x++) {
+            for (let z = x + 10; z < x + 12; z++) {
                 for (let y = height; y < height + 2; y++) {
                     chunk.setBlockId(x, y, z, 3);
                 }
@@ -263,8 +271,8 @@ export class World extends THREE.Group {
         }
 
         const width = this.chunkSize.width;
-        for (let x = width - 15; x < width - 10; x++) {
-            for (let z = 29 + width - x; z < 31 + width - x; z++) {
+        for (let x = width - 20; x < width - 15; x++) {
+            for (let z = 9 + width - x; z < 11 + width - x; z++) {
                 for (let y = height; y < height + 2; y++) {
                     chunk.setBlockId(x, y, z, 3);
                 }

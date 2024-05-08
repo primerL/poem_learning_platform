@@ -1,4 +1,4 @@
-package edu.fudan.poetryconference.websocket;
+package edu.fudan.poetryconference.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,7 +1,12 @@
-package edu.fudan.poetryconference.websocket;
+package edu.fudan.poetryconference.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.fudan.poetryconference.model.Options;
+import edu.fudan.poetryconference.model.Questions;
+import edu.fudan.poetryconference.repository.OptionRepository;
+import edu.fudan.poetryconference.repository.QuestionRepository;
+import edu.fudan.poetryconference.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,11 +15,12 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class service {
+public class QuestionServiceImpl implements QuestionService {
     @Autowired
     private QuestionRepository questionRepository;
+
     @Autowired
-    private OptionsRepository optionsRepository;
+    private OptionRepository optionsRepository;
     public String getQuestion() {
         // 在225个题目中随机选取一个题目
         int questionId = (int) (Math.random() * 225) + 1;

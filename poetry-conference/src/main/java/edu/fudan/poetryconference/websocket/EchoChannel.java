@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.fudan.poetryconference.service.QuestionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class EchoChannel implements ApplicationContextAware {
 
     private Session session;
 
-    private service service;
+    private QuestionService service;
 
     private static boolean topicSent = false;
 
@@ -95,7 +96,7 @@ public class EchoChannel implements ApplicationContextAware {
                         return;
                     }
                     topicSent = true;
-                    this.service = EchoChannel.applicationContext.getBean(service.class);
+                    this.service = EchoChannel.applicationContext.getBean(QuestionService.class);
                     broadcast(this.service.getQuestion(), "");
                     topicSent = false;
                 }

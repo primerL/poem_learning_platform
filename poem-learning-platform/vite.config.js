@@ -13,11 +13,5 @@ export default defineConfig({
 
     quasar({
     })
-  ],
-  server: {
-    hmr: false
-  },
-  build: {
-    sourcemap: true
-  }
-});
+  ]
+})

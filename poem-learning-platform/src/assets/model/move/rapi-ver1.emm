@@ -1,0 +1,10 @@
+[Info]
+Version = 3
+
+[Object]
+Pmd1 = B:\NIKKE MMD\Nikke-Rapi\nikke.pmx
+
+[Effect]
+Default = none
+Pmd1 = none
+

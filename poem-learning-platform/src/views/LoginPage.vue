@@ -19,7 +19,7 @@
 
                             <q-tabs v-model="tab" class="text-teal">
                                 <q-tab label="Login" name="login" />
-                                <q-tab label="Register" name="register" />
+                                
                             </q-tabs>
 
                             <q-separator />
@@ -37,30 +37,6 @@
                                                 :rules="[
                                 val => val !== null && val !== '' || 'Please type your password',
                             ]" />
-
-                                            <q-toggle v-model="accept" label="I accept the license and terms" />
-
-                                            <div>
-                                                <q-btn label="Submit" type="submit" color="teal" />
-                                                <q-btn label="Reset" type="reset" color="teal" flat class="q-ml-sm" />
-                                            </div>
-                                        </q-form>
-
-                                    </div>
-                                </q-tab-panel>
-
-                                <q-tab-panel name="register">
-                                    <div class="q-pa-md" style="max-width: 400px">
-
-                                        <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
-                                            <q-input filled v-model="register_name" label="Your name *"
-                                                hint="please type your name" lazy-rules
-                                                :rules="[val => val && val.length > 0 || 'Please type something']" />
-
-                                            <q-input filled v-model="register_password" label="Your password *" lazy-rules
-                                                :rules="[
-                                            val => val !== null && val !== '' || 'Please type your password',
-                                            ]" />
 
                                             <q-toggle v-model="accept" label="I accept the license and terms" />
 

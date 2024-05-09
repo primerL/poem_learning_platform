@@ -45,6 +45,10 @@ const router = createRouter({
         {
             path: '/person',
             component: ()=> import('../views/PersonPage.vue')
+        },
+        {
+            path: '/register',
+            component: ()=> import('../views/RegisterPage.vue')
         }
     ]
 });

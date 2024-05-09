@@ -22,7 +22,7 @@ export class Player {
 
     constructor(scene, screen, params) {
         if (params.role == 0) {
-            this.camera.position.set(32, 16, 25);
+            this.camera.position.set(32, 16, -2);
         } else if (params.role == 1) {
             this.camera.position.set(17, 16, 25);
             screen.showState(scene, params.role, params.name, false);

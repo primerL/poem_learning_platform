@@ -1,22 +1,26 @@
 {
-  "name": "poem-learning-platform",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite --host 127.0.0.1",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "ammo.js": "^0.0.10",
-    "axios": "^1.6.8",
-    "three": "^0.164.1",
-    "vue": "^3.4.21",
-    "vue-router": "^4.0.13"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.4",
-    "vite": "^5.2.0"
-  }
+    "name": "poem-learning-platform",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite --host 127.0.0.1",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@quasar/cli": "^2.4.1",
+        "@quasar/extras": "^1.16.11",
+        "@quasar/icongenie": "^4.0.0",
+        "ammo.js": "^0.0.10",
+        "axios": "^1.6.8",
+        "quasar": "^2.16.2",
+        "three": "^0.164.1",
+        "vue": "^3.4.21",
+        "vue-router": "^4.0.13"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^5.0.4",
+        "vite": "^5.2.0"
+    }
 }

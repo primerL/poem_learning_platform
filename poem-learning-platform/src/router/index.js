@@ -31,8 +31,20 @@ const router = createRouter({
             }
         },
         {
-            path: '/test',
+            path: '/login',
             component: () => import('../views/LoginPage.vue')
+        },
+        {
+            path: '/open',
+            component: ()=> import('../views/OpenView.vue')
+        },
+        {
+            path: '/main',
+            component: ()=> import('../views/MainPage.vue')
+        },
+        {
+            path: '/person',
+            component: ()=> import('../views/PersonPage.vue')
         }
     ]
 });

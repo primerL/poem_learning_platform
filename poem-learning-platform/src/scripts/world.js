@@ -169,9 +169,13 @@ export class World extends THREE.Group {
     update(player) {
         // 1. 找到玩家可见的区块
         const visibleChunks = this.getVisibleChunks(player);
-        // 保证 (0, 0) 区块始终存在
-        if (!visibleChunks.find((chunk) => chunk.x === 0 && chunk.z === 0)) {
-            visibleChunks.push({ x: 0, z: 0 });
+        // 保证 (0, 0) 区块始终存在，及其周围的区块
+        for (let x = -1; x <= 1; x++) {
+            for (let z = -1; z <= 1; z++) {
+                if (!visibleChunks.find((chunk) => chunk.x === x && chunk.z === z)) {
+                    visibleChunks.push({ x, z });
+                }
+            }
         }
         // 2. 与当前所有区块进行比较，找到需要添加和移除的区块
         const chunksToAdd = this.getChunksToAdd(visibleChunks);

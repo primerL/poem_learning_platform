@@ -37,10 +37,12 @@
             document.body.appendChild(stats.dom);
     
             // Renderer
-            const renderer = new THREE.WebGLRenderer();
+            const renderer = new THREE.WebGLRenderer( { antialias: true } );
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setClearColor(0x80a0e0);
+            renderer.setClearColor(0xb0e0ff);
+            renderer.outputColorSpace = THREE.LinearSRGBColorSpace
+            renderer.outputEncoding = THREE.sRGBEncoding;
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             document.body.appendChild(renderer.domElement);
@@ -67,7 +69,7 @@
             // 将生成的方块添加到场景中
             scene.add(world);
             // 添加雾
-            scene.fog = new THREE.Fog(0x80a0e0, 50, 100);
+            scene.fog = new THREE.Fog(0xb0e0ff, 50, 80);
     
             scene.add(orbitCameraHelper);
     
@@ -80,6 +82,7 @@
             const light = new THREE.DirectionalLight();
             // 添加光源，包括环境光、平行光
             function setupLight() {
+                light.intensity = 1.5;
                 light.castShadow = true;
                 light.shadow.camera.top = 100;
                 light.shadow.camera.bottom = -100;
@@ -97,8 +100,7 @@
                 // const shadowHelper = new THREE.CameraHelper(light.shadow.camera);
                 // scene.add(shadowHelper);
         
-                const ambientLight = new THREE.AmbientLight();
-                ambientLight.intensity = 0.1;
+                const ambientLight = new THREE.AmbientLight(0xaaaaaa, 3);
                 scene.add(ambientLight);
             }
             setupLight();
@@ -276,6 +278,7 @@
 
                         // 使光源跟随玩家
                         light.position.copy(player.position);
+                        light.intensity = 3;
                         light.position.sub(new THREE.Vector3(-50, -50, -50));
                         light.target.position.copy(player.position);
                     }

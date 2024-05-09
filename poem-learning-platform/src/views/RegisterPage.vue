@@ -118,6 +118,10 @@ function loadMMDwithAnimation(pmxfile, vmdfile, position, directionalLight_inten
   scene.remove(mesh)
 }
 
+function init()
+{
+  
+}
 
 
 onMounted(() => {

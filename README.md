@@ -14,43 +14,50 @@
 
 #### 注册
 
-**post** http://localhost:2345/api/users/register
-
-**body:**
-
+```
+POST http://localhost:2345/api/users/register
+request body:
 {
-
  "username": "newuser",
-
  "password": "password123",
-
  "model": 1
-
 }
+```
 
 #### 登录
 
-**post** http://localhost:2345/api/users/login
-
-**body:**
-
+```
+POST http://localhost:2345/api/users/login
+request body:
 {
-
  "username": "newuser",
-
  "password": "password123",
-
 }
+```
 
 ### 3D 相关
 #### 智能NPC
 
-**GET** http://localhost:2345/api/chat?message=请告诉我一句关于月亮的诗句
-
-**response:**(string)
-
+```
+GET http://localhost:2345/api/chat?message=请告诉我一句关于月亮的诗句
+response:(string)
 当然，关于月亮的诗句有很多，这里给你一句来自中国古代诗人苏轼的名句：
-
 “但愿人长久，千里共婵娟。”
-
 这句诗出自苏轼的《水调歌头·丙辰中秋》，表达了诗人对远方亲人的思念之情，以及对人间美好情感的祝愿。婵娟在这里指的是月亮，诗句通过月亮的意象，寄托了对亲人的思念和对团圆的渴望。
+```
+
+#### 记录比赛结果
+
+```
+POST http://localhost:2345/api/contest-results
+request body:
+{
+    "user1Name": "Alice",
+    "user2Name": "Bob",
+    "score1": 5,
+    "score2": 3,
+    "winnerName": "Alice",
+    "contestDate": "2023-05-10T14:30:00"
+}
+```
+

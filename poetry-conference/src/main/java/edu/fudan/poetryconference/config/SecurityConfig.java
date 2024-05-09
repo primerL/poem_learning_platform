@@ -22,7 +22,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/question/**").permitAll()
                         .requestMatchers("/api/chat").permitAll()
                         .requestMatchers("/ws").permitAll()
-                        .anyRequest().authenticated()  // 其他所有请求都需要认证
+                        .anyRequest().permitAll()  // 暂时打开所有访问权限
                 );
 
         return http.build();

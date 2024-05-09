@@ -56,7 +56,7 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 // 3d
 let clock, loader, helper, gui, camera, scene;
-let directionalLight, renderer, container, pmxfile, vmdfile,textureLoader, controls;
+let directionalLight, renderer, container, pmxfile, vmdfile, textureLoader, controls;
 let position = { x: 0, y: 0, z: 0 };
 let mesh
 
@@ -78,6 +78,10 @@ const options = [
   {
     label: '驭空',
     value: 'yukong'
+  },
+  {
+    label: '饮月君',
+    value: 'yinyue'
   }
 ]
 
@@ -87,24 +91,37 @@ watch(group, (newValue, oldValue) => {
     case 'liuying':
       pmxfile = '../../src/assets/model/星穹铁道—流萤无武器/流萤3.0.pmx';
       vmdfile = '../../src/assets/animation/待机动作黑塔.vmd';
+      position = { x: 6.2, y: -16, z: 1 };
+      localStorage.setItem('selectModelId', 1);
+      loadMMDwithAnimation(pmxfile, vmdfile, position, 3);
       break;
     case 'luocha':
-      pmxfile = '../../src/assets/model/星穹铁道—罗刹/罗刹.pmx';
+      pmxfile = '../../src/assets/model/星穹铁道-罗刹/罗刹.pmx';
       vmdfile = '../../src/assets/animation/待机动作钟离.vmd';
       position = { x: 6.2, y: -18, z: 1 };
-      loadMMDwithAnimation(pmxfile, vmdfile);
+      localStorage.setItem('selectModelId', 2);
+      loadMMDwithAnimation(pmxfile, vmdfile, position, 6);
       break;
     case 'suchang':
       pmxfile = '../../src/assets/model/星穹铁道—李素裳/李素裳1.0.pmx';
       vmdfile = '../../src/assets/animation/待机动作转圈.vmd';
-      break;
-    case 'yinyue':
-      pmxfile = '../../src/assets/model/星穹铁道—饮月君/星穹铁道—饮月君1708.pmx';
-      vmdfile = '../../src/assets/animation/待机动作公子.vmd';
+      position = { x: 6.2, y: -16, z: 1 };
+      localStorage.setItem('selectModelId', 3);
+      loadMMDwithAnimation(pmxfile, vmdfile, position, 3);
       break;
     case 'yukong':
       pmxfile = '../../src/assets/model/星穹铁道—驭空/星穹铁道—驭空（改5）.pmx';
       vmdfile = '../../src/assets/animation/待机动作云堇.vmd';
+      position = { x: 6.2, y: -16, z: 1 };
+      localStorage.setItem('selectModelId', 4);
+      loadMMDwithAnimation(pmxfile, vmdfile, position, 3);
+      break;
+    case 'yinyue':
+      pmxfile = '../../src/assets/model/星穹铁道—饮月君/星穹铁道—饮月君1708.pmx';
+      vmdfile = '../../src/assets/animation/待机动作公子.vmd';
+      localStorage.setItem('selectModelId', 5);
+      position = { x: 6.2, y: -16, z: 1 };
+      loadMMDwithAnimation(pmxfile, vmdfile, position, 3.2);
       break;
     default:
       pmxfile = '../../src/assets/model/星穹铁道—流萤无武器/流萤3.0.pmx';
@@ -113,16 +130,74 @@ watch(group, (newValue, oldValue) => {
 
 });
 
+
 function loadMMDwithAnimation(pmxfile, vmdfile, position, directionalLight_intensity) {
   // 先删除之前的模型
   scene.remove(mesh)
+
+
+  console.log('加载中')
+
+  loader.loadWithAnimation(
+    pmxfile,
+    vmdfile,
+    (mmd) => {
+      mesh = mmd.mesh;
+      mesh.position.x = position.x
+      mesh.position.y = position.y;
+      mesh.position.z = position.z;
+      scene.add(mesh);
+      helper.add(mmd.mesh, {
+        animation: mmd.animation,
+        physics: false
+      });
+      // const modelFolder = gui.addFolder('人物');
+      // const modelParams = { x: 0, y: 0, z: 0 }
+      // modelFolder.add(modelParams, 'x', -200, 200).onChange(() => {
+      //   mesh.position.x = modelParams.x;
+      // });
+      // modelFolder.add(modelParams, 'y', -200, 200).onChange(() => {
+      //   mesh.position.y = modelParams.y;
+      // });
+      // modelFolder.add(modelParams, 'z', -200, 200).onChange(() => {
+      //   mesh.position.z = modelParams.z;
+      // });
+    },
+    (xhr) => {
+      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+    },
+    (err) => {
+      console.error(err);
+    }
+  )
+
+  directionalLight.intensity = directionalLight_intensity;
+
+  directionalLight.target.updateMatrixWorld();
+  helper.update();
+
+  window.addEventListener('resize', () => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+  });
+
+  animate()
 }
 
-function init()
-{
-  
+
+function init() {
+
 }
 
+// 场景渲染和动画
+function animate() {
+  helper.update(clock.getDelta());
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
 
 onMounted(() => {
 
@@ -141,18 +216,18 @@ onMounted(() => {
 
   camera.position.set(0, 0, 20); // 将相机位置移动到模型前方
   camera.lookAt(0, 0, 5); // 让相机指向场景的中心点
-  
-  const modelFolder = gui.addFolder('相机');
-  const modelParams = { x: 0, y: 0, z: 0 }
-  modelFolder.add(modelParams, 'x', -200, 200).onChange(() => {
-    camera.position.x = modelParams.x;
-  });
-  modelFolder.add(modelParams, 'y', -200, 200).onChange(() => {
-    camera.position.y = modelParams.y;
-  });
-  modelFolder.add(modelParams, 'z', -200, 200).onChange(() => {
-    camera.position.z = modelParams.z;
-  });
+
+  // const modelFolder = gui.addFolder('相机');
+  // const modelParams = { x: 0, y: 0, z: 0 }
+  // modelFolder.add(modelParams, 'x', -200, 200).onChange(() => {
+  //   camera.position.x = modelParams.x;
+  // });
+  // modelFolder.add(modelParams, 'y', -200, 200).onChange(() => {
+  //   camera.position.y = modelParams.y;
+  // });
+  // modelFolder.add(modelParams, 'z', -200, 200).onChange(() => {
+  //   camera.position.z = modelParams.z;
+  // });
 
   scene.background = new THREE.Color(0x151515);
 
@@ -218,12 +293,11 @@ onMounted(() => {
 
   loader.loadWithAnimation(
     pmxfile,
-    // '../../src/assets/model/move/rapi.vmd',
     '../../src/assets/animation/待机动作黑塔.vmd',
     (mmd) => {
       mesh = mmd.mesh;
       mesh.position.x = 6.2
-      mesh.position.y = -18;
+      mesh.position.y = -16;
       mesh.position.z = 1
       scene.add(mesh);
       helper.add(mmd.mesh, {

@@ -69,7 +69,7 @@
             // 将生成的方块添加到场景中
             scene.add(world);
             // 添加雾
-            scene.fog = new THREE.Fog(0xb0e0ff, 50, 100);
+            scene.fog = new THREE.Fog(0xb0e0ff, 50, 80);
     
             scene.add(orbitCameraHelper);
     
@@ -82,7 +82,7 @@
             const light = new THREE.DirectionalLight();
             // 添加光源，包括环境光、平行光
             function setupLight() {
-                light.intensity = 2;
+                light.intensity = 1.5;
                 light.castShadow = true;
                 light.shadow.camera.top = 100;
                 light.shadow.camera.bottom = -100;
@@ -278,6 +278,7 @@
 
                         // 使光源跟随玩家
                         light.position.copy(player.position);
+                        light.intensity = 3;
                         light.position.sub(new THREE.Vector3(-50, -50, -50));
                         light.target.position.copy(player.position);
                     }

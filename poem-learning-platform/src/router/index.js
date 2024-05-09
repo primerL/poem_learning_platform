@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import Scene from '../views/scene.vue';
+import Audience from '../views/audience.vue';
 import App from '../App.vue';
 
 const role = 2;  // 玩家角色，0 为观战者，1 为玩家1，2 为玩家2
@@ -24,6 +25,17 @@ const router = createRouter({
             path: '/scene/:role/:name',
             name: 'Scene',
             component: Scene,
+            params: {
+                role: role,
+                name: name,
+                id: id
+            }
+        },
+        {
+            // 减少冲突，先另开一个文件（
+            path: '/audience/:role/:name',
+            name: 'Audience',
+            component: Audience,
             params: {
                 role: role,
                 name: name,

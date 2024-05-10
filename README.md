@@ -13,7 +13,7 @@
 注册页允许选择5个模型
 目前与后端约定
 1: 流萤
-2：罗刹
+2: 罗刹
 3: 李素裳
 4: 驭空
 5: 饮月君
@@ -73,4 +73,31 @@ request body:
     "contestDate": "2023-05-10T14:30:00"
 }
 ```
+
+#### 记录错题
+
+```
+POST http://localhost:2345/api/wrong-answers
+request body:
+{
+    "username": "Alice",
+    "questionId": 5,
+    "wrongOption": 3,
+    "answerDate": "2023-05-10T14:30:00"
+}
+```
+
+## 数据库
+
+### MySQL
+
+生成数据表，运行根目录`poetry.sql`
+
+ ```
+ users: 用户信息
+ questions: 题库
+ options: 题目对应的选项
+ contest_results: 比赛结果
+ wrong_answers: 错题集
+ ```
 

@@ -4,7 +4,12 @@
         <div id="info">
             <div id="player-position"></div>
         </div>
-        <button id="connectBtn">加入音视频通讯</button>
+
+        <div id="videoArea"></div>
+        <button id="connectBtn">
+            <img id="connectIcon" src="../assets/img/语音通话2.png"/>
+            加入音视频通讯
+        </button>
     </div>
 </template>
 
@@ -19,7 +24,7 @@
     import { Screen } from "../scripts/screen.js";
     import loader from '../scripts/loader.js';
 
-    // FIXME: 增加导入
+    // 增加导入
     import { startWebRTC } from '../scripts/webrtc.js'
 
     // TODO：未考虑多种模型的个性化选择
@@ -391,10 +396,37 @@
             // FIXME:
             // 连接到rtc
             document.getElementById("connectBtn").addEventListener("click", function() {
-                // console.log("here")
                 // TODO: 修改样式
                 startWebRTC();
+                // console.log(this);
+                this.style.display = 'none';
             });
+
+            function loadNPC() {
+                // FIXME: 现在这个方式注册的动作，角色的动作和npc的会轮播（不能同时播放
+                // TODO: 碰撞检测 交互逻辑
+                loader.loadModelWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/待机动作整理.vmd').then(({ mmd, helper }) => {
+                    mmd.mesh.position.set(20, 1.5, 0);
+                    mmd.mesh.rotation.set(0, Math.PI/2, 0);
+                    mmd.mesh.castShadow = true;
+                    mmd.mesh.receiveShadow = true;
+                    scene.add(mmd.mesh);
+                    const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
+                    const height = boundingBox.max.y - boundingBox.min.y;
+                    playerMap.set(message.socketId, {mesh: mmd.mesh, height: height});
+                });
+                loader.loadModelWithAnimation('../../src/assets/model/螺丝咕姆20231219/螺丝咕姆1.0.pmx', '../../src/assets/animation/待机动作整理.vmd').then(({ mmd, helper }) => {
+                    mmd.mesh.position.set(44, 1.5, 0);
+                    mmd.mesh.rotation.set(0, -Math.PI/2, 0);
+                    mmd.mesh.castShadow = true;
+                    mmd.mesh.receiveShadow = true;
+                    scene.add(mmd.mesh);
+                    const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
+                    const height = boundingBox.max.y - boundingBox.min.y;
+                    playerMap.set(message.socketId, {mesh: mmd.mesh, height: height});
+                });
+            }
+            loadNPC();
         },
     };
     </script>
@@ -414,8 +446,32 @@
         margin: 8px;
     }
     
-    #connectBtn {
+    #videoArea {
         position: absolute;
-        right: 0;
+        display: flex;
+        flex-direction: column;
+        right: 10px;
+        top: 10px;
+        width: 120px;
     }
+    #connectIcon {
+        width: 30px;
+    }
+    #connectBtn {
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        width: 160px;
+        height: 30px;
+        border: 0;
+        border-radius: 15px;
+
+        background-image: linear-gradient(to right, rgba(30, 144, 255, 0.9), rgba(65, 105, 225, 0.9));
+        color: aliceblue;
+    }
+
 </style>

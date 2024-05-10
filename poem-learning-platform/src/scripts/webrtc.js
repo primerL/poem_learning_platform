@@ -63,15 +63,15 @@ function init() {
 //   controls = new FirstPersonControls(scene, camera, renderer);
 
   // add controls for adding boxes on a key press
-  window.addEventListener("keyup", (ev) => {
-    if (ev.key === "b") {
-      addBox();
-    }
-  });
+  // window.addEventListener("keyup", (ev) => {
+  //   if (ev.key === "b") {
+  //     addBox();
+  //   }
+  // });
 
   //Push the canvas to the DOM
-  let domElement = document.getElementById("canvas-container");
-  domElement.append(renderer.domElement);
+  // let domElement = document.getElementById("canvas-container");
+  // domElement.append(renderer.domElement);
 
   //Setup event listeners for events and handle the states
   window.addEventListener("resize", (e) => onWindowResize(e), false);
@@ -86,7 +86,7 @@ function init() {
   update();
 }
 
-// 暴露
+// 暴露给外部
 function startWebRTC() {
   init();
 }

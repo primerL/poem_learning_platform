@@ -225,7 +225,8 @@ function createPeerDOMElements(_id) {
   videoElement.style.width = '120px';
   videoElement.style.height = '90px';
 
-  document.body.appendChild(videoElement);
+  // document.body.appendChild(videoElement);
+  document.getElementById("videoArea").appendChild(videoElement);
 
   let audioEl = document.createElement("audio");
   audioEl.setAttribute("id", _id + "_audio");
@@ -235,7 +236,11 @@ function createPeerDOMElements(_id) {
   // 修改样式
   audioEl.style.visibility = 'hidden';
 
-  document.body.appendChild(audioEl);
+  // document.body.appendChild(audioEl);
+  document.getElementById("videoArea").appendChild(audioEl);
+
+  // TODO: 挂断
+  // TODO: check多人
 
   audioEl.addEventListener("loadeddata", () => {
     audioEl.play();

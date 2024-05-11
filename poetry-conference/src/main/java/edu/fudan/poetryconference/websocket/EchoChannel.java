@@ -1,6 +1,7 @@
 package edu.fudan.poetryconference.websocket;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -9,6 +10,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.fudan.poetryconference.model.Answers;
+import edu.fudan.poetryconference.model.ContestResult;
+import edu.fudan.poetryconference.service.AnswersService;
+import edu.fudan.poetryconference.service.ContestResultService;
 import edu.fudan.poetryconference.service.QuestionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +47,6 @@ public class EchoChannel implements ApplicationContextAware {
 
     private Session session;
 
-    private QuestionService service;
-
     private static boolean topicSent = false;
 
     @OnMessage
@@ -65,6 +68,8 @@ public class EchoChannel implements ApplicationContextAware {
                     data.put("socketId", this.session.getId());
                     data.put("role", jsonNode.get("role").asText());
                     data.put("name", jsonNode.get("name").asText());
+                    data.put("userId", jsonNode.get("userId").asLong());
+                    data.put("modelId", jsonNode.get("modelId").asLong());
                     broadcast(objectMapper.writeValueAsString(data), this.session.getId());
                 }
                 else if ("position".equals(type)) {
@@ -75,6 +80,8 @@ public class EchoChannel implements ApplicationContextAware {
                     data.put("rotation", jsonNode.get("rotation").asText());
                     data.put("role", jsonNode.get("role").asText());
                     data.put("name", jsonNode.get("name").asText());
+                    data.put("userId", jsonNode.get("userId").asLong());
+                    data.put("modelId", jsonNode.get("modelId").asLong());
                     broadcast(objectMapper.writeValueAsString(data), this.session.getId());
                 }
                 else if ("pre".equals(type)) {
@@ -96,12 +103,16 @@ public class EchoChannel implements ApplicationContextAware {
                         return;
                     }
                     topicSent = true;
-                    this.service = EchoChannel.applicationContext.getBean(QuestionService.class);
-                    broadcast(this.service.getQuestion(), "");
+                    QuestionService questionService = EchoChannel.applicationContext.getBean(QuestionService.class);
+                    broadcast(questionService.getQuestion(), "");
                     topicSent = false;
                 }
                 else if ("result".equals(type)) {
                     Map<String, Object> data = new HashMap<>();
+                    Answers answers = new Answers(jsonNode.get("userId").asLong(), jsonNode.get("questionId").asLong(), jsonNode.get("result").asBoolean());
+                    AnswersService answersService = EchoChannel.applicationContext.getBean(AnswersService.class);
+                    answersService.saveAnswers(answers);
+
                     data.put("type", "result");
                     data.put("name", jsonNode.get("name").asText());
                     data.put("result", jsonNode.get("result").asBoolean());
@@ -113,6 +124,12 @@ public class EchoChannel implements ApplicationContextAware {
                     data.put("role", jsonNode.get("role").asText());
                     data.put("name", jsonNode.get("name").asText());
                     broadcast(objectMapper.writeValueAsString(data), "");
+                }
+                else if ("end".equals(type)) {
+                    ContestResult contestResult = new ContestResult(jsonNode.get("user1Id").asLong(),
+                            jsonNode.get("user2Id").asLong(), jsonNode.get("winNum").asLong(), jsonNode.get("loseNum").asLong());
+                    ContestResultService contestResultService = EchoChannel.applicationContext.getBean(ContestResultService.class);
+                    contestResultService.saveContestResult(contestResult);
                 }
             } else {
                 LOGGER.warn("[websocket] Message does not contain 'type' field");

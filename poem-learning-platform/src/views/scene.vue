@@ -18,11 +18,16 @@
     import { Screen } from "../scripts/screen.js";
     import loader from '../scripts/loader.js';
 
-    // TODO：未考虑多种模型的个性化选择
     export default {
         name: "Scene",
         mounted() {
             const role = this.$route.params.role;
+
+            const userInfoString = localStorage.getItem("userInfo");
+            const userInfo = JSON.parse(userInfoString);
+            const name = userInfo.name;
+            const userId = userInfo.userId;
+            const modelId = userInfo.modelId;
 
             let preNum = 0; // 记录准备状态的人数
             let topicNum = 0; // 记录已答的题目数
@@ -31,6 +36,10 @@
             let answer = 0;
             let queationId = 0;
             let showEnd = false; // 是否显示结束界面
+            let sendTopicRequest = false; // 是否发送题目请求
+            let opponentId;  // 对手的userId
+            let winNum = 0; // 记录胜利次数
+            let loseNum = 0; // 记录失败次数
 
             // 显示性能监控（FPS）
             const stats = new Stats();
@@ -77,7 +86,7 @@
 
             let screen = new Screen(scene);
     
-            const player = new Player(scene, screen, this.$route.params);
+            const player = new Player(scene, screen, this.$route.params, name, modelId);
     
             const light = new THREE.DirectionalLight();
             // 添加光源，包括环境光、平行光
@@ -110,11 +119,12 @@
             const ws = new WebSocket("ws://localhost:2345/ws");
             let isSending = false; // 用于标记是否正在发送消息
             ws.onopen = function(event) {
-                // TODO：name 应该从localStorage中得到
                 const loginObject = {
                     type: "login",
                     role: role, 
-                    name: "player" 
+                    name: name,
+                    userId: userId,
+                    modelId: modelId
                 }
                 ws.send(JSON.stringify(loginObject));                
             };
@@ -123,13 +133,15 @@
                 const message = JSON.parse(event.data);
                 if (message.type == "login") {
                     // 导入模型
-                    loader.loadModelWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/疾跑_by_AAAAAAA_fa76438117510229c16270320f38f58a.vmd').then(({ mmd, helper }) => {
+                    loader.loadModelWithNumber(message.modelId).then(({ mmd, helper }) => {
                         if (message.role == 0) {
                             mmd.mesh.position.set(32, 16, 25);
                         } else if (message.role == 1) {
                             mmd.mesh.position.set(17, 16, 25);
+                            opponentId = message.userId;
                         } else if (message.role == 2) {
                             mmd.mesh.position.set(46, 16, 25);
+                            opponentId = message.userId;
                         }
                         mmd.mesh.rotation.set(0, Math.PI, 0);
                         mmd.mesh.castShadow = true;
@@ -149,8 +161,9 @@
                     const rotation = JSON.parse(message.rotation);
                     
                     if (playerMap.get(message.socketId) == undefined) {
+                        opponentId = message.userId;
                         playerMap.set(message.socketId, 0);
-                        loader.loadModelWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/疾跑_by_AAAAAAA_fa76438117510229c16270320f38f58a.vmd').then(({ mmd, helper }) => {
+                        loader.loadModelWithNumber(message.modelId).then(({ mmd, helper }) => {
                             if (playerMap.get(message.socketId) == 0) {
                                 const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
                                 const height = boundingBox.max.y - boundingBox.min.y;
@@ -177,7 +190,6 @@
                     }
                 }
                 else if (message.type == "pre") {
-                    console.log("pre")
                     screen.showState(scene, message.role, message.name, true);
                     preNum++;
                 }
@@ -204,12 +216,27 @@
                         }, 15000);
                         answer = message.answer;
                         queationId = message.questionId;
+                        sendTopicRequest = false;
                     }
                 }
                 else if (message.type == "result") {
                     screen.showResult(scene, message.name, message.result);
                     showTopic = false;
                     clearTimeout(countdownTimer);
+                    if (message.name == player) {
+                        if (message.result) {
+                            winNum++;
+                        } else {
+                            loseNum++;
+                        }
+                    }   
+                    else {
+                        if (message.result) {
+                            loseNum++;
+                        } else {
+                            winNum++;
+                        }
+                    }
                 }
                 else if (message.type == "cont") {
                     screen.deleteEnd(scene);
@@ -263,13 +290,14 @@
                         const rotation = player.model.mesh.rotation.clone();
                         if (!isSending) {
                             isSending = true;
-                            // TODO：name 应该从localStorage中得到
                             ws.send(JSON.stringify({
                                 type: "position",
                                 position: JSON.stringify(position2),
                                 rotation: JSON.stringify(rotation),
                                 role: role,
-                                name: "player"
+                                name: name,
+                                userId: userId,
+                                modelId: modelId
                             }));
                             isSending = false;
                         }
@@ -290,27 +318,25 @@
                         if (player.input.pre == true) {
                             if (!player.pre) {
                                 player.pre = true;
-                                screen.showState(scene, player.role, player.name, true);
+                                screen.showState(scene, player.role, name, true);
                                 preNum++;
 
-                                // TODO：玩家名可能要从localStorage中得到
                                 ws.send(JSON.stringify({
                                     type: "pre",
                                     role: role,
-                                    name: "player"
+                                    name: name
                                 }));
                             }
                         } else if (player.input.pre == false) {
                             if (player.pre) {
                                 player.pre = false;
-                                screen.showState(scene, player.role, player.name, false);
+                                screen.showState(scene, player.role, name, false);
                                 preNum--;
 
-                                // TODO：玩家名可能要从localStorage中得到
                                 ws.send(JSON.stringify({
                                     type: "depre",
                                     role: role,
-                                    name: "player"
+                                    name: name
                                 }));
                             }
                         }
@@ -322,21 +348,30 @@
                     }
                     if (preNum == 2 && !showTopic) {  // 两人都准备好了再开始游戏
                         if (topicNum < 2) {
-                            player.input.answer = null;
-                            ws.send(JSON.stringify({
-                                type: "topic",
-                            }));
+                            if (!sendTopicRequest) {
+                                player.input.answer = null;
+                                ws.send(JSON.stringify({
+                                    type: "topic",
+                                }));
+                                sendTopicRequest = true;
+                            }
                         } else {
                             if (!showEnd) {
                                 showEnd = true;
                                 screen.showEnd(scene);
+                                ws.send(JSON.stringify({
+                                    type: "end",
+                                    user1Id: userId,
+                                    user2Id: opponentId,
+                                    winNum: winNum,
+                                    loseNum: loseNum
+                                }));
                             }
                             if (player.input.cont == true) {
-                                // TODO：name 应该从localStorage中得到
                                 ws.send(JSON.stringify({
                                     type: "cont",
                                     role: role,
-                                    name: "player"
+                                    name: name
                                 }));
                             }
                         }
@@ -346,13 +381,12 @@
                         if (player.input.answer) {
                             if (player.input.answer < screen.topicMesh.length) {
                                 let result = player.input.answer == answer;
-                                // TODO：userId 和 name 应该从localStorage中得到
                                 ws.send(JSON.stringify({
                                     type: "result",
                                     questionId: queationId,
                                     result: result,
-                                    userId: 1,
-                                    name: "player"
+                                    userId: userId,
+                                    name: name
                                 }));
                             }
                         }

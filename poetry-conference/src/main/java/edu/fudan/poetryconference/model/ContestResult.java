@@ -1,33 +1,85 @@
 package edu.fudan.poetryconference.model;
 
-import jakarta.persistence.*;
-import lombok.Data;
 
-import java.util.Date;
+import jakarta.persistence.*;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Entity
-@Data
 @Table(name = "contest_results")
 public class ContestResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @Column(name = "user1_name")
-    private String user1Name;
+    @Column(name = "user1_id")
+    private Long user1Id;
 
-    @Column(name = "user2_name")
-    private String user2Name;
+    @Column(name = "user2_id")
+    private Long user2Id;
 
-    @Column(name = "score_1")
-    private int score1;
+    private Long score1;
 
-    @Column(name = "score_2")
-    private int score2;
+    private Long score2;
 
-    @Column(name = "winner_name")
-    private String winnerName;
+    private LocalDateTime contestDate;
 
-    @Column(name = "contest_date")
-    private Date contestDate;
+    public ContestResult(Long user1Id, Long user2Id, Long score1, Long score2) {
+        this.user1Id = user1Id;
+        this.user2Id = user2Id;
+        this.score1 = score1;
+        this.score2 = score2;
+        this.contestDate = LocalDateTime.now();
+    }
+
+    // Getters and setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getUser1Id() {
+        return user1Id;
+    }
+
+    public void setUser1Id(Long user1Id) {
+        this.user1Id = user1Id;
+    }
+
+    public Long getUser2Id() {
+        return user2Id;
+    }
+
+    public void setUser2Id(Long user2Id) {
+        this.user2Id = user2Id;
+    }
+
+    public Long getScore1() {
+        return score1;
+    }
+
+    public void setScore1(Long score1) {
+        this.score1 = score1;
+    }
+
+    public Long getScore2() {
+        return score2;
+    }
+
+    public void setScore2(Long score2) {
+        this.score2 = score2;
+    }
+
+    public LocalDateTime getContestDate() {
+        return contestDate;
+    }
+
+    public void setContestDate(LocalDateTime contestDate) {
+        this.contestDate = contestDate;
+    }
 }
+

@@ -21,22 +21,19 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- Table structure for contest_results
 -- ----------------------------
 DROP TABLE IF EXISTS `contest_results`;
-CREATE TABLE `contest_results`  (
+CREATE TABLE `contest_results` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `user1_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `user2_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `score_1` int NOT NULL,
-  `score_2` int NOT NULL,
-  `winner_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `user1_id` int NOT NULL,
+  `user2_id` int NOT NULL,
+  `score1` int NOT NULL,
+  `score2` int NOT NULL,
   `contest_date` datetime NOT NULL,
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `user1_name`(`user1_name` ASC) USING BTREE,
-  INDEX `user2_name`(`user2_name` ASC) USING BTREE,
-  INDEX `winner_name`(`winner_name` ASC) USING BTREE,
-  CONSTRAINT `contest_results_ibfk_1` FOREIGN KEY (`user1_name`) REFERENCES `users` (`username`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `contest_results_ibfk_2` FOREIGN KEY (`user2_name`) REFERENCES `users` (`username`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `contest_results_ibfk_3` FOREIGN KEY (`winner_name`) REFERENCES `users` (`username`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+  PRIMARY KEY (`id`),
+  KEY `user1_id` (`user1_id`),
+  KEY `user2_id` (`user2_id`),
+  CONSTRAINT `contest_results_ibfk_1` FOREIGN KEY (`user1_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `contest_results_ibfk_2` FOREIGN KEY (`user2_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
 -- Records of contest_results
@@ -1133,22 +1130,21 @@ INSERT INTO `users` VALUES (3, 'Alice', '$2a$10$5YErnaf.56jWyt48FvETC.5vqeY3bfhk
 INSERT INTO `users` VALUES (4, 'Bob', '$2a$10$E17dP4PuvEjp.76P1gbE6e/uYcs3Af4SpAH/cGGX0sSxqISl00hOu', 1);
 
 -- ----------------------------
--- Table structure for wrong_answers
+-- Table structure for answers
 -- ----------------------------
-DROP TABLE IF EXISTS `wrong_answers`;
-CREATE TABLE `wrong_answers`  (
+DROP TABLE IF EXISTS `answers`;
+CREATE TABLE `answers` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `user_id` int NOT NULL,
   `question_id` int NOT NULL,
-  `wrong_option` int NOT NULL,
+  `correct` tinyint(1) DEFAULT NULL,
   `answer_date` datetime NOT NULL,
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `username`(`username` ASC) USING BTREE,
-  INDEX `question_id`(`question_id` ASC) USING BTREE,
-  CONSTRAINT `wrong_answers_ibfk_1` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  KEY `user_id` (`user_id`) USING BTREE,
+  KEY `question_id` (`question_id`) USING BTREE,
+  CONSTRAINT `wrong_answers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `wrong_answers_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `questions` (`question_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
-
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 -- ----------------------------
 -- Records of wrong_answers
 -- ----------------------------

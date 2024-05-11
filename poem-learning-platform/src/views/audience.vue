@@ -10,6 +10,8 @@
             <img id="connectIcon" src="../assets/img/语音通话2.png"/>
             加入音视频通讯
         </button>
+
+        <div id="bubble">进行交互</div>
     </div>
 </template>
 
@@ -32,6 +34,12 @@
         name: "Audience",
         mounted() {
             const role = this.$route.params.role;
+
+            const userInfoString = localStorage.getItem("userInfo");
+            const userInfo = JSON.parse(userInfoString);
+            const name = userInfo.name;
+            const userId = userInfo.userId;
+            const modelId = userInfo.modelId;
 
             let preNum = 0; // 记录准备状态的人数
             let topicNum = 0; // 记录已答的题目数
@@ -86,8 +94,9 @@
 
             let screen = new Screen(scene);
     
-            const player = new Player(scene, screen, this.$route.params);
-    
+            // const player = new Player(scene, screen, this.$route.params);
+            const player = new Player(scene, screen, this.$route.params, name, modelId);
+
             const light = new THREE.DirectionalLight();
             // 添加光源，包括环境光、平行光
             function setupLight() {
@@ -232,6 +241,7 @@
                     player.pre = false;
                     player.input.pre = false;
                     player.input.cont = false;
+                    player.input.npcChat = false;
                     clearTimeout(countdownTimer);
                 }
                 else if (message.type == "logout") {
@@ -272,13 +282,14 @@
                         const rotation = player.model.mesh.rotation.clone();
                         if (!isSending) {
                             isSending = true;
-                            // TODO：name 应该从localStorage中得到
                             ws.send(JSON.stringify({
                                 type: "position",
                                 position: JSON.stringify(position2),
                                 rotation: JSON.stringify(rotation),
                                 role: role,
-                                name: "player"
+                                name: name,
+                                userId: userId,
+                                modelId: modelId
                             }));
                             isSending = false;
                         }
@@ -290,6 +301,35 @@
                         light.intensity = 3;
                         light.position.sub(new THREE.Vector3(-50, -50, -50));
                         light.target.position.copy(player.position);
+                    }
+
+                    // 补充：与npc交互
+                    let npcPosFlower = new THREE.Vector3(20, 1.5, 0);
+                    let npcPosAI = new THREE.Vector3(44, 1.5, 0);
+                    let bubble = document.getElementById('bubble');
+
+                    let distanceFlo = player.position.distanceTo(npcPosFlower);
+                    let distanceAI = player.position.distanceTo(npcPosAI);
+                    
+                    // TODO: 献花方式：跑到对应台子？（能买几朵啊）））
+                    if(distanceFlo <= 4) {
+                        bubble.style.display = 'block';
+                        bubble.innerHTML = '[M]向阮·梅买花';    // TODO: 不在视线内不显示提示框
+                        console.log(player.input.npcChat)
+                        console.log(player.input)
+                        if(player.input.npcChat == true) {
+                            bubble.innerHTML = '成功买花！';
+                            // 记录献花状态
+                        }
+                    } else if(distanceAI <= 4) {
+                        bubble.style.display = 'block';
+                        bubble.innerHTML = '[M]与螺丝咕姆交谈';
+                        if(player.input.npcChat == true) {
+                            bubble.innerHTML = '跳转中……';
+                            // 接通ai
+                        }
+                    } else {
+                        bubble.style.display = 'none';
                     }
                 }
 
@@ -393,7 +433,6 @@
     
             animate();
 
-            // FIXME:
             // 连接到rtc
             document.getElementById("connectBtn").addEventListener("click", function() {
                 // TODO: 修改样式
@@ -452,7 +491,7 @@
         flex-direction: column;
         right: 10px;
         top: 10px;
-        width: 120px;
+        /* width: 120px; */
     }
     #connectIcon {
         width: 30px;
@@ -472,6 +511,27 @@
 
         background-image: linear-gradient(to right, rgba(30, 144, 255, 0.9), rgba(65, 105, 225, 0.9));
         color: aliceblue;
+    }
+
+    #bubble {
+        display: none;
+
+        position: absolute;
+        top: 60%;
+        right: 30%;
+        width: 150px;
+        height: 30px;
+        line-height: 30px;
+        border: 0;
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
+
+        background-image: linear-gradient(to right, rgba(159, 214, 235, 0.664), rgba(175, 190, 233, 0));
+        color: aliceblue;
+        font-weight: bold;
+        /* text-align: center; */
+        padding-left: 30px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
     }
 
 </style>

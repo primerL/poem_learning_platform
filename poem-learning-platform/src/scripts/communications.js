@@ -234,7 +234,7 @@ function createPeerDOMElements(_id) {
   audioEl.volume = 0; // initialize at 0 volume.  This will be set by 3D scene.
 
   // 修改样式
-  audioEl.style.visibility = 'hidden';
+  audioEl.style.display = 'none';
 
   // document.body.appendChild(audioEl);
   document.getElementById("videoArea").appendChild(audioEl);

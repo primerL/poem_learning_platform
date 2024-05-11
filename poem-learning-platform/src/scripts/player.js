@@ -125,6 +125,9 @@ export class Player {
                     this.velocity.y += this.jumpSpeed;
                 }
                 break;
+            case 'KeyM' :
+                this.input.npcChat = true;
+                break;
         }
     }
 

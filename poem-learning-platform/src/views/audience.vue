@@ -24,10 +24,13 @@
     import { Player } from "../scripts/player.js";
     import { Physics } from "../scripts/physics.js";
     import { Screen } from "../scripts/screen.js";
-    import loader from '../scripts/loader.js';
+    import loader, { Loader } from '../scripts/loader.js';
 
     // 增加导入
     import { startWebRTC } from '../scripts/webrtc.js'
+    import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader.js";
+    import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper.js";
+
 
     // TODO：未考虑多种模型的个性化选择
     export default {
@@ -311,26 +314,35 @@
                     let distanceFlo = player.position.distanceTo(npcPosFlower);
                     let distanceAI = player.position.distanceTo(npcPosAI);
                     
-                    // TODO: 献花方式：跑到对应台子？（能买几朵啊）））
-                    if(distanceFlo <= 4) {
+                    // 献花方式：跑到对应台子？（能买几朵啊）））
+                    if(!hasFlower && distanceFlo <= 4) {
                         bubble.style.display = 'block';
-                        bubble.innerHTML = '[M]向阮·梅买花';    // TODO: 不在视线内不显示提示框
-                        console.log(player.input.npcChat)
-                        console.log(player.input)
+                        bubble.innerHTML = '[M]向阮·梅买花';    // TODO: 不在视线内/esc时不显示提示框
+                        // console.log(player.input.npcChat)
+                        // console.log(player.input)
                         if(player.input.npcChat == true) {
-                            bubble.innerHTML = '成功买花！';
-                            // 记录献花状态
+                            bubble.innerHTML = '去献花吧！';
+                            // 记录花状态
+                            hasFlower = true;
                         }
                     } else if(distanceAI <= 4) {
                         bubble.style.display = 'block';
                         bubble.innerHTML = '[M]与螺丝咕姆交谈';
                         if(player.input.npcChat == true) {
                             bubble.innerHTML = '跳转中……';
-                            // 接通ai
+                            // TODO: 接通ai
+                        }
+                    } else if(hasFlower) {
+                        if(player.position.x < 32) {
+                            bubble.innerHTML = '献花给p1';
+                            // TODO: 后续处理
+                        } else {
+                            bubble.innerHTML = '献花给p2';
                         }
                     } else {
                         bubble.style.display = 'none';
                     }
+
                 }
 
                 if (player.role != 0) {
@@ -417,8 +429,11 @@
                 );
                 stats.update();
                 previousTime = currentTime;
+
                 // physics.helpers.clear();
             }
+
+            let hasFlower = false;
     
             // 窗口大小变化，重新渲染
             window.addEventListener("resize", () => {
@@ -435,37 +450,59 @@
 
             // 连接到rtc
             document.getElementById("connectBtn").addEventListener("click", function() {
-                // TODO: 修改样式
                 startWebRTC();
-                // console.log(this);
                 this.style.display = 'none';
             });
 
+            let loader2 = new MMDLoader();
+            let helper2 = new MMDAnimationHelper();
             function loadNPC() {
-                // FIXME: 现在这个方式注册的动作，角色的动作和npc的会轮播（不能同时播放
-                // TODO: 碰撞检测 交互逻辑
-                loader.loadModelWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/待机动作整理.vmd').then(({ mmd, helper }) => {
+                
+                loader2.loadWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/待机动作整理.vmd',(mmd) => {
+                    mmd.mesh.scale.set(0.15, 0.15, 0.15);
+                    helper2.add(mmd.mesh, {
+                        animation: mmd.animation,
+                        physics: false // 是否添加物理效果
+                    });
+                    // 返回加载的模型
+                    // resolve({mmd, helper2});
                     mmd.mesh.position.set(20, 1.5, 0);
                     mmd.mesh.rotation.set(0, Math.PI/2, 0);
                     mmd.mesh.castShadow = true;
                     mmd.mesh.receiveShadow = true;
                     scene.add(mmd.mesh);
-                    const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
-                    const height = boundingBox.max.y - boundingBox.min.y;
-                    playerMap.set(message.socketId, {mesh: mmd.mesh, height: height});
                 });
-                loader.loadModelWithAnimation('../../src/assets/model/螺丝咕姆20231219/螺丝咕姆1.0.pmx', '../../src/assets/animation/待机动作整理.vmd').then(({ mmd, helper }) => {
+                loader2.loadWithAnimation('../../src/assets/model/螺丝咕姆20231219/螺丝咕姆1.0.pmx', '../../src/assets/animation/待机动作公子.vmd',(mmd) => {
+                    mmd.mesh.scale.set(0.15, 0.15, 0.15);
+                    helper2.add(mmd.mesh, {
+                        animation: mmd.animation,
+                        physics: false // 是否添加物理效果
+                    });
+                    // 返回加载的模型
+                    // resolve({mmd, helper2});
                     mmd.mesh.position.set(44, 1.5, 0);
                     mmd.mesh.rotation.set(0, -Math.PI/2, 0);
                     mmd.mesh.castShadow = true;
                     mmd.mesh.receiveShadow = true;
                     scene.add(mmd.mesh);
-                    const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
-                    const height = boundingBox.max.y - boundingBox.min.y;
-                    playerMap.set(message.socketId, {mesh: mmd.mesh, height: height});
                 });
+
             }
+            let clock = new THREE.Clock();
+
+
             loadNPC();
+            const animate2 = () => {
+                helper2.update(clock.getDelta());
+                requestAnimationFrame(animate2);
+                renderer.render(
+                    scene,
+                    player.controls.isLocked ? player.camera : orbitCamera
+                );
+                // renderer.render(scene, camera);
+            }
+            animate2();
+
         },
     };
     </script>

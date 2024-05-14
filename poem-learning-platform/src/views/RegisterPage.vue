@@ -54,6 +54,7 @@ import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader.js";
 import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper.js";
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
+
 // 3d
 let clock, loader, helper, gui, camera, scene;
 let directionalLight, renderer, container, pmxfile, vmdfile, textureLoader, controls;

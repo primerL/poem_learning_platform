@@ -20,24 +20,22 @@ export class Player {
     jumpSpeed = 10;
     onGround = false;
 
-    constructor(scene, screen, params) {
+    constructor(scene, screen, params, name, modelId) {
         if (params.role == 0) {
-            this.camera.position.set(32, 16, -2);
+            this.camera.position.set(32, 32, -2);
         } else if (params.role == 1) {
-            this.camera.position.set(17, 16, 25);
-            screen.showState(scene, params.role, params.name, false);
+            this.camera.position.set(17, 32, 25);
+            screen.showState(scene, params.role, name, false);
         } else if (params.role == 2) {
-            this.camera.position.set(46, 16, 25);
-            screen.showState(scene, params.role, params.name, false);
+            this.camera.position.set(46, 32, 25);
+            screen.showState(scene, params.role, name, false);
         }
         // 将用户相关信息存入
         this.role = params.role;
-        this.name = params.name;
-        this.id = params.id;
         this.camera.rotation.y += Math.PI;
         scene.add(this.camera);
 
-        loader.loadModelWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/疾跑_by_AAAAAAA_fa76438117510229c16270320f38f58a.vmd').then(({ mmd, helper }) => {
+        loader.loadModelWithNumber(modelId).then(({ mmd, helper }) => {
             mmd.mesh.position.copy(this.camera.position);
             mmd.mesh.rotation.copy(this.camera.rotation);
             mmd.mesh.castShadow = true;
@@ -126,6 +124,9 @@ export class Player {
                 if (this.onGround) {
                     this.velocity.y += this.jumpSpeed;
                 }
+                break;
+            case 'KeyM' :
+                this.input.npcChat = true;
                 break;
         }
     }

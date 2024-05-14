@@ -50,6 +50,21 @@ export class Loader {
             );
         });
     }
+
+    loadModelWithNumber(index) {
+        switch (index) {
+            case 1:
+                return this.loadModelWithAnimation("../../src/assets/model/星穹铁道—流萤无武器/流萤3.0.pmx", "../../src/assets/animation/疾跑_by_AAAAAAA_fa76438117510229c16270320f38f58a.vmd");
+            case 2:
+                return this.loadModelWithAnimation("../../src/assets/model/星穹铁道-罗刹/罗刹.pmx", "../../src/assets/animation/疾跑_by_AAAAAAA_fa76438117510229c16270320f38f58a.vmd");
+            case 3:
+                return this.loadModelWithAnimation("../../src/assets/model/星穹铁道—李素裳/李素裳1.0.pmx", "../../src/assets/animation/疾跑_by_AAAAAAA_fa76438117510229c16270320f38f58a.vmd");
+            case 4:
+                return this.loadModelWithAnimation("../../src/assets/model/星穹铁道—驭空/星穹铁道—驭空（改5）.pmx", "../../src/assets/animation/疾跑_by_AAAAAAA_fa76438117510229c16270320f38f58a.vmd");
+            case 5:
+                return this.loadModelWithAnimation("../../src/assets/model/星穹铁道—饮月君/星穹铁道—饮月君1708.pmx", "../../src/assets/animation/疾跑_by_AAAAAAA_fa76438117510229c16270320f38f58a.vmd");
+        }
+    }
 }
 
 export default new Loader();

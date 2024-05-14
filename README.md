@@ -8,16 +8,16 @@
 按 `1` 进入准备状态，按 `2` 退出准备状态，一轮比赛结束后按 `3` 重新开启一场比赛。  
 按下 `a`, `b`, `c`, `d` 表示题目选项。  
 按下 `上下左右` 键进行移动。    
-现在有一个问题是mmd模型导入后颜色失真，还未找到解决方案。
 
-注册页允许选择5个模型
-目前与后端约定
-1: 流萤
-2：罗刹
-3: 李素裳
-4: 驭空
-5: 饮月君
+注册页允许选择5个模型  
+目前与后端约定：  
+1: 流萤  
+2: 罗刹  
+3: 李素裳  
+4: 驭空  
+5: 饮月君  
 
+**跳转部分localStorage写在了index.js中，需要进行相应的更改**。
 跳转到3d场景时可以用localStorage.getItem('selectModelId') 获取到模型选择的参数，所有模型和动作已经更新整理在assets下
 
 
@@ -59,18 +59,17 @@ response:(string)
 这句诗出自苏轼的《水调歌头·丙辰中秋》，表达了诗人对远方亲人的思念之情，以及对人间美好情感的祝愿。婵娟在这里指的是月亮，诗句通过月亮的意象，寄托了对亲人的思念和对团圆的渴望。
 ```
 
-#### 记录比赛结果
+## 数据库
 
-```
-POST http://localhost:2345/api/contest-results
-request body:
-{
-    "user1Name": "Alice",
-    "user2Name": "Bob",
-    "score1": 5,
-    "score2": 3,
-    "winnerName": "Alice",
-    "contestDate": "2023-05-10T14:30:00"
-}
-```
+### MySQL
+
+生成数据表，运行根目录`poetry.sql`
+
+ ```
+ users: 用户信息
+ questions: 题库
+ options: 题目对应的选项
+ contest_results: 比赛结果
+ answers: 回答情况
+ ```
 

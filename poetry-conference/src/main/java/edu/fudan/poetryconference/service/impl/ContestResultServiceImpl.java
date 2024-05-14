@@ -8,17 +8,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ContestResultServiceImpl implements ContestResultService {
-    private final ContestResultRepository contestResultRepository;
-
     @Autowired
-    public ContestResultServiceImpl(ContestResultRepository contestResultRepository) {
-        this.contestResultRepository = contestResultRepository;
-    }
+    private ContestResultRepository contestResultRepository;
 
     @Override
-    public ContestResult saveContestResult(ContestResult contestResult) {
-        return contestResultRepository.save(contestResult);
+    public boolean saveContestResult(ContestResult contestResult) {
+        contestResultRepository.save(contestResult);
+        return true;
     }
-
-    // 实现其他业务逻辑方法
 }

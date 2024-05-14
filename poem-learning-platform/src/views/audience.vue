@@ -4,6 +4,14 @@
         <div id="info">
             <div id="player-position"></div>
         </div>
+
+        <div id="videoArea"></div>
+        <button id="connectBtn">
+            <img id="connectIcon" src="../assets/img/语音通话2.png"/>
+            加入音视频通讯
+        </button>
+
+        <div id="bubble">进行交互</div>
     </div>
 </template>
 
@@ -16,10 +24,17 @@
     import { Player } from "../scripts/player.js";
     import { Physics } from "../scripts/physics.js";
     import { Screen } from "../scripts/screen.js";
-    import loader from '../scripts/loader.js';
+    import loader, { Loader } from '../scripts/loader.js';
 
+    // 增加导入
+    import { startWebRTC } from '../scripts/webrtc.js'
+    import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader.js";
+    import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper.js";
+
+
+    // TODO：未考虑多种模型的个性化选择
     export default {
-        name: "Scene",
+        name: "Audience",
         mounted() {
             const role = this.$route.params.role;
 
@@ -36,10 +51,6 @@
             let answer = 0;
             let queationId = 0;
             let showEnd = false; // 是否显示结束界面
-            let sendTopicRequest = false; // 是否发送题目请求
-            let opponentId;  // 对手的userId
-            let winNum = 0; // 记录胜利次数
-            let loseNum = 0; // 记录失败次数
 
             // 显示性能监控（FPS）
             const stats = new Stats();
@@ -86,8 +97,9 @@
 
             let screen = new Screen(scene);
     
+            // const player = new Player(scene, screen, this.$route.params);
             const player = new Player(scene, screen, this.$route.params, name, modelId);
-    
+
             const light = new THREE.DirectionalLight();
             // 添加光源，包括环境光、平行光
             function setupLight() {
@@ -119,12 +131,11 @@
             const ws = new WebSocket("ws://localhost:2345/ws");
             let isSending = false; // 用于标记是否正在发送消息
             ws.onopen = function(event) {
+                // TODO：name 应该从localStorage中得到
                 const loginObject = {
                     type: "login",
                     role: role, 
-                    name: name,
-                    userId: userId,
-                    modelId: modelId
+                    name: "player" 
                 }
                 ws.send(JSON.stringify(loginObject));                
             };
@@ -133,15 +144,13 @@
                 const message = JSON.parse(event.data);
                 if (message.type == "login") {
                     // 导入模型
-                    loader.loadModelWithNumber(message.modelId).then(({ mmd, helper }) => {
+                    loader.loadModelWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/疾跑_by_AAAAAAA_fa76438117510229c16270320f38f58a.vmd').then(({ mmd, helper }) => {
                         if (message.role == 0) {
                             mmd.mesh.position.set(32, 16, 25);
                         } else if (message.role == 1) {
                             mmd.mesh.position.set(17, 16, 25);
-                            opponentId = message.userId;
                         } else if (message.role == 2) {
                             mmd.mesh.position.set(46, 16, 25);
-                            opponentId = message.userId;
                         }
                         mmd.mesh.rotation.set(0, Math.PI, 0);
                         mmd.mesh.castShadow = true;
@@ -161,9 +170,8 @@
                     const rotation = JSON.parse(message.rotation);
                     
                     if (playerMap.get(message.socketId) == undefined) {
-                        opponentId = message.userId;
                         playerMap.set(message.socketId, 0);
-                        loader.loadModelWithNumber(message.modelId).then(({ mmd, helper }) => {
+                        loader.loadModelWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/疾跑_by_AAAAAAA_fa76438117510229c16270320f38f58a.vmd').then(({ mmd, helper }) => {
                             if (playerMap.get(message.socketId) == 0) {
                                 const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
                                 const height = boundingBox.max.y - boundingBox.min.y;
@@ -190,6 +198,7 @@
                     }
                 }
                 else if (message.type == "pre") {
+                    console.log("pre")
                     screen.showState(scene, message.role, message.name, true);
                     preNum++;
                 }
@@ -216,27 +225,12 @@
                         }, 15000);
                         answer = message.answer;
                         queationId = message.questionId;
-                        sendTopicRequest = false;
                     }
                 }
                 else if (message.type == "result") {
                     screen.showResult(scene, message.name, message.result);
                     showTopic = false;
                     clearTimeout(countdownTimer);
-                    if (message.name == player) {
-                        if (message.result) {
-                            winNum++;
-                        } else {
-                            loseNum++;
-                        }
-                    }   
-                    else {
-                        if (message.result) {
-                            loseNum++;
-                        } else {
-                            winNum++;
-                        }
-                    }
                 }
                 else if (message.type == "cont") {
                     screen.deleteEnd(scene);
@@ -250,6 +244,7 @@
                     player.pre = false;
                     player.input.pre = false;
                     player.input.cont = false;
+                    player.input.npcChat = false;
                     clearTimeout(countdownTimer);
                 }
                 else if (message.type == "logout") {
@@ -310,33 +305,73 @@
                         light.position.sub(new THREE.Vector3(-50, -50, -50));
                         light.target.position.copy(player.position);
                     }
+
+                    // 补充：与npc交互
+                    let npcPosFlower = new THREE.Vector3(20, 1.5, 0);
+                    let npcPosAI = new THREE.Vector3(44, 1.5, 0);
+                    let bubble = document.getElementById('bubble');
+
+                    let distanceFlo = player.position.distanceTo(npcPosFlower);
+                    let distanceAI = player.position.distanceTo(npcPosAI);
+                    
+                    // 献花方式：跑到对应台子？（能买几朵啊）））
+                    if(!hasFlower && distanceFlo <= 4) {
+                        bubble.style.display = 'block';
+                        bubble.innerHTML = '[M]向阮·梅买花';    // TODO: 不在视线内/esc时不显示提示框
+                        // console.log(player.input.npcChat)
+                        // console.log(player.input)
+                        if(player.input.npcChat == true) {
+                            bubble.innerHTML = '去献花吧！';
+                            // 记录花状态
+                            hasFlower = true;
+                        }
+                    } else if(distanceAI <= 4) {
+                        bubble.style.display = 'block';
+                        bubble.innerHTML = '[M]与螺丝咕姆交谈';
+                        if(player.input.npcChat == true) {
+                            bubble.innerHTML = '跳转中……';
+                            // TODO: 接通ai
+                        }
+                    } else if(hasFlower) {
+                        if(player.position.x < 32) {
+                            bubble.innerHTML = '献花给p1';
+                            // TODO: 后续处理
+                        } else {
+                            bubble.innerHTML = '献花给p2';
+                        }
+                    } else {
+                        bubble.style.display = 'none';
+                    }
+
                 }
 
                 if (player.role != 0) {
                     // 比赛尚未开始
-                    if (preNum != 2) {
+                    if (preNum != 1) {
                         if (player.input.pre == true) {
                             if (!player.pre) {
                                 player.pre = true;
-                                screen.showState(scene, player.role, name, true);
+                                screen.showState(scene, player.role, player.name, true);
                                 preNum++;
 
+                                // TODO：玩家名可能要从localStorage中得到
                                 ws.send(JSON.stringify({
                                     type: "pre",
                                     role: role,
-                                    name: name
+                                    name: "player"
                                 }));
                             }
                         } else if (player.input.pre == false) {
                             if (player.pre) {
                                 player.pre = false;
-                                screen.showState(scene, player.role, name, false);
+                                screen.showState(scene, player.role, player.name, false);
                                 preNum--;
 
+                                // TODO：玩家名可能要从localStorage中得到
                                 ws.send(JSON.stringify({
                                     type: "depre",
                                     role: role,
-                                    name: name
+                                    name: "player"
                                 }));
                             }
                         }
@@ -348,30 +383,21 @@
                     }
                     if (preNum == 2 && !showTopic) {  // 两人都准备好了再开始游戏
                         if (topicNum < 2) {
-                            if (!sendTopicRequest) {
-                                player.input.answer = null;
-                                ws.send(JSON.stringify({
-                                    type: "topic",
-                                }));
-                                sendTopicRequest = true;
-                            }
+                            player.input.answer = null;
+                            ws.send(JSON.stringify({
+                                type: "topic",
+                            }));
                         } else {
                             if (!showEnd) {
                                 showEnd = true;
                                 screen.showEnd(scene);
-                                ws.send(JSON.stringify({
-                                    type: "end",
-                                    user1Id: userId,
-                                    user2Id: opponentId,
-                                    winNum: winNum,
-                                    loseNum: loseNum
-                                }));
                             }
                             if (player.input.cont == true) {
+                                // TODO：name 应该从localStorage中得到
                                 ws.send(JSON.stringify({
                                     type: "cont",
                                     role: role,
-                                    name: name
+                                    name: "player"
                                 }));
                             }
                         }
@@ -381,12 +407,13 @@
                         if (player.input.answer) {
                             if (player.input.answer < screen.topicMesh.length) {
                                 let result = player.input.answer == answer;
+                                // TODO：userId 和 name 应该从localStorage中得到
                                 ws.send(JSON.stringify({
                                     type: "result",
                                     questionId: queationId,
                                     result: result,
-                                    userId: userId,
-                                    name: name
+                                    userId: 1,
+                                    name: "player"
                                 }));
                             }
                         }
@@ -402,8 +429,11 @@
                 );
                 stats.update();
                 previousTime = currentTime;
+
                 // physics.helpers.clear();
             }
+
+            let hasFlower = false;
     
             // 窗口大小变化，重新渲染
             window.addEventListener("resize", () => {
@@ -417,6 +447,62 @@
             // createGUI(scene, world, player);
     
             animate();
+
+            // 连接到rtc
+            document.getElementById("connectBtn").addEventListener("click", function() {
+                startWebRTC();
+                this.style.display = 'none';
+            });
+
+            let loader2 = new MMDLoader();
+            let helper2 = new MMDAnimationHelper();
+            function loadNPC() {
+                
+                loader2.loadWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/待机动作整理.vmd',(mmd) => {
+                    mmd.mesh.scale.set(0.15, 0.15, 0.15);
+                    helper2.add(mmd.mesh, {
+                        animation: mmd.animation,
+                        physics: false // 是否添加物理效果
+                    });
+                    // 返回加载的模型
+                    // resolve({mmd, helper2});
+                    mmd.mesh.position.set(20, 1.5, 0);
+                    mmd.mesh.rotation.set(0, Math.PI/2, 0);
+                    mmd.mesh.castShadow = true;
+                    mmd.mesh.receiveShadow = true;
+                    scene.add(mmd.mesh);
+                });
+                loader2.loadWithAnimation('../../src/assets/model/螺丝咕姆20231219/螺丝咕姆1.0.pmx', '../../src/assets/animation/待机动作公子.vmd',(mmd) => {
+                    mmd.mesh.scale.set(0.15, 0.15, 0.15);
+                    helper2.add(mmd.mesh, {
+                        animation: mmd.animation,
+                        physics: false // 是否添加物理效果
+                    });
+                    // 返回加载的模型
+                    // resolve({mmd, helper2});
+                    mmd.mesh.position.set(44, 1.5, 0);
+                    mmd.mesh.rotation.set(0, -Math.PI/2, 0);
+                    mmd.mesh.castShadow = true;
+                    mmd.mesh.receiveShadow = true;
+                    scene.add(mmd.mesh);
+                });
+
+            }
+            let clock = new THREE.Clock();
+
+
+            loadNPC();
+            const animate2 = () => {
+                helper2.update(clock.getDelta());
+                requestAnimationFrame(animate2);
+                renderer.render(
+                    scene,
+                    player.controls.isLocked ? player.camera : orbitCamera
+                );
+                // renderer.render(scene, camera);
+            }
+            animate2();
+
         },
     };
     </script>
@@ -435,4 +521,54 @@
         color: white;
         margin: 8px;
     }
+    
+    #videoArea {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        right: 10px;
+        top: 10px;
+        /* width: 120px; */
+    }
+    #connectIcon {
+        width: 30px;
+    }
+    #connectBtn {
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        width: 160px;
+        height: 30px;
+        border: 0;
+        border-radius: 15px;
+
+        background-image: linear-gradient(to right, rgba(30, 144, 255, 0.9), rgba(65, 105, 225, 0.9));
+        color: aliceblue;
+    }
+
+    #bubble {
+        display: none;
+
+        position: absolute;
+        top: 60%;
+        right: 30%;
+        width: 150px;
+        height: 30px;
+        line-height: 30px;
+        border: 0;
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
+
+        background-image: linear-gradient(to right, rgba(159, 214, 235, 0.664), rgba(175, 190, 233, 0));
+        color: aliceblue;
+        font-weight: bold;
+        /* text-align: center; */
+        padding-left: 30px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
 </style>

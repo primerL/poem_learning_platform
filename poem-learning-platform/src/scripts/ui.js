@@ -1,7 +1,7 @@
 // lil-gui
 import {GUI} from 'three/addons/libs/lil-gui.module.min.js'
 
-export function createGUI(scene, world, player) {
+export function createGUI(scene, world, player, loader) {
     const gui = new GUI();
 
     const sceneFolder = gui.addFolder('Scene');

@@ -84,6 +84,12 @@ public class EchoChannel implements ApplicationContextAware {
                     data.put("modelId", jsonNode.get("modelId").asLong());
                     broadcast(objectMapper.writeValueAsString(data), this.session.getId());
                 }
+                else if ("still".equals(type)) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("type", "still");
+                    data.put("socketId", this.session.getId());
+                    broadcast(objectMapper.writeValueAsString(data), this.session.getId());
+                }
                 else if ("pre".equals(type)) {
                     Map<String, Object> data = new HashMap<>();
                     data.put("type", "pre");

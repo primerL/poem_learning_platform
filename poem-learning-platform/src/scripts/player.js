@@ -3,6 +3,7 @@ import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import loader from './loader.js';
 import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper.js";
 
+
 export class Player {
     // 只有在锁定状态下才能移动
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 200);
@@ -21,6 +22,8 @@ export class Player {
     onGround = false;
 
     constructor(scene, screen, params, name, modelId) {
+        this.animationId = 0;
+
         if (params.role == 0) {
             this.camera.position.set(32, 32, -2);
         } else if (params.role == 1) {
@@ -35,18 +38,26 @@ export class Player {
         this.camera.rotation.y += Math.PI;
         scene.add(this.camera);
 
-        loader.loadModelWithNumber(modelId).then(({ mmd, helper }) => {
+        loader.loadModelWithNumber(modelId, 2).then((mmd) => {
             mmd.mesh.position.copy(this.camera.position);
             mmd.mesh.rotation.copy(this.camera.rotation);
             mmd.mesh.castShadow = true;
             mmd.mesh.receiveShadow = true;
-            scene.add(mmd.mesh);
-            this.model = mmd;
+            this.modelWalk = mmd;
+        });
+
+        loader.loadModelWithNumber(modelId, 1).then((mmd) => {
+            mmd.mesh.position.copy(this.camera.position);
+            mmd.mesh.rotation.copy(this.camera.rotation);
+            mmd.mesh.castShadow = true;
+            mmd.mesh.receiveShadow = true;
+            this.modelStill = mmd;
+
+            this.model = this.modelStill;
+            scene.add(this.model.mesh);
 
             const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
             this.height = boundingBox.max.y - boundingBox.min.y;
-            
-            this.modelHelper = helper;
         });
 
         this.cameraHelper.visible = false;
@@ -57,18 +68,16 @@ export class Player {
         document.addEventListener('keyup', this.onKeyUp.bind(this));
     }
 
-    updateModel(dt) {
+    updateModel() {
         // 使模型跟随玩家
         let position = this.position.clone();
-        position.sub(new THREE.Vector3(0, this.height, 0));
+        position.sub(new THREE.Vector3(0, this.height, 0));  
         this.model.mesh.position.copy(position);
         // 获取相机的欧拉角
         const euler = new THREE.Euler();
         euler.setFromQuaternion(this.controls.camera.quaternion, 'YXZ');
         // 只保留 Y 方向上的旋转
         this.model.mesh.rotation.y = euler.y + Math.PI;
-        // 更新动画
-        this.modelHelper.update(dt);
     }
 
     get position() {

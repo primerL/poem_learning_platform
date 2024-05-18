@@ -18,6 +18,7 @@
     import { Screen } from "../scripts/screen.js";
     import loader from '../scripts/loader.js';
 
+
     export default {
         name: "Scene",
         mounted() {
@@ -40,6 +41,7 @@
             let opponentId;  // 对手的userId
             let winNum = 0; // 记录胜利次数
             let loseNum = 0; // 记录失败次数
+            let isStill = true; // 是否静止
 
             // 显示性能监控（FPS）
             const stats = new Stats();
@@ -80,7 +82,7 @@
             // 添加雾
             scene.fog = new THREE.Fog(0xb0e0ff, 50, 80);
     
-            scene.add(orbitCameraHelper);
+            // scene.add(orbitCameraHelper);
     
             const physics = new Physics(scene);
 
@@ -129,27 +131,31 @@
                 ws.send(JSON.stringify(loginObject));                
             };
             ws.onmessage = function(event) {
-                console.log("Received message: ", event.data);
+                // console.log("Received message: ", event.data);
                 const message = JSON.parse(event.data);
                 if (message.type == "login") {
                     // 导入模型
-                    loader.loadModelWithNumber(message.modelId).then(({ mmd, helper }) => {
+                    loader.loadModelWithNumber(message.modelId, 1).then((mmd) => {
                         if (message.role == 0) {
-                            mmd.mesh.position.set(32, 16, 25);
+                            mmd.mesh.position.set(32, 16, 60);
                         } else if (message.role == 1) {
-                            mmd.mesh.position.set(17, 16, 25);
+                            mmd.mesh.position.set(17, 16, 60);
                             opponentId = message.userId;
                         } else if (message.role == 2) {
-                            mmd.mesh.position.set(46, 16, 25);
+                            mmd.mesh.position.set(46, 16, 60);
                             opponentId = message.userId;
                         }
                         mmd.mesh.rotation.set(0, Math.PI, 0);
-                        mmd.mesh.castShadow = true;
-                        mmd.mesh.receiveShadow = true;
                         scene.add(mmd.mesh);
                         const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
                         const height = boundingBox.max.y - boundingBox.min.y;
-                        playerMap.set(message.socketId, {mesh: mmd.mesh, height: height});
+                        playerMap.set(message.socketId, {model: mmd, modelStill: mmd,height: height});
+
+                        loader.loadModelWithNumber(message.modelId, 2).then((mmd) => {
+                            let data = playerMap.get(message.socketId);
+                            data.modelWalk = mmd;
+                            playerMap.set(message.socketId, data);
+                        });
                     });
                     // 显示状态
                     if (!screen.isState[message.role - 1]) {
@@ -163,20 +169,21 @@
                     if (playerMap.get(message.socketId) == undefined) {
                         opponentId = message.userId;
                         playerMap.set(message.socketId, 0);
-                        loader.loadModelWithNumber(message.modelId).then(({ mmd, helper }) => {
-                            if (playerMap.get(message.socketId) == 0) {
-                                const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
-                                const height = boundingBox.max.y - boundingBox.min.y;
+                        loader.loadModelWithNumber(message.modelId, 2).then((mmd) => {
+                            const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
+                            const height = boundingBox.max.y - boundingBox.min.y;
 
-                                mmd.mesh.position.set(position.x, position.y - height, position.z);
-                                mmd.mesh.rotation.set(rotation.x, rotation.y, rotation.z);
+                            mmd.mesh.position.set(position.x, position.y - height, position.z);
+                            mmd.mesh.rotation.set(rotation.x, rotation.y, rotation.z);
+                            
+                            scene.add(mmd.mesh);
+                            playerMap.set(message.socketId, {model: mmd, modelWalk: mmd, height: height});
 
-                                mmd.mesh.castShadow = true;
-                                mmd.mesh.receiveShadow = true;
-                                
-                                scene.add(mmd.mesh);
-                                playerMap.set(message.socketId, {mesh: mmd.mesh, height: height});
-                            }
+                            loader.loadModelWithNumber(message.modelId, 1).then((mmd) => {
+                                let data = playerMap.get(message.socketId);
+                                data.modelStill = mmd;
+                                playerMap.set(message.socketId, data);
+                            });
                         });
                         
                         if (!screen.isState[message.role - 1]) {
@@ -184,8 +191,30 @@
                         }
                     } else {
                         if (playerMap.get(message.socketId) != 0 && playerMap.get(message.socketId) != -1){
-                            playerMap.get(message.socketId).mesh.position.set(position.x, position.y - playerMap.get(message.socketId).height, position.z);
-                            playerMap.get(message.socketId).mesh.rotation.set(rotation._x, rotation._y, rotation._z);
+                            let modelWalk = playerMap.get(message.socketId).modelWalk;
+                            if (modelWalk) {
+                                modelWalk.mesh.position.set(position.x, position.y - playerMap.get(message.socketId).height, position.z);
+                                modelWalk.mesh.rotation.set(rotation._x, rotation._y, rotation._z);
+                                scene.remove(playerMap.get(message.socketId).model.mesh);
+                                playerMap.get(message.socketId).model = modelWalk;
+                                scene.add(modelWalk.mesh);
+                            }
+                        }
+                    }
+                }
+                else if (message.type == "still") {
+                    if (playerMap.get(message.socketId) != 0 && playerMap.get(message.socketId) != -1){
+                        let modelStill = playerMap.get(message.socketId).modelStill;
+                        if (modelStill) {
+                            const mixer = modelStill.helper.objects.get(modelStill.mesh).mixer;
+                            const AnimationAction = mixer.clipAction(modelStill.animation);
+                            AnimationAction.time = 0.2;
+                            AnimationAction.play();
+                            modelStill.mesh.position.copy(playerMap.get(message.socketId).model.mesh.position);
+                            modelStill.mesh.rotation.copy(playerMap.get(message.socketId).model.mesh.rotation);
+                            scene.remove(playerMap.get(message.socketId).model.mesh);
+                            playerMap.get(message.socketId).model = modelStill;
+                            scene.add(modelStill.mesh);
                         }
                     }
                 }
@@ -255,7 +284,7 @@
                 else if (message.type == "logout") {
                     if (playerMap.get(message.socketId) != undefined && playerMap.get(message.socketId) != 0){
                         // 删除 state
-                        let position = playerMap.get(message.socketId).mesh.position.clone();
+                        let position = playerMap.get(message.socketId).model.mesh.position.clone();
                         if (position.z > 4 && position.z < 60) {
                             if (position.x > 4 && position.x < 32) {
                                 scene.remove(screen.stateMesh[1 - 1]);
@@ -267,7 +296,7 @@
                             }
                         }
                         
-                        scene.remove(playerMap.get(message.socketId).mesh);
+                        scene.remove(playerMap.get(message.socketId).model.mesh);
                         playerMap.set(message.socketId, -1);
                     }
                 }
@@ -286,7 +315,7 @@
                     physics.update(deltaTime, player, world);
                     let position2 = player.position.clone();
                     if (position1.x != position2.x || position1.y != position2.y || position1.z != position2.z) {
-
+                        isStill = false;
                         const rotation = player.model.mesh.rotation.clone();
                         if (!isSending) {
                             isSending = true;
@@ -309,6 +338,41 @@
                         light.intensity = 3;
                         light.position.sub(new THREE.Vector3(-50, -50, -50));
                         light.target.position.copy(player.position);
+
+                        if (player.animationId == 0) {
+                            player.animationId = 1;
+                            if (player.modelWalk) {
+                                player.modelWalk.mesh.position.copy(player.model.mesh.position);
+                                player.modelWalk.mesh.rotation.copy(player.model.mesh.rotation);
+                                scene.remove(player.model.mesh);
+                                scene.add(player.modelWalk.mesh);
+                                player.model = player.modelWalk;
+                            }
+                        }
+                    } else {
+                        if (player.animationId == 1) {
+                            player.animationId = 0;
+                            if (player.modelStill) {
+                                player.modelStill.mesh.position.copy(player.model.mesh.position);
+                                player.modelStill.mesh.rotation.copy(player.model.mesh.rotation);
+                                scene.remove(player.model.mesh);
+                                scene.add(player.modelStill.mesh);
+                                player.model = player.modelStill;
+                            }
+                        }
+                        if (!isStill) {
+                            isStill = true;
+                            ws.send(JSON.stringify({
+                                type: "still"
+                            }));
+                        }
+                    }
+                    if (player.model && player.model.mesh.visible == true) {
+                        player.model.mesh.visible = false;
+                    }
+                } else {
+                    if (player.model && player.model.mesh.visible == false) {
+                        player.model.mesh.visible = true;
                     }
                 }
 
@@ -403,6 +467,18 @@
                 stats.update();
                 previousTime = currentTime;
                 // physics.helpers.clear();
+                
+                // 更新动画
+                if (player.model && player.model.helper) {
+                    player.model.helper.update(deltaTime);
+                }
+                for (let [key, value] of playerMap) {
+                    if (value != 0 && value != -1) {
+                        if (value.model.helper) {
+                            value.model.helper.update(deltaTime);
+                        }
+                    }
+                }
             }
     
             // 窗口大小变化，重新渲染

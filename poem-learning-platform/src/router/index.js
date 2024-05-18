@@ -5,7 +5,7 @@ import Audience from '../views/audience.vue';
 import App from '../App.vue';
 
 const role = 2;  // 玩家角色，0 为观战者，1 为玩家1，2 为玩家2
-const userId = Math.floor(Math.random() * 2 + 3);  // 玩家 id
+const userId = Math.floor(Math.random() * 100 + 3);  // 玩家 id
 const name = "Player" + userId;;  // 玩家名
 const modelId = Math.floor(Math.random() * 5 + 1);  // 玩家模型 id
 

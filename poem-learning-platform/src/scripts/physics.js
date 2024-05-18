@@ -27,7 +27,7 @@ export class Physics {
             player.velocity.y -= this.gravity * this.timeStep;
             player.applyInputs(this.timeStep);
             this.detectCollisions(player, world);
-            player.updateModel(this.timeStep);
+            player.updateModel();
             this.accumulator -= this.timeStep;
         }
     }

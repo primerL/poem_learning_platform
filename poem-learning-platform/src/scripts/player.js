@@ -135,7 +135,13 @@ export class Player {
                 }
                 break;
             case 'KeyM' :
+                this.input.npcFlo = true;
+                break;
+            case 'KeyN' :
                 this.input.npcChat = true;
+                break;
+            case 'KeyX' :
+                this.input.sendFlo = true;
                 break;
         }
     }

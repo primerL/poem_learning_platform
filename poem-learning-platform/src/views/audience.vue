@@ -285,15 +285,15 @@
                         const rotation = player.model.mesh.rotation.clone();
                         if (!isSending) {
                             isSending = true;
-                            ws.send(JSON.stringify({
-                                type: "position",
-                                position: JSON.stringify(position2),
-                                rotation: JSON.stringify(rotation),
-                                role: role,
-                                name: name,
-                                userId: userId,
-                                modelId: modelId
-                            }));
+                            // ws.send(JSON.stringify({
+                            //     type: "position",
+                            //     position: JSON.stringify(position2),
+                            //     rotation: JSON.stringify(rotation),
+                            //     role: role,
+                            //     name: name,
+                            //     userId: userId,
+                            //     modelId: modelId
+                            // }));
                             isSending = false;
                         }
                         
@@ -315,34 +315,54 @@
                     let distanceAI = player.position.distanceTo(npcPosAI);
                     
                     // 献花方式：跑到对应台子？（能买几朵啊）））
-                    if(!hasFlower && distanceFlo <= 4) {
+                    bubble.style.display = 'block';
+                    if(distanceAI <= 4) {
                         bubble.style.display = 'block';
-                        bubble.innerHTML = '[M]向阮·梅买花';    // TODO: 不在视线内/esc时不显示提示框
-                        // console.log(player.input.npcChat)
-                        // console.log(player.input)
-                        if(player.input.npcChat == true) {
-                            bubble.innerHTML = '去献花吧！';
-                            // 记录花状态
-                            hasFlower = true;
-                        }
-                    } else if(distanceAI <= 4) {
-                        bubble.style.display = 'block';
-                        bubble.innerHTML = '[M]与螺丝咕姆交谈';
+                        bubble.innerHTML = '[N]与螺丝咕姆交谈';
                         if(player.input.npcChat == true) {
                             bubble.innerHTML = '跳转中……';
                             // TODO: 接通ai
                         }
-                    } else if(hasFlower) {
+                    } else if(hasFlower == true) {
                         if(player.position.x < 32) {
-                            bubble.innerHTML = '献花给p1';
-                            // TODO: 后续处理
+                            bubble.innerHTML = '[X]献花给p1';
+                            // TODO: 记录花数量；接模型；传递后端
+                            if(player.input.sendFlo == true) {
+                                // alert("已献花给p1！");
+                                hasFlower = false;
+                                playerFlowerNum[0] ++;
+                                addFlower(1);
+                                console.log(playerFlowerNum);
+                                player.input.sendFlo = false;
+                                player.input.npcFlo = false;
+                            }
                         } else {
-                            bubble.innerHTML = '献花给p2';
+                            bubble.innerHTML = '[X]献花给p2';
+                            if(player.input.sendFlo == true) {
+                                alert("已献花给p2！");
+                                hasFlower = false;
+                                playerFlowerNum[1] ++;
+                                addFlower(2);
+
+                                player.input.sendFlo = false;
+                                player.input.npcFlo = false;
+                            }
+                        }
+                    } else if(hasFlower == false && distanceFlo <= 4) {
+                        bubble.style.display = 'block';
+                        bubble.innerHTML = '[M]向阮·梅买花';
+                        player.input.sendFlo = false;
+                        if(player.input.npcFlo == true) {
+                            bubble.innerHTML = '去献花吧！';
+                            // 记录花状态
+                            hasFlower = true;
                         }
                     } else {
                         bubble.style.display = 'none';
                     }
 
+                } else {
+                    bubble.style.display = 'none';
                 }
 
                 if (player.role != 0) {
@@ -434,6 +454,59 @@
             }
 
             let hasFlower = false;
+            let playerFlowerNum = [0,0];
+            let flowerInfo = [];
+            let loader3 = new MMDLoader();
+            // let helper3 = new MMDAnimationHelper();
+            
+            function addFlower(playerID) {
+                console.log('add flower')
+                // 划定区域
+                let pos_X;
+                let pos_Z = 10;
+                if(playerID === 1) {
+                    pos_X = 18;
+                } else {
+                    pos_X = 36;
+                }
+                pos_X += Math.random() * 10;
+                pos_Z += Math.random() * 10;
+                // 随机model
+                let flowerPaths = ['../../src/assets/model/原神-风车菊/风车菊.pmx',
+                    '../../src/assets/model/原神-琉璃百合/琉璃百合.pmx',
+                    '../../src/assets/model/原神-琉璃百合/琉璃百合-夜晚.pmx',
+                    '../../src/assets/model/原神-清心/清心.pmx',
+                    '../../src/assets/model/原神-塞西莉亚花/塞西莉亚花.pmx',
+                ]
+                let flowerType = Math.floor(Math.random() * 5);
+
+                // 记录
+                flowerInfo.push([pos_X, pos_Z, flowerType])
+                console.log(flowerInfo)
+                // 加载到场景
+                // TODO: 有一堆err：WebGL: INVALID_VALUE: uniform1fv: no array
+                // 不影响实际效果，但是为什么orz
+
+                let flowerPath = flowerPaths[flowerType];
+                loader2.load(
+                    flowerPath,
+                    function (object) {
+                        console.log('模型加载成功:', object);
+                        object.scale.set(0.15, 0.15, 0.15);
+                        object.position.set(pos_X, 1.5, pos_Z);
+                        object.rotation.set(0, Math.PI/2, 0);
+                        object.castShadow = true;
+                        object.receiveShadow = true;
+                        scene.add(object);
+                    },
+                    // function (xhr) {
+                    //     console.log((xhr.loaded / xhr.total * 100) + '% 已加载');
+                    // },
+                    // function (error) {
+                    //     console.error('模型加载失败:', error);
+                    // }
+                );
+            }
     
             // 窗口大小变化，重新渲染
             window.addEventListener("resize", () => {
@@ -501,7 +574,7 @@
                 );
                 // renderer.render(scene, camera);
             }
-            animate2();
+            animate2();            
 
         },
     };

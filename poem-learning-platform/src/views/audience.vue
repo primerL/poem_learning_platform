@@ -494,7 +494,7 @@
                         console.log('模型加载成功:', object);
                         object.scale.set(0.15, 0.15, 0.15);
                         object.position.set(pos_X, 1.5, pos_Z);
-                        object.rotation.set(0, Math.PI/2, 0);
+                        object.rotation.set(0, Math.PI*(pos_X+pos_Z), 0);
                         object.castShadow = true;
                         object.receiveShadow = true;
                         scene.add(object);

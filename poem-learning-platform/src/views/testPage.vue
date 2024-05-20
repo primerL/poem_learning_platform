@@ -1,171 +1,547 @@
 <template>
-    <h1 class="title">Hover over the cards</h1>
+    <div class="wrapper">
+        <div class="background">
+            <img src="https://res.cloudinary.com/muhammederdem/image/upload/q_60/v1537132206/news-slider/background.webp"
+                alt="" />
+        </div>
+        <div class="item-bg" ref="itemBg"></div>
 
-    <div id="app" class="container">
-        <card
-            data-image="https://images.unsplash.com/photo-1479660656269-197ebb83b540?dpr=2&auto=compress,format&fit=crop&w=1199&h=798&q=80&cs=tinysrgb&crop=">
-            <h1 slot="header">Canyons</h1>
-            <p slot="content">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-        </card>
-        <card
-            data-image="https://images.unsplash.com/photo-1479659929431-4342107adfc1?dpr=2&auto=compress,format&fit=crop&w=1199&h=799&q=80&cs=tinysrgb&crop=">
-            <h1 slot="header">Beaches</h1>
-            <p slot="content">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-        </card>
-        <card
-            data-image="https://images.unsplash.com/photo-1479644025832-60dabb8be2a1?dpr=2&auto=compress,format&fit=crop&w=1199&h=799&q=80&cs=tinysrgb&crop=">
-            <h1 slot="header">Trees</h1>
-            <p slot="content">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-        </card>
-        <card
-            data-image="https://images.unsplash.com/photo-1479621051492-5a6f9bd9e51a?dpr=2&auto=compress,format&fit=crop&w=1199&h=811&q=80&cs=tinysrgb&crop=">
-            <h1 slot="header">Lakes</h1>
-            <p slot="content">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-        </card>
+        <div class="news-slider">
+            <div class="news-slider__wrp swiper-wrapper">
+                <div class="news-slider__item swiper-slide" v-for="(newsItem, index) in newsItems" :key="index">
+                    <a href="#" class="news__item">
+                        <div class="news-date">
+                            <span class="news-date__title">{{ newsItem.date.day }}</span>
+                            <span class="news-date__txt">{{ newsItem.date.month }}</span>
+                        </div>
+                        <div class="news__title">{{ newsItem.title }}</div>
+                        <p class="news__txt">{{ newsItem.text }}</p>
+                        <!-- <div class="news__img">
+                            <img :src="newsItem.image" alt="news" />
+                        </div> -->
+                        <q-btn color="teal-4">
+                            <q-icon left size="3xs" name="map" />
+                            <div>Label</div>
+                        </q-btn>
+                    </a>
+                </div>
+            </div>
+
+            <div class="news-slider__ctr">
+                <div class="news-slider__arrows">
+                    <button class="news-slider__arrow news-slider-prev" @click="slidePrev()">
+                        <span class="icon-font">
+                            <svg class="icon icon-arrow-left">
+                                <use xlink:href="#icon-arrow-left"></use>
+                            </svg>
+                        </span>
+                    </button>
+                    <button class="news-slider__arrow news-slider-next" @click="slideNext()">
+                        <span class="icon-font">
+                            <svg class="icon icon-arrow-right">
+                                <use xlink:href="#icon-arrow-right"></use>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+                <div class="news-slider__pagination"></div>
+
+            </div>
+        </div>
+        <svg hidden="hidden">
+            <defs>
+                <symbol id="icon-arrow-left" viewBox="0 0 32 32">
+                    <title>arrow-left</title>
+                    <path
+                        d="M0.704 17.696l9.856 9.856c0.896 0.896 2.432 0.896 3.328 0s0.896-2.432 0-3.328l-5.792-5.856h21.568c1.312 0 2.368-1.056 2.368-2.368s-1.056-2.368-2.368-2.368h-21.568l5.824-5.824c0.896-0.896 0.896-2.432 0-3.328-0.48-0.48-1.088-0.704-1.696-0.704s-1.216 0.224-1.696 0.704l-9.824 9.824c-0.448 0.448-0.704 1.056-0.704 1.696s0.224 1.248 0.704 1.696z">
+                    </path>
+                </symbol>
+                <symbol id="icon-arrow-right" viewBox="0 0 32 32">
+                    <title>arrow-right</title>
+                    <path
+                        d="M31.296 14.336l-9.888-9.888c-0.896-0.896-2.432-0.896-3.328 0s-0.896 2.432 0 3.328l5.824 5.856h-21.536c-1.312 0-2.368 1.056-2.368 2.368s1.056 2.368 2.368 2.368h21.568l-5.856 5.824c-0.896 0.896-0.896 2.432 0 3.328 0.48 0.48 1.088 0.704 1.696 0.704s1.216-0.224 1.696-0.704l9.824-9.824c0.448-0.448 0.704-1.056 0.704-1.696s-0.224-1.248-0.704-1.664z">
+                    </path>
+                </symbol>
+            </defs>
+        </svg>
     </div>
 </template>
 
 <script setup>
+import { onMounted, ref } from 'vue';
+import Swiper from 'swiper';
+import 'swiper/swiper-bundle.css';
+import $ from 'jquery';
 
+const itemBg = ref(null);
+let swiper;
 
+const newsItems = ref([
+    {
+        date: { day: '01', month: 'ROOM' },
+        title: 'Lorem Ipsum Dolor Sit Amed',
+        text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s...",
+        //   image: 'https://res.cloudinary.com/muhammederdem/image/upload/q_60/v1537132205/news-slider/item-2.webp',
+    },
+    {
+        date: { day: '02', month: 'ROOM' },
+        title: 'Lorem Ipsum Dolor Sit Amed',
+        text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s...",
+        //   image: 'https://res.cloudinary.com/muhammederdem/image/upload/q_60/v1537132205/news-slider/item-3.webp',
+    },
+    {
+        date: { day: '03', month: 'ROOM' },
+        title: 'Lorem Ipsum Dolor Sit Amed',
+        text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s...",
+        //   image: 'https://res.cloudinary.com/muhammederdem/image/upload/q_60/v1537132205/news-slider/item-3.webp',
+    },
+    {
+        date: { day: '04', month: 'ROOM' },
+        title: 'Lorem Ipsum Dolor Sit Amed',
+        text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s...",
+        //   image: 'https://res.cloudinary.com/muhammederdem/image/upload/q_60/v1537132205/news-slider/item-3.webp',
+    },
+    {
+        date: { day: '05', month: 'ROOM' },
+        title: 'Lorem Ipsum Dolor Sit Amed',
+        text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s...",
+        //   image: 'https://res.cloudinary.com/muhammederdem/image/upload/q_60/v1537132205/news-slider/item-3.webp',
+    },
+    // 继续添加其他newsItems...
+]);
+
+const slideNext = () => {
+    if (swiper) {
+        swiper.slideNext();
+    }
+};
+
+const slidePrev = () => {
+    if (swiper) {
+        swiper.slidePrev();
+    }
+}
+
+onMounted(() => {
+    swiper = new Swiper('.news-slider', {
+        effect: 'coverflow',
+        grabCursor: true,
+        loop: true,
+        centeredSlides: true,
+        keyboard: true,
+        spaceBetween: 0,
+        slidesPerView: 'auto',
+        speed: 300,
+        coverflowEffect: {
+            rotate: 0,
+            stretch: 0,
+            depth: 0,
+            modifier: 3,
+            slideShadows: false,
+        },
+        breakpoints: {
+            480: {
+                spaceBetween: 0,
+                centeredSlides: true,
+            },
+        },
+        simulateTouch: true,
+        navigation: {
+            nextEl: '.news-slider-next',
+            prevEl: '.news-slider-prev',
+        },
+        pagination: {
+            el: '.news-slider__pagination',
+            clickable: true,
+        },
+        on: {
+            init: function () {
+                const activeItem = document.querySelector('.swiper-slide-active .news__item');
+                const x = activeItem.getBoundingClientRect().left;
+                const y = activeItem.getBoundingClientRect().top;
+                const width = activeItem.getBoundingClientRect().width;
+                const height = activeItem.getBoundingClientRect().height;
+
+                itemBg.value.style.width = `${width}px`;
+                itemBg.value.style.height = `${height}px`;
+                itemBg.value.style.transform = `translateX(${x}px) translateY(${y}px)`;
+                itemBg.value.classList.add('active');
+            },
+        },
+    });
+
+    swiper.on('touchEnd', function () {
+        document.querySelectorAll('.news__item').forEach((item) => item.classList.remove('active'));
+        document.querySelector('.swiper-slide-active .news__item').classList.add('active');
+        console.log('touchEnd');
+    });
+
+    swiper.on('slideChange', function () {
+        document.querySelectorAll('.news__item').forEach((item) => item.classList.remove('active'));
+        console.log('slideChange');
+    });
+
+    swiper.on('slideChangeTransitionEnd', function () {
+        document.querySelectorAll('.news__item').forEach((item) => item.classList.remove('active'));
+        const activeItem = document.querySelector('.swiper-slide-active .news__item');
+        const x = activeItem.getBoundingClientRect().left;
+        const y = activeItem.getBoundingClientRect().top;
+        const width = activeItem.getBoundingClientRect().width;
+        const height = activeItem.getBoundingClientRect().height;
+
+        itemBg.value.style.width = `${width}px`;
+        itemBg.value.style.height = `${height}px`;
+        itemBg.value.style.transform = `translateX(${x}px) translateY(${y}px)`;
+        itemBg.value.classList.add('active');
+        activeItem.classList.add('active');
+        console.log('slideChangeTransitionEnd');
+    });
+
+    if (window.innerWidth > 800) {
+        $(document).on('mouseover', '.news__item', function () {
+            const x = this.getBoundingClientRect().left;
+            const y = this.getBoundingClientRect().top;
+            const width = this.getBoundingClientRect().width;
+            const height = this.getBoundingClientRect().height;
+
+            itemBg.value.style.width = `${width}px`;
+            itemBg.value.style.height = `${height}px`;
+            itemBg.value.style.transform = `translateX(${x}px) translateY(${y}px)`;
+            itemBg.value.classList.add('active');
+        });
+
+        $(document).on('mouseleave', '.news__item', function () {
+            itemBg.value.classList.remove('active');
+        });
+    }
+});
 </script>
 
 <style>
-body {
-    margin: 40px 0;
-    font-family: "Raleway";
-    font-size: 14px;
-    font-weight: 500;
-    background-color: #BCAAA4;
-    -webkit-font-smoothing: antialiased;
-}
+@import url("https://fonts.googleapis.com/css?family=Quicksand:400,500,700&subset=latin-ext");
 
-.title {
-    font-family: "Raleway";
-    font-size: 24px;
-    font-weight: 700;
-    color: #5D4037;
-    text-align: center;
-}
-
-p {
-    line-height: 1.5em;
-}
-
-h1+p,
-p+p {
-    margin-top: 10px;
-}
-
-.container {
-    padding: 40px 80px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.card-wrap {
-    margin: 10px;
-    transform: perspective(800px);
-    transform-style: preserve-3d;
-    cursor: pointer;
-}
-
-.card-wrap:hover .card-info {
-    transform: translateY(0);
-}
-
-.card-wrap:hover .card-info p {
-    opacity: 1;
-}
-
-.card-wrap:hover .card-info,
-.card-wrap:hover .card-info p {
-    transition: 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.card-wrap:hover .card-info:after {
-    transition: 5s cubic-bezier(0.23, 1, 0.32, 1);
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.card-wrap:hover .card-bg {
-    transition: 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 5s cubic-bezier(0.23, 1, 0.32, 1);
-    opacity: 0.8;
-}
-
-.card-wrap:hover .card {
-    transition: 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 2s cubic-bezier(0.23, 1, 0.32, 1);
-    box-shadow: rgba(255, 255, 255, 0.2) 0 0 40px 5px, white 0 0 0 1px, rgba(0, 0, 0, 0.66) 0 30px 60px 0, inset #333 0 0 0 5px, inset white 0 0 0 6px;
-}
-
-.card {
+html {
     position: relative;
-    flex: 0 0 240px;
-    width: 240px;
-    height: 320px;
-    background-color: #333;
-    overflow: hidden;
-    border-radius: 10px;
-    box-shadow: rgba(0, 0, 0, 0.66) 0 30px 60px 0, inset #333 0 0 0 5px, inset rgba(255, 255, 255, 0.5) 0 0 0 6px;
-    transition: 1s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+    overflow-x: hidden !important;
 }
 
-.card-bg {
-    opacity: 0.5;
-    position: absolute;
-    top: -20px;
-    left: -20px;
+body {
+    font-family: "Quicksand", sans-serif;
+}
+
+a,
+a:hover {
+    text-decoration: none;
+}
+
+.icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    stroke-width: 0;
+    stroke: currentColor;
+    fill: currentColor;
+}
+
+.background {
+    position: fixed;
     width: 100%;
     height: 100%;
-    padding: 20px;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    transition: 1s cubic-bezier(0.445, 0.05, 0.55, 0.95), opacity 5s 1s cubic-bezier(0.445, 0.05, 0.55, 0.95);
-    pointer-events: none;
+    left: 0;
+    top: 0;
 }
 
-.card-info {
-    padding: 20px;
-    position: absolute;
-    bottom: 0;
-    color: #fff;
-    transform: translateY(40%);
-    transition: 0.6s 1.6s cubic-bezier(0.215, 0.61, 0.355, 1);
-}
-
-.card-info p {
-    opacity: 0;
-    text-shadow: black 0 2px 3px;
-    transition: 0.6s 1.6s cubic-bezier(0.215, 0.61, 0.355, 1);
-}
-
-.card-info * {
-    position: relative;
-    z-index: 1;
-}
-
-.card-info:after {
+.background:after {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 0;
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
-    background-blend-mode: overlay;
-    opacity: 0;
-    transform: translateY(100%);
-    transition: 5s 1s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+    background-image: linear-gradient(45deg, #86BABA, #598CAC, rgba(230, 251, 245));
+    opacity: 0.9;
 }
 
-.card-info h1 {
-    font-family: "Playfair Display";
-    font-size: 36px;
-    font-weight: 700;
-    text-shadow: rgba(0, 0, 0, 0.5) 0 10px 10px;
+.background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    user-select: none;
+}
+
+.item-bg {
+    width: 300px;
+    height: 500px;
+    position: absolute;
+    top: 30px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 6px 26px 6px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transition: all 0.3s;
+    left: -30px;
+}
+
+.item-bg.active {
+    left: 0;
+    top: 0;
+    opacity: 1;
+}
+
+.news-slider {
+    z-index: 2;
+    max-width: 1300px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 60px;
+}
+
+@media screen and (max-width: 1300px) {
+    .news-slider {
+        max-width: 1000px;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .news-slider {
+        margin-top: 45px;
+    }
+}
+
+.news-slider__wrp {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    z-index: 2;
+}
+
+.news-slider__item {
+    width: 400px;
+    flex-shrink: 0;
+}
+
+@media screen and (max-width: 992px) {
+    .news-slider__item {
+        width: 340px;
+    }
+}
+
+.news-slider__item.swiper-slide {
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+}
+
+.news-slider__item.swiper-slide-active,
+.news-slider__item.swiper-slide-prev,
+.news-slider__item.swiper-slide-next {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.news-slider__ctr {
+    position: relative;
+    z-index: 12;
+}
+
+.news-slider__arrow {
+    background: #fff;
+    border: none;
+    display: inline-flex;
+    width: 50px;
+    height: 50px;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 6px 26px 6px rgba(0, 0, 0, 0.25);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    z-index: 12;
+    cursor: pointer;
+    outline: none !important;
+}
+
+.news-slider__arrow:focus {
+    outline: none !important;
+}
+
+.news-slider__arrow .icon-font {
+    display: inline-flex;
+}
+
+.news-slider__arrow.news-slider-prev {
+    left: 15px;
+    transform: translateY(-50%);
+}
+
+.news-slider__arrow.news-slider-next {
+    right: 15px;
+    transform: translateY(-50%);
+}
+
+.news-slider__pagination {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.news-slider__pagination .swiper-pagination-bullet {
+    width: 13px;
+    height: 10px;
+    display: inline-block;
+    background: #fff;
+    opacity: 0.2;
+    margin: 0 5px;
+    border-radius: 20px;
+    transition: opacity 0.5s, background-color 0.5s, width 0.5s;
+    transition-delay: 0.5s, 0.5s, 0s;
+}
+
+.news-slider__pagination .swiper-pagination-bullet-active {
+    opacity: 1;
+    background: #ffffff;
+    width: 100px;
+    transition-delay: 0s;
+}
+
+@media screen and (max-width: 576px) {
+    .news-slider__pagination .swiper-pagination-bullet-active {
+        width: 70px;
+    }
+}
+
+.news__item {
+    padding: 40px;
+    color: #fff;
+    border-radius: 10px;
+    display: block;
+    transition: all 0.3s;
+}
+
+@media screen and (min-width: 800px) {
+    .news__item:hover {
+        color: #222222;
+        transition-delay: 0.1s;
+    }
+
+    .news__item:hover .news-date,
+    .news__item:hover .news__title,
+    .news__item:hover .news__txt {
+        opacity: 1;
+        transition-delay: 0.1s;
+    }
+
+    .news__item:hover .news__img {
+        box-shadow: none;
+    }
+}
+
+.news__item.active {
+    color: #222222;
+}
+
+.news__item.active .news-date,
+.news__item.active .news__title,
+.news__item.active .news__txt {
+    opacity: 1;
+}
+
+.news__item.active .news__img {
+    box-shadow: none;
+}
+
+@media screen and (max-width: 992px) {
+    .news__item {
+        padding: 30px;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .news__item {
+        padding: 20px;
+    }
+}
+
+.news-date {
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid;
+    display: inline-block;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+@media screen and (max-width: 576px) {
+    .news-date {
+        margin-bottom: 10px;
+        display: inline-flex;
+        align-items: center;
+        padding-bottom: 0;
+    }
+}
+
+.news-date__title {
+    display: block;
+    font-size: 32px;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+@media screen and (max-width: 576px) {
+    .news-date__title {
+        margin-right: 10px;
+    }
+}
+
+.news-date__txt {
+    font-size: 16px;
+}
+
+.news__title {
+    font-size: 25px;
+    font-weight: 500;
+    opacity: 0.7;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    transition: opacity 0.3s;
+}
+
+@media screen and (max-width: 576px) {
+    .news__title {
+        font-size: 22px;
+        margin-bottom: 10px;
+    }
+}
+
+.news__txt {
+    margin: 10px 0;
+    line-height: 1.6em;
+    font-size: 15px;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.news__img {
+    border-radius: 10px;
+    box-shadow: 0 6px 26px 6px rgba(0, 0, 0, 0.25);
+    height: 200px;
+    margin-top: 30px;
+    width: 100%;
+    transition: all 0.3s;
+    transform-origin: 0% 0%;
+}
+
+@media screen and (max-width: 576px) {
+    .news__img {
+        height: 180px;
+        margin-top: 20px;
+    }
+}
+
+.news__img img {
+    max-width: 100%;
+    border-radius: 10px;
+    height: 100%;
+    width: 100%;
 }
 </style>

@@ -15,7 +15,7 @@
 
         <div id="chatAI">
             <input id="chatAIInput" type="text" placeholder="请输入消息">
-            <button id="chatAIBtn">发送</button>
+            <button id="chatAIBtn">[Enter]发送</button>
         </div>
     </div>
 </template>
@@ -492,6 +492,7 @@
                 fetch(url)
                     .then(response => response.text())
                     .then(data => {
+                        // TODO: 展示返回内容
                         console.log(data)
                     })
                     .catch(error => console.error('Error:', error));
@@ -530,14 +531,13 @@
                 flowerInfo.push([pos_X, pos_Z, flowerType])
                 console.log(flowerInfo)
                 // 加载到场景
-                // TODO: 有一堆err：WebGL: INVALID_VALUE: uniform1fv: no array
+                // 有一堆err：WebGL: INVALID_VALUE: uniform1fv: no array
                 // 不影响实际效果，但是为什么orz
-
                 let flowerPath = flowerPaths[flowerType];
                 loader2.load(
                     flowerPath,
                     function (object) {
-                        console.log('模型加载成功:', object);
+                        // console.log('模型加载成功:', object);
                         object.scale.set(0.15, 0.15, 0.15);
                         object.position.set(pos_X, 1.5, pos_Z);
                         object.rotation.set(0, Math.PI*(pos_X+pos_Z), 0);
@@ -545,12 +545,6 @@
                         object.receiveShadow = true;
                         scene.add(object);
                     },
-                    // function (xhr) {
-                    //     console.log((xhr.loaded / xhr.total * 100) + '% 已加载');
-                    // },
-                    // function (error) {
-                    //     console.error('模型加载失败:', error);
-                    // }
                 );
             }
     

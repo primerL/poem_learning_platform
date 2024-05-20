@@ -12,6 +12,11 @@
         </button>
 
         <div id="bubble">进行交互</div>
+
+        <div id="chatAI">
+            <input id="chatAIInput" type="text" placeholder="请输入消息">
+            <button id="chatAIBtn">发送</button>
+        </div>
     </div>
 </template>
 
@@ -320,8 +325,10 @@
                         bubble.style.display = 'block';
                         bubble.innerHTML = '[N]与螺丝咕姆交谈';
                         if(player.input.npcChat == true) {
-                            bubble.innerHTML = '跳转中……';
+                            bubble.innerHTML = '[F8]退出交谈';
                             // TODO: 接通ai
+                            startChatWithNPC();
+                            // player.input.npcChat = false;
                         }
                     } else if(hasFlower == true) {
                         if(player.position.x < 32) {
@@ -453,10 +460,49 @@
                 // physics.helpers.clear();
             }
 
+            function startChatWithNPC() {
+                // const container = document.createElement('div');
+                const container = document.getElementById('chatAI');
+                container.style.display = 'flex';
+                const inputElement = document.getElementById('chatAIInput');
+                inputElement.focus();
+            }
+
+            // 连接ai
+            document.getElementById("chatAIBtn").addEventListener("click", function() {
+                sendMessageToAI();
+            });
+            document.getElementById("chatAIInput").addEventListener("keydown", function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    sendMessageToAI();
+                } else if(event.key === 'F8') {
+                    event.preventDefault();
+                    // console.log("f8 yes")
+                    const container = document.getElementById('chatAI');
+                    container.style.display = 'none';
+                    player.input.npcChat = false;
+                }
+            });
+            function sendMessageToAI() {
+                const inputElement = document.getElementById('chatAIInput');
+                const message = inputElement.value;
+                console.log(message);
+                const url = "http://localhost:2345/api/chat?message=" + encodeURIComponent(message);
+                fetch(url)
+                    .then(response => response.text())
+                    .then(data => {
+                        console.log(data)
+                    })
+                    .catch(error => console.error('Error:', error));
+                
+                inputElement.value = '';
+            }
+
             let hasFlower = false;
             let playerFlowerNum = [0,0];
             let flowerInfo = [];
-            let loader3 = new MMDLoader();
+            // let loader3 = new MMDLoader();
             // let helper3 = new MMDAnimationHelper();
             
             function addFlower(playerID) {
@@ -578,6 +624,8 @@
 
         },
     };
+    
+
     </script>
     
     <style>
@@ -642,6 +690,38 @@
         /* text-align: center; */
         padding-left: 30px;
         text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    #chatAI {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 30px;
+        background-color: #f0f0f0;
+        /* display: flex; */
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #chatAI input[type="text"] {
+        height: 100%;
+        flex: 1;
+        margin-right: 10px;
+        padding: 0 10px;
+        border: none;
+        outline: none;
+    }
+
+    #chatAI button {
+        width: 100px;
+        height: 100%;
+        border: none;
+        /* background-color: #4CAF50; */
+        background-image: linear-gradient(to right, rgba(30, 144, 255, 0.9), rgba(65, 105, 225, 0.9));
+        color: white;
+        cursor: pointer;
     }
 
 </style>

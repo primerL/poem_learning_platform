@@ -426,11 +426,9 @@
                         if (preNum != 2 || showEnd) {
                             if (player.input.exit == true) {
                                 // TODO：退出现在跳转到main页面
-                                ws.send(JSON.stringify({
-                                    type: "logout",
-                                    room: room
-                                }));
-                                router.push('/main');
+                                router.push('/main').then(() => {
+                                    window.location.reload(); // 强制刷新页面
+                                });
                             }
                         }
                     }

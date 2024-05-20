@@ -13,10 +13,5 @@ import 'quasar/dist/quasar.css'
 const app = createApp(App)
 
 app.use(router).use(store).use(Quasar)
-store.subscribe((mutation, state) => {
-    console.log('Mutation occurred:', mutation);
-    console.log('New state:', state);
-});
-
 
 app.mount('#app')

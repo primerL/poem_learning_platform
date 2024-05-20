@@ -19,10 +19,21 @@
     import loader from '../scripts/loader.js';
     import router from '../router/index.js'
 
+    import { mapActions, mapState } from 'vuex';
+
 
     export default {
         name: "Scene",
+        computed: {
+            ...mapState({
+                isLoading: state => state.isLoading
+            })
+        },
+        methods: {
+            ...mapActions(['startLoading', 'stopLoading'])
+        },
         mounted() {
+            this.startLoading();
             const role = this.$route.params.role;
             const room = this.$route.params.room;
 
@@ -495,6 +506,9 @@
                             value.model.helper.update(deltaTime);
                         }
                     }
+                }
+                if (this.isLoading && screen.warmtextMesh) {
+                    this.stopLoading();
                 }
             }
     

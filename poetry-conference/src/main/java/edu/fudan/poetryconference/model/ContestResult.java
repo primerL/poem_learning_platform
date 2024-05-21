@@ -25,6 +25,7 @@ public class ContestResult {
 
     private LocalDateTime contestDate;
 
+    public ContestResult() {}
     public ContestResult(Long user1Id, Long user2Id, Long score1, Long score2) {
         this.user1Id = user1Id;
         this.user2Id = user2Id;

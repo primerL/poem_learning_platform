@@ -27,4 +27,10 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username);
         return user != null && passwordEncoder.matches(password, user.getPassword());
     }
+
+    @Override
+    public User getUserInfo(Long userId) {
+        User user = userRepository.findById(userId).get();
+        return user;
+    }
 }

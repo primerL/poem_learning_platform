@@ -5,6 +5,7 @@ import Audience from '../views/audience.vue';
 import App from '../App.vue';
 
 const role = 2;  // 玩家角色，0 为观战者，1 为玩家1，2 为玩家2
+const room = Math.floor(Math.random() * 4 + 1);  // 房间号，1～4
 const userId = Math.floor(Math.random() * 2 + 3);  // 玩家 id
 const name = "Player" + userId;;  // 玩家名
 const modelId = Math.floor(Math.random() * 5 + 1);  // 玩家模型 id
@@ -17,16 +18,18 @@ const router = createRouter({
             redirect: {
                 name: 'Scene',
                 params: {
-                    role: role
+                    role: role,
+                    room: room
                 },
             }
         },
         {
-            path: '/scene/:role',
+            path: '/scene/:role/:room',
             name: 'Scene',
             component: Scene,
             params: {
                 role: role,
+                room: room,
             }
         },
         {

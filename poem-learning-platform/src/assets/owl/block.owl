@@ -1,0 +1,35 @@
+@prefix : <http://www.semanticweb.org/scene#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+
+# 定义实体类别
+:Block rdf:type owl:Class.
+:Character rdf:type owl:Class.
+
+# 定义属性
+:hasTag rdf:type owl:ObjectProperty.
+:hasName rdf:type owl:DatatypeProperty.
+:hasDescription rdf:type owl:DatatypeProperty.
+
+# 定义实体和属性关系
+:grassBlock rdf:type :Block;
+    :hasTag "ground", "nature";
+    :hasName "grass";
+    :hasDescription "A block of grass".
+
+:airWallBlock rdf:type :Block;
+    :hasTag "obstacle";
+    :hasName "airWall";
+    :hasDescription "An invisible wall".
+
+:screenWallBlock rdf:type :Block;
+    :hasTag "screen";
+    :hasName "screenWall";
+    :hasDescription "A wall that shows something".
+
+:npcCharacter rdf:type :Character;
+    :hasTag "character";
+    :hasName "npc";
+    :hasDescription "A non-player character".

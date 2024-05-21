@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { SimplexNoise } from 'three/examples/jsm/math/SimplexNoise.js'
 import { RNG } from './rng.js';
+import * as RDFLib from 'rdflib';
 
 
 function loadTexture(path) {
@@ -12,6 +13,89 @@ function loadTexture(path) {
     texture.magFilter = THREE.NearestFilter;  //最近点采样
     return texture;
 }
+
+function extractInformationFromRDF(store) {
+    const information = {
+        classes: {},
+        properties: {},
+        relationships: []
+    };
+
+    // 遍历 RDF 图中的每个三元组
+    store.statements.forEach((triple) => {
+        const subject = triple.subject.value;
+        const predicate = triple.predicate.value;
+        const object = triple.object.value;
+
+        // 检查是否是类别定义
+        if (predicate === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type') {
+            if (!information.classes[subject]) {
+                information.classes[subject] = [];
+            }
+            information.classes[subject].push(object);
+        }
+        // 检查是否是属性定义
+        else if (predicate.endsWith('#ObjectProperty') || predicate.endsWith('#DatatypeProperty')) {
+            if (!information.properties[subject]) {
+                information.properties[subject] = [];
+            }
+            information.properties[subject].push({
+                predicate,
+                object
+            });
+        }
+        // 检查是否是实体之间的关系
+        else {
+            information.relationships.push({
+                subject,
+                predicate,
+                object
+            });
+        }
+    });
+
+    return information;
+}
+let relationships = {};
+async function loadOWL(owlFilePath) {
+    try {
+        // 使用 fetch API 加载文件内容
+        const response = await fetch(owlFilePath);
+        if (!response.ok) {
+            throw new Error('Failed to load OWL file');
+        }
+        const owlData = await response.text();
+
+        // 解析 RDF 数据
+        const store = RDFLib.graph();
+        RDFLib.parse(owlData, store, owlFilePath, 'text/turtle');
+
+        const information = extractInformationFromRDF(store);
+        // console.log('Properties:', information.properties);
+        // console.log('Relationships:', information.relationships);
+
+        const classes = Object.keys(information.classes);
+        for (let aclass of classes) {
+            const temp = information.relationships.filter((relationship) => {
+                return relationship.subject === aclass;
+            });
+            const parts = aclass.split('#');
+            if (temp.length > 0) {
+                for (let i = 0; i < temp.length; i++) {
+                    const parts = temp[i].predicate.split('#');
+                    temp[i].predicate = parts[parts.length - 1];
+                }
+                relationships[parts[parts.length - 1]] = temp;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading OWL file:', error);
+    }
+}
+const owlFilePath = 'http://127.0.0.1:5173/src/assets/owl/block.owl';
+loadOWL(owlFilePath);
+await loadOWL(owlFilePath);
+
 // 中心点在原点
 const geometry = new THREE.BoxGeometry();
 const textures = {
@@ -121,15 +205,52 @@ export class WorldChunk extends THREE.Group {
         grassMesh.castShadow = true;
         grassMesh.receiveShadow = true;
         grassMesh.count = 0;
+        let information = {};
+        for (let i = 0; i < relationships["grassBlock"].length; i++) {
+            if (information[relationships["grassBlock"][i].predicate]) {
+                information[relationships["grassBlock"][i].predicate].push(relationships["grassBlock"][i].object);
+            }else {                
+                information[relationships["grassBlock"][i].predicate] = [relationships["grassBlock"][i].object]; 
+            }
+        }
+        grassMesh.userData = information;
+        information = {};
         meshes[1] = grassMesh;
         const airWallMesh = new THREE.InstancedMesh(geometry, airWallMaterial, maxCount);
         airWallMesh.count = 0;
+        for (let i = 0; i < relationships["airWallBlock"].length; i++) {
+            if (information[relationships["airWallBlock"][i].predicate]) {
+                information[relationships["airWallBlock"][i].predicate].push(relationships["airWallBlock"][i].object);
+            }else {                
+                information[relationships["airWallBlock"][i].predicate] = [relationships["airWallBlock"][i].object]; 
+            }
+        }
+        airWallMesh.userData = information;
+        information = {};
         meshes[2] = airWallMesh;
         const screenMesh = new THREE.InstancedMesh(geometry, screenMaterial, maxCount);
         screenMesh.count = 0;
+        for (let i = 0; i < relationships["screenWallBlock"].length; i++) {
+            if (information[relationships["screenWallBlock"][i].predicate]) {
+                information[relationships["screenWallBlock"][i].predicate].push(relationships["screenWallBlock"][i].object);
+            }else {                
+                information[relationships["screenWallBlock"][i].predicate] = [relationships["screenWallBlock"][i].object]; 
+            }
+        }
+        screenMesh.userData = information;
+        information = {};
         meshes[3] = screenMesh;
         const npcMesh = new THREE.InstancedMesh(npcGeometry, npcMaterial, maxCount);
         npcMesh.count = 0;
+        for (let i = 0; i < relationships["npcCharacter"].length; i++) {
+            if (information[relationships["npcCharacter"][i].predicate]) {
+                information[relationships["npcCharacter"][i].predicate].push(relationships["npcCharacter"][i].object);
+            }else {                
+                information[relationships["npcCharacter"][i].predicate] = [relationships["npcCharacter"][i].object]; 
+            }
+        }
+        npcMesh.userData = information;
+        information = {};
         meshes[4] = npcMesh;
 
         const matrix = new THREE.Matrix4();

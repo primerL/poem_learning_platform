@@ -34,11 +34,12 @@ const router = createRouter({
         },
         {
             // 减少冲突，先另开一个文件（
-            path: '/audience/:role',
+            path: '/audience/:role/:room',
             name: 'Audience',
             component: Audience,
             params: {
-                role: role
+                role: role,
+                room: room,
             }
         },
         {

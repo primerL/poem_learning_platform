@@ -1,9 +1,5 @@
 package edu.fudan.poetryconference.websocket;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArraySet;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,22 +8,18 @@ import edu.fudan.poetryconference.model.ContestResult;
 import edu.fudan.poetryconference.service.AnswersService;
 import edu.fudan.poetryconference.service.ContestResultService;
 import edu.fudan.poetryconference.service.QuestionService;
-import jakarta.websocket.server.PathParam;
+import jakarta.websocket.*;
+import jakarta.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jakarta.websocket.CloseReason;
-import jakarta.websocket.EndpointConfig;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnError;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
-import jakarta.websocket.server.ServerEndpoint;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @ServerEndpoint(value = "/ws")
 @Component
@@ -147,6 +139,13 @@ public class EchoChannel implements ApplicationContextAware {
                     Integer room = jsonNode.get("room").asInt();
                     broadcast(objectMapper.writeValueAsString(data), this.session.getId(), room);
                     sessions.get(room).remove(this.session);
+                }
+                else if("flower".equals(type)) {
+                    //
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("type", "flower");
+                    data.put("flower", jsonNode.get("flower").asText());
+                    broadcast(objectMapper.writeValueAsString(data), "", jsonNode.get("room").asInt());
                 }
                 else {
                     LOGGER.warn("[websocket] Unknown message type: {}", type);

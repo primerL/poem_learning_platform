@@ -17,6 +17,7 @@
             <input id="chatAIInput" type="text" placeholder="请输入消息">
             <button id="chatAIBtn">[Enter]发送</button>
         </div>
+        <div id="chatOutput"></div>
     </div>
 </template>
 
@@ -319,14 +320,13 @@
                     let distanceFlo = player.position.distanceTo(npcPosFlower);
                     let distanceAI = player.position.distanceTo(npcPosAI);
                     
-                    // 献花方式：跑到对应台子？（能买几朵啊）））
                     bubble.style.display = 'block';
                     if(distanceAI <= 4) {
                         bubble.style.display = 'block';
-                        bubble.innerHTML = '[N]与螺丝咕姆交谈';
+                        bubble.innerHTML = '[N]与Kimi交谈';
                         if(player.input.npcChat == true) {
-                            bubble.innerHTML = '[F8]退出交谈';
-                            // TODO: 接通ai
+                            bubble.innerHTML = '[↑↓←→]退出交谈';
+                            
                             startChatWithNPC();
                             // player.input.npcChat = false;
                         }
@@ -476,11 +476,13 @@
                 if (event.key === 'Enter') {
                     event.preventDefault();
                     sendMessageToAI();
-                } else if(event.key === 'F8') {
+                } else if(event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'ArrowLeft' || event.key === 'ArrowRight') {// 方向键
                     event.preventDefault();
-                    // console.log("f8 yes")
+                    
                     const container = document.getElementById('chatAI');
                     container.style.display = 'none';
+                    const output = document.getElementById('chatOutput');
+                    output.style.display = 'none';
                     player.input.npcChat = false;
                 }
             });
@@ -493,6 +495,9 @@
                     .then(response => response.text())
                     .then(data => {
                         // TODO: 展示返回内容
+                        let output = document.getElementById('chatOutput');
+                        output.innerHTML = data;
+                        output.style.display = 'block';
                         console.log(data)
                     })
                     .catch(error => console.error('Error:', error));
@@ -669,11 +674,32 @@
         display: none;
 
         position: absolute;
-        top: 60%;
-        right: 30%;
+        bottom: 35%;
+        left: 55%;
         width: 150px;
         height: 30px;
         line-height: 30px;
+        border: 0;
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
+
+        background-image: linear-gradient(to right, rgba(159, 214, 235, 0.664), rgba(175, 190, 233, 0));
+        color: aliceblue;
+        font-weight: bold;
+        /* text-align: center; */
+        padding-left: 30px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    #chatOutput {
+        display: none;
+        position: absolute;
+        bottom: 40%;
+        left: 55%;
+        width: 35%;
+        word-break: break-all;
+        /* height: 30px; */
+        line-height: 20px;
         border: 0;
         border-top-left-radius: 15px;
         border-bottom-left-radius: 15px;

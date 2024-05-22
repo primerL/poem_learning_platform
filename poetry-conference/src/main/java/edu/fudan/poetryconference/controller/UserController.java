@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/users")
 public class UserController {
 
@@ -23,12 +24,14 @@ public class UserController {
     @Autowired
     private ContestResultService contestResultService;
 
+    @CrossOrigin
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         User registered = userService.register(user);
         return ResponseEntity.ok(registered);
     }
 
+    @CrossOrigin
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody User user) {
         if (userService.checkLogin(user.getUsername(),  user.getPassword())) {
@@ -38,6 +41,7 @@ public class UserController {
         }
     }
 
+    @CrossOrigin
     @GetMapping("/personal/contest/results/{userId}")
     public ResponseEntity<List<UserContestResultDTO>> getUserContestResults(@PathVariable Long userId){
         List<UserContestResultDTO> results = contestResultService.getUserContestResults(userId);
@@ -50,24 +54,28 @@ public class UserController {
 //        return new ResponseEntity<>(winRate, HttpStatus.OK);
 //    }
 
+    @CrossOrigin
     @GetMapping("/{userId}")
     public ResponseEntity<User> getUserInfo(@PathVariable Long userId) {
         User user = userService.getUserInfo(userId);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @CrossOrigin
     @GetMapping("/win/rate/total/{userId}")
     public Double getUserWinRateTotal(@PathVariable Long userId) {
         System.out.println("controller: "+userId);
         return contestResultService.getUserWinRateTotal(userId);
     }
 
+    @CrossOrigin
     @GetMapping("/contest/num/{userId}")
     public ResponseEntity<List<Integer>> getUserContestNum(@PathVariable Long userId) {
         List<Integer> userContestNum = contestResultService.getUserContestNum(userId);
         return new ResponseEntity<>(userContestNum, HttpStatus.OK);
     }
 
+    @CrossOrigin
     @GetMapping("/contest/win/rate/{userId}")
     public ResponseEntity<List<Double>> getUserContestWinRate(@PathVariable Long userId){
         List<Double> userContestWinRate = contestResultService.getUserContestWinRate(userId);

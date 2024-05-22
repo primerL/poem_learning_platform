@@ -13,7 +13,7 @@
 
  Date: 10/05/2024 15:51:47
 */
-
+USE poetry;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -38,7 +38,6 @@ CREATE TABLE `contest_results` (
 -- ----------------------------
 -- Records of contest_results
 -- ----------------------------
-INSERT INTO `contest_results` VALUES (1, 'Alice', 'Bob', 5, 3, 'Alice', '2023-05-10 14:30:00');
 
 -- ----------------------------
 -- Table structure for options
@@ -1148,6 +1147,5 @@ CREATE TABLE `answers` (
 -- ----------------------------
 -- Records of wrong_answers
 -- ----------------------------
-INSERT INTO `wrong_answers` VALUES (1, 'Alice', 5, 3, '2023-05-10 14:30:00');
 
 SET FOREIGN_KEY_CHECKS = 1;

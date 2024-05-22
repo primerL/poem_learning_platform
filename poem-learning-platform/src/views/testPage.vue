@@ -45,7 +45,6 @@
                     </button>
                 </div>
                 <div class="news-slider__pagination"></div>
-
             </div>
         </div>
         <svg hidden="hidden">

@@ -1253,5 +1253,21 @@ svg {
 }
 </style>
 
-<script>
+<script setup>
+// 5s后自动跳转到登录页面
+import { ref,  onMounted} from 'vue'
+import { useRouter } from 'vue-router'
+
+
+const router = useRouter()
+
+// 5s后自动跳转到登录页面
+onMounted(() => {
+  console.log('login')
+  setTimeout(() => {
+    router.push('/login')
+  }, 4000)
+})
+
+
 </script>

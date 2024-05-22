@@ -15,13 +15,7 @@ const router = createRouter({
     routes: [
         {
             path: '/',
-            redirect: {
-                name: 'Scene',
-                params: {
-                    role: role,
-                    room: room
-                },
-            }
+            component: () => import('../views/OpenView.vue')
         },
         {
             path: '/scene/:role/:room',

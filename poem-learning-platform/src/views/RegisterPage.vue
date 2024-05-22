@@ -58,7 +58,6 @@ const accept = ref(false);
 
 function onSubmit() {
   console.log("Submitted");
-  axios.get
 }
 
 function onReset() {

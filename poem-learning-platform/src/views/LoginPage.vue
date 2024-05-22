@@ -19,7 +19,7 @@
 
                             <q-tabs v-model="tab" class="text-teal">
                                 <q-tab label="Login" name="login" />
-                                
+
                             </q-tabs>
 
                             <q-separator />
@@ -33,13 +33,20 @@
                                                 hint="please type your name" lazy-rules
                                                 :rules="[val => val && val.length > 0 || 'Please type something']" />
 
-                                            <q-input filled v-model="login_password" label="Your password *" lazy-rules
-                                                :rules="[
-                                val => val !== null && val !== '' || 'Please type your password',
-                            ]" />
+                                            <q-input ref="nameField" name="password" v-model="login_password" filled
+                                                :type="isPwd ? 'password' : 'text'" label="密码 *" hint="Your password *"
+                                                lazy-rules :rules="[
+                                (val) => (val && val.length > 0)]">
+                                                <template v-slot:append>
+                                                    <q-icon :name="isPwd ? 'visibility_off' : 'visibility'"
+                                                        class="cursor-pointer" @click="isPwd = !isPwd" />
+                                                </template>
+                                            </q-input>
 
-                                            <q-toggle v-model="accept" label="I accept the license and terms" />
-
+                                            <div class="row">
+                                                <q-toggle v-model="accept" label="I accept the license and terms" />
+                                                <q-btn flat color="primary" label="注册" to="/register" />
+                                            </div>
                                             <div>
                                                 <q-btn label="Submit" type="submit" color="teal" />
                                                 <q-btn label="Reset" type="reset" color="teal" flat class="q-ml-sm" />
@@ -66,11 +73,34 @@
 
 
 <script setup>
+import axios from 'axios';
 import { ref } from 'vue'
 
 const tab = ref('login')
-const splitterModel = ref(20)
-const lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+const login_name = ref(null)
+const login_password = ref(null)
+const isPwd = ref(true)
+const accept = ref(false)
+axios.defaults.baseURL = 'http://localhost:2345'
+
+const onSubmit = () => {
+    console.log('submit')
+    axios.post('/api/users/login', {
+        user_id: null,
+        username: login_name.value.toString(),
+        password: login_password.value.toString(),
+        model: null
+    }).then(res => {
+        console.log(res)
+    }).catch(err => {
+        console.log(err)
+    })
+}
+
+const onReset = () => {
+    console.log('reset')
+}
+
 </script>
 
 <style>

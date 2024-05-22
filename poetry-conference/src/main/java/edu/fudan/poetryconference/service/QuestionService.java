@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface QuestionService {
     String getQuestion();
+
+    String getReviewQuestion(Long userId);
 }

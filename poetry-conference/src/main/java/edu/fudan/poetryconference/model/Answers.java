@@ -22,6 +22,8 @@ public class Answers {
 
     private LocalDateTime answerDate;
 
+    private Long reviewTimes;
+
     // Getters and setters
     public Long getId() {
         return id;
@@ -63,10 +65,22 @@ public class Answers {
         this.answerDate = answerDate;
     }
 
+    public Long getReviewTimes() {
+        return reviewTimes;
+    }
+
+
+    public void setReviewTimes(Long reviewTimes) {
+        this.reviewTimes = reviewTimes;
+    }
+
     public Answers(Long userId, Long questionId, Boolean correct) {
         this.userId = userId;
         this.questionId = questionId;
         this.correct = correct;
         this.answerDate = LocalDateTime.now();
+        this.reviewTimes = 0L;
     }
+
+    public Answers() {}
 }

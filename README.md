@@ -50,7 +50,50 @@ request body:
 }
 ```
 
+#### 过去一周的比赛场数
+
+```
+GET http://localhost:2345/api/users/contest/num/{userId}
+request body:(list)
+[
+    19, 
+    13,
+    15,
+    19,
+    15,
+    10,
+    13
+]#分别对应周一到周日
+```
+
+#### 过去一周的比赛胜率
+
+```
+GET http://localhost:2345/api/users/contest/win/rate/{userId}
+request body:(list)
+[
+    0.3,
+    0.3076923076923077,
+    0.5333333333333333,
+    0.42105263157894735,
+    0.3333333333333333,
+    0.3,
+    0.6153846153846154
+]#分别对应周一到周日
+```
+
+#### 总胜率(放中间的)
+
+```
+GET http://localhost:2345/api/users/win/rate/total/1
+response: (double)
+0.4391025641025641
+```
+
+
+
 ### 3D 相关
+
 #### 智能NPC
 
 ```

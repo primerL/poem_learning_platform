@@ -12,6 +12,12 @@
         </button>
 
         <div id="bubble">进行交互</div>
+
+        <div id="chatAI">
+            <input id="chatAIInput" type="text" placeholder="请输入消息">
+            <button id="chatAIBtn">[Enter]发送</button>
+        </div>
+        <div id="chatOutput"></div>
     </div>
 </template>
 
@@ -314,14 +320,15 @@
                     let distanceFlo = player.position.distanceTo(npcPosFlower);
                     let distanceAI = player.position.distanceTo(npcPosAI);
                     
-                    // 献花方式：跑到对应台子？（能买几朵啊）））
                     bubble.style.display = 'block';
                     if(distanceAI <= 4) {
                         bubble.style.display = 'block';
-                        bubble.innerHTML = '[N]与螺丝咕姆交谈';
+                        bubble.innerHTML = '[N]与Kimi交谈';
                         if(player.input.npcChat == true) {
-                            bubble.innerHTML = '跳转中……';
-                            // TODO: 接通ai
+                            bubble.innerHTML = '[↑↓←→]退出交谈';
+                            
+                            startChatWithNPC();
+                            // player.input.npcChat = false;
                         }
                     } else if(hasFlower == true) {
                         if(player.position.x < 32) {
@@ -453,10 +460,55 @@
                 // physics.helpers.clear();
             }
 
+            function startChatWithNPC() {
+                // const container = document.createElement('div');
+                const container = document.getElementById('chatAI');
+                container.style.display = 'flex';
+                const inputElement = document.getElementById('chatAIInput');
+                inputElement.focus();
+            }
+
+            // 连接ai
+            document.getElementById("chatAIBtn").addEventListener("click", function() {
+                sendMessageToAI();
+            });
+            document.getElementById("chatAIInput").addEventListener("keydown", function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    sendMessageToAI();
+                } else if(event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'ArrowLeft' || event.key === 'ArrowRight') {// 方向键
+                    event.preventDefault();
+                    
+                    const container = document.getElementById('chatAI');
+                    container.style.display = 'none';
+                    const output = document.getElementById('chatOutput');
+                    output.style.display = 'none';
+                    player.input.npcChat = false;
+                }
+            });
+            function sendMessageToAI() {
+                const inputElement = document.getElementById('chatAIInput');
+                const message = inputElement.value;
+                console.log(message);
+                const url = "http://localhost:2345/api/chat?message=" + encodeURIComponent(message);
+                fetch(url)
+                    .then(response => response.text())
+                    .then(data => {
+                        // TODO: 展示返回内容
+                        let output = document.getElementById('chatOutput');
+                        output.innerHTML = data;
+                        output.style.display = 'block';
+                        console.log(data)
+                    })
+                    .catch(error => console.error('Error:', error));
+                
+                inputElement.value = '';
+            }
+
             let hasFlower = false;
             let playerFlowerNum = [0,0];
             let flowerInfo = [];
-            let loader3 = new MMDLoader();
+            // let loader3 = new MMDLoader();
             // let helper3 = new MMDAnimationHelper();
             
             function addFlower(playerID) {
@@ -484,14 +536,13 @@
                 flowerInfo.push([pos_X, pos_Z, flowerType])
                 console.log(flowerInfo)
                 // 加载到场景
-                // TODO: 有一堆err：WebGL: INVALID_VALUE: uniform1fv: no array
+                // 有一堆err：WebGL: INVALID_VALUE: uniform1fv: no array
                 // 不影响实际效果，但是为什么orz
-
                 let flowerPath = flowerPaths[flowerType];
                 loader2.load(
                     flowerPath,
                     function (object) {
-                        console.log('模型加载成功:', object);
+                        // console.log('模型加载成功:', object);
                         object.scale.set(0.15, 0.15, 0.15);
                         object.position.set(pos_X, 1.5, pos_Z);
                         object.rotation.set(0, Math.PI*(pos_X+pos_Z), 0);
@@ -499,12 +550,6 @@
                         object.receiveShadow = true;
                         scene.add(object);
                     },
-                    // function (xhr) {
-                    //     console.log((xhr.loaded / xhr.total * 100) + '% 已加载');
-                    // },
-                    // function (error) {
-                    //     console.error('模型加载失败:', error);
-                    // }
                 );
             }
     
@@ -578,6 +623,8 @@
 
         },
     };
+    
+
     </script>
     
     <style>
@@ -627,8 +674,8 @@
         display: none;
 
         position: absolute;
-        top: 60%;
-        right: 30%;
+        bottom: 35%;
+        left: 55%;
         width: 150px;
         height: 30px;
         line-height: 30px;
@@ -642,6 +689,59 @@
         /* text-align: center; */
         padding-left: 30px;
         text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    #chatOutput {
+        display: none;
+        position: absolute;
+        bottom: 40%;
+        left: 55%;
+        width: 35%;
+        word-break: break-all;
+        /* height: 30px; */
+        line-height: 20px;
+        border: 0;
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
+
+        background-image: linear-gradient(to right, rgba(159, 214, 235, 0.664), rgba(175, 190, 233, 0));
+        color: aliceblue;
+        font-weight: bold;
+        /* text-align: center; */
+        padding-left: 30px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    #chatAI {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 30px;
+        background-color: #f0f0f0;
+        /* display: flex; */
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #chatAI input[type="text"] {
+        height: 100%;
+        flex: 1;
+        margin-right: 10px;
+        padding: 0 10px;
+        border: none;
+        outline: none;
+    }
+
+    #chatAI button {
+        width: 100px;
+        height: 100%;
+        border: none;
+        /* background-color: #4CAF50; */
+        background-image: linear-gradient(to right, rgba(30, 144, 255, 0.9), rgba(65, 105, 225, 0.9));
+        color: white;
+        cursor: pointer;
     }
 
 </style>

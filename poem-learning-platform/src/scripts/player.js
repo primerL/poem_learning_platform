@@ -10,7 +10,7 @@ export class Player {
     controls = new PointerLockControls(this.camera, document.body);
     cameraHelper = new THREE.CameraHelper(this.camera);
 
-    maxSpeed = 10;
+    maxSpeed = 4;
     input = new THREE.Vector3();
     velocity = new THREE.Vector3();
     #worldVelocity = new THREE.Vector3();
@@ -186,7 +186,9 @@ export class Player {
             this.position.y += this.velocity.y * delta;  // 由于重力持续下降
 
             // 显示玩家的位置
-            document.getElementById('player-position').innerText = this.toString();
+            if (document.getElementById('player-position')) {
+                document.getElementById('player-position').innerText = this.toString();
+            }
         }
     }
 

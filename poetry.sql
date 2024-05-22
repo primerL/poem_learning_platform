@@ -36,10 +36,6 @@ CREATE TABLE `contest_results` (
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
--- Records of contest_results
--- ----------------------------
-
--- ----------------------------
 -- Table structure for options
 -- ----------------------------
 DROP TABLE IF EXISTS `options`;
@@ -1144,8 +1140,5 @@ CREATE TABLE `answers` (
   CONSTRAINT `wrong_answers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `wrong_answers_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `questions` (`question_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
--- ----------------------------
--- Records of wrong_answers
--- ----------------------------
 
 SET FOREIGN_KEY_CHECKS = 1;

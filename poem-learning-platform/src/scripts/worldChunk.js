@@ -11,6 +11,7 @@ function loadTexture(path) {
     // 不会模糊显示
     texture.minFilter = THREE.NearestFilter;  //最近点采样
     texture.magFilter = THREE.NearestFilter;  //最近点采样
+    texture.transparent = true;  // 确保处理透明度
     return texture;
 }
 
@@ -99,11 +100,20 @@ await loadOWL(owlFilePath);
 // 中心点在原点
 const geometry = new THREE.BoxGeometry();
 const textures = {
-    dirt: loadTexture('/textures/dirt.png'),
-    grass: loadTexture('/textures/grass.png'),
-    grassSide: loadTexture('/textures/grass_side.png'),
+    dirt: loadTexture('/src/assets/textures/dirt.png'),
+    grass: loadTexture('/src/assets/textures/grass.png'),
+    grassSide: loadTexture('/src/assets/textures/grass_side.png'),
+    white: loadTexture('/src/assets/textures/white.png'),
+    grey: loadTexture('/src/assets/textures/grey.png'),
+    red: loadTexture('/src/assets/textures/red.png'),
+    glass: loadTexture('/src/assets/textures/glass.png'),
+    pink: loadTexture('/src/assets/textures/pink.png'),
+    tntBottom: loadTexture('/src/assets/textures/tnt_bottom.png'),
+    tntSide: loadTexture('/src/assets/textures/tnt_side.png'),
+    tntTop: loadTexture('/src/assets/textures/tnt_top.png'),
+    gold: loadTexture('/src/assets/textures/gold.png'),
 }
-const grassMaterial = [
+const grassMaterial1 = [
     new THREE.MeshLambertMaterial({map: textures.grassSide}),
     new THREE.MeshLambertMaterial({map: textures.grassSide}),
     new THREE.MeshLambertMaterial({map: textures.grass}),
@@ -111,10 +121,68 @@ const grassMaterial = [
     new THREE.MeshLambertMaterial({map: textures.grassSide}),
     new THREE.MeshLambertMaterial({map: textures.grassSide}),
 ]
+const grassMaterial2 = [
+    new THREE.MeshLambertMaterial({map: textures.white}),
+    new THREE.MeshLambertMaterial({map: textures.white}),
+    new THREE.MeshLambertMaterial({map: textures.white}),
+    new THREE.MeshLambertMaterial({map: textures.white}),
+    new THREE.MeshLambertMaterial({map: textures.white}),
+    new THREE.MeshLambertMaterial({map: textures.white}),
+]
+const grassMaterial3 = [
+    new THREE.MeshLambertMaterial({map: null, transparent: true, opacity: 0}),
+    new THREE.MeshLambertMaterial({map: null, transparent: true, opacity: 0}),
+    new THREE.MeshLambertMaterial({map: textures.glass, transparent: true}),
+    new THREE.MeshLambertMaterial({map: null, transparent: true, opacity: 0}),
+    new THREE.MeshLambertMaterial({map: null, transparent: true, opacity: 0}),
+    new THREE.MeshLambertMaterial({map: null, transparent: true, opacity: 0}),
+];
+const grassMaterial4 = [
+    new THREE.MeshLambertMaterial({map: textures.gold}),
+    new THREE.MeshLambertMaterial({map: textures.gold}),
+    new THREE.MeshLambertMaterial({map: textures.gold}),
+    new THREE.MeshLambertMaterial({map: textures.gold}),
+    new THREE.MeshLambertMaterial({map: textures.gold}),
+    new THREE.MeshLambertMaterial({map: textures.gold}),
+];
+const grassMaterial = [grassMaterial1, grassMaterial4, grassMaterial3, grassMaterial2];
 const airWallMaterial = new THREE.MeshBasicMaterial({ wireframe: true });
 const screenMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
 const npcGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1.75, 16);
 const npcMaterial = new THREE.MeshBasicMaterial({ wireframe: true });
+const arenaMaterial1 = [
+    new THREE.MeshLambertMaterial({map: textures.grey}),
+    new THREE.MeshLambertMaterial({map: textures.grey}),
+    new THREE.MeshLambertMaterial({map: textures.grey}),
+    new THREE.MeshLambertMaterial({map: textures.grey}),
+    new THREE.MeshLambertMaterial({map: textures.grey}),
+    new THREE.MeshLambertMaterial({map: textures.grey}),
+]
+const arenaMaterial2 = [
+    new THREE.MeshLambertMaterial({map: textures.red}),
+    new THREE.MeshLambertMaterial({map: textures.red}),
+    new THREE.MeshLambertMaterial({map: textures.red}),
+    new THREE.MeshLambertMaterial({map: textures.red}),
+    new THREE.MeshLambertMaterial({map: textures.red}),
+    new THREE.MeshLambertMaterial({map: textures.red}),
+]
+const arenaMaterial3 = [
+    new THREE.MeshLambertMaterial({map: textures.pink, transparent: true}),
+    new THREE.MeshLambertMaterial({map: textures.pink, transparent: true}),
+    new THREE.MeshLambertMaterial({map: textures.pink, transparent: true}),
+    new THREE.MeshLambertMaterial({map: textures.pink, transparent: true}),
+    new THREE.MeshLambertMaterial({map: textures.pink, transparent: true}),
+    new THREE.MeshLambertMaterial({map: textures.pink, transparent: true}),
+]
+const arenaMaterial4 = [
+    new THREE.MeshLambertMaterial({map: textures.tntSide}),
+    new THREE.MeshLambertMaterial({map: textures.tntSide}),
+    new THREE.MeshLambertMaterial({map: textures.tntTop}),
+    new THREE.MeshLambertMaterial({map: textures.tntBottom}),
+    new THREE.MeshLambertMaterial({map: textures.tntSide}),
+    new THREE.MeshLambertMaterial({map: textures.tntSide}),
+]
+const arenaMaterial = [arenaMaterial1, arenaMaterial2, arenaMaterial3, arenaMaterial4];
 export class WorldChunk extends THREE.Group {
     /**
      * @type {{
@@ -201,7 +269,7 @@ export class WorldChunk extends THREE.Group {
         // 缩减同一种块的渲染次数，可以渲染不超过 maxCount 个相同的块
         const maxCount = this.size.width * this.size.height * this.size.width;
         const meshes = {};
-        const grassMesh = new THREE.InstancedMesh(geometry, grassMaterial, maxCount);
+        const grassMesh = new THREE.InstancedMesh(geometry, grassMaterial[this.params.room - 1], maxCount);
         grassMesh.castShadow = true;
         grassMesh.receiveShadow = true;
         grassMesh.count = 0;
@@ -252,6 +320,18 @@ export class WorldChunk extends THREE.Group {
         npcMesh.userData = information;
         information = {};
         meshes[4] = npcMesh;
+        const arenaMesh = new THREE.InstancedMesh(geometry, arenaMaterial[this.params.room - 1], maxCount);
+        arenaMesh.count = 0;
+        for (let i = 0; i < relationships["arenaBlock"].length; i++) {
+            if (information[relationships["arenaBlock"][i].predicate]) {
+                information[relationships["arenaBlock"][i].predicate].push(relationships["arenaBlock"][i].object);
+            }else {                
+                information[relationships["arenaBlock"][i].predicate] = [relationships["arenaBlock"][i].object]; 
+            }
+        }
+        arenaMesh.userData = information;
+        information = {};
+        meshes[5] = arenaMesh;
 
         const matrix = new THREE.Matrix4();
         for (let x = 0; x < this.size.width; x++) {

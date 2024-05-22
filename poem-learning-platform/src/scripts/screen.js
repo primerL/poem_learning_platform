@@ -50,8 +50,8 @@ export class Screen {
         // 去除所有的'\n'
         topic = topic.map(item => item.replace(/\n/g, ''));
         let topicArray = [];
-        for (let i = 0; i < topic[0].length; i += 37) {
-            topicArray.push(topic[0].substring(i, i + 37));
+        for (let i = 0; i < topic[0].length; i += 41) {
+            topicArray.push(topic[0].substring(i, i + 41));
         }
         topic[0] = topicArray.join('\n');
         const topicGeometry = new TextGeometry(topic[0], {
@@ -62,14 +62,14 @@ export class Screen {
             bevelEnabled: false
         });
         const topicMesh = new THREE.Mesh(topicGeometry, textMaterial);
-        topicMesh.position.set(54.5, 29.5, 53.5);
+        topicMesh.position.set(58, 33, 53.5);
         topicMesh.rotation.y = Math.PI;
         scene.add(topicMesh);
         this.topicMesh = [topicMesh];
 
         let optionArray = [];
-        for (let i = 0; i < topic[1].length; i += 16) {
-            optionArray.push(topic[1].substring(i, i + 16));
+        for (let i = 0; i < topic[1].length; i += 18) {
+            optionArray.push(topic[1].substring(i, i + 18));
         }
         topic[1] = optionArray.join('\n');
         const option1Geometry = new TextGeometry(topic[1], {
@@ -80,14 +80,14 @@ export class Screen {
             bevelEnabled: false
         });
         const option1Mesh = new THREE.Mesh(option1Geometry, textMaterial);
-        option1Mesh.position.set(54.5, 25, 53.5);
+        option1Mesh.position.set(58, 29, 53.5);
         option1Mesh.rotation.y = Math.PI;
         scene.add(option1Mesh);
         this.topicMesh.push(option1Mesh);
 
         optionArray = [];
-        for (let i = 0; i < topic[2].length; i += 16) {
-            optionArray.push(topic[2].substring(i, i + 16));
+        for (let i = 0; i < topic[2].length; i += 18) {
+            optionArray.push(topic[2].substring(i, i + 18));
         }
         topic[2] = optionArray.join('\n');
         const option2Geometry = new TextGeometry(topic[2], {
@@ -98,14 +98,14 @@ export class Screen {
             bevelEnabled: false
         });
         const option2Mesh = new THREE.Mesh(option2Geometry, textMaterial);
-        option2Mesh.position.set(31.5, 25, 53.5);
+        option2Mesh.position.set(31.5, 29, 53.5);
         option2Mesh.rotation.y = Math.PI;
         scene.add(option2Mesh);
         this.topicMesh.push(option2Mesh);
 
         optionArray = [];
-        for (let i = 0; i < topic[3].length; i += 16) {
-            optionArray.push(topic[3].substring(i, i + 16));
+        for (let i = 0; i < topic[3].length; i += 18) {
+            optionArray.push(topic[3].substring(i, i + 18));
         }
         topic[3] = optionArray.join('\n');
         const option3Geometry = new TextGeometry(topic[3], {
@@ -116,15 +116,15 @@ export class Screen {
             bevelEnabled: false
         });
         const option3Mesh = new THREE.Mesh(option3Geometry, textMaterial);
-        option3Mesh.position.set(54.5, 17, 53.5);
+        option3Mesh.position.set(58, 17.5, 53.5);
         option3Mesh.rotation.y = Math.PI;
         scene.add(option3Mesh);
         this.topicMesh.push(option3Mesh);
 
         if (topic.length > 4) {
             optionArray = [];
-            for (let i = 0; i < topic[4].length; i += 16) {
-                optionArray.push(topic[4].substring(i, i + 16));
+            for (let i = 0; i < topic[4].length; i += 18) {
+                optionArray.push(topic[4].substring(i, i + 18));
             }
             topic[4] = optionArray.join('\n');
             const option4Geometry = new TextGeometry(topic[4], {
@@ -135,7 +135,7 @@ export class Screen {
                 bevelEnabled: false
             });
             const option4Mesh = new THREE.Mesh(option4Geometry, textMaterial);
-            option4Mesh.position.set(31.5, 17, 53.5);
+            option4Mesh.position.set(31.5, 17.5, 53.5);
             option4Mesh.rotation.y = Math.PI;
             scene.add(option4Mesh);
             this.topicMesh.push(option4Mesh);

@@ -33,3 +33,8 @@
     :hasTag "character";
     :hasName "npc";
     :hasDescription "A non-player character".
+
+:arenaBlock rdf:type :Block;
+    :hasTag "arena", "table";
+    :hasName "arena";
+    :hasDescription "A block of arena".

@@ -88,7 +88,7 @@
     
             // Scene
             const scene = new THREE.Scene();
-            const world = new World();
+            const world = new World(room);
             world.generate();
             // 将生成的方块添加到场景中
             scene.add(world);

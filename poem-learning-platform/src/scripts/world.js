@@ -13,8 +13,8 @@ export class World extends THREE.Group {
 
     chunkSize = {
         width: 64,
-        height: 32,
-        groundHeight: 1
+        height: 35,
+        groundHeight: 0
     };
 
     // 用户可以看到的区块数量
@@ -23,9 +23,10 @@ export class World extends THREE.Group {
     // 是否异步加载区块
     asyncLoading = true;
 
-    constructor(seed = 0) {
+    constructor(room, seed = 0) {
         super();
-        this.seed = seed;
+        this.params.seed = seed;
+        this.params.room = room;
     }
 
     generate() {
@@ -45,7 +46,7 @@ export class World extends THREE.Group {
         this.generateScreen();
         this.generateArena();
         this.generateNPC();
-        this.generateTable();
+        // this.generateTable();
     }
 
     /**
@@ -153,7 +154,7 @@ export class World extends THREE.Group {
     }
 
     generateChunk(x, z) {
-        const chunk = new WorldChunk(this.chunkSize, this.params, this.dataStore);
+        const chunk = new WorldChunk(this.chunkSize, this.params);
         chunk.position.set(x * this.chunkSize.width, 0, z * this.chunkSize.width);
 
         if (this.asyncLoading) {
@@ -245,8 +246,8 @@ export class World extends THREE.Group {
                 break;
             }
         }
-        for (let x = 8; x < this.chunkSize.width - 8; x++) {
-            for (let y = height + 7; y < height + 30; y++) {
+        for (let x = 7; x <= this.chunkSize.width - 6; x++) {
+            for (let y = height + 7; y <= this.chunkSize.height; y++) {
                 let z = this.chunkSize.width - 10;
                 chunk.setBlockId(x, y, z, 3);
             }
@@ -269,16 +270,16 @@ export class World extends THREE.Group {
         for (let x = 15; x < 20; x++) {
             for (let z = x + 10; z < x + 12; z++) {
                 for (let y = height; y < height + 2; y++) {
-                    chunk.setBlockId(x, y, z, 3);
+                    chunk.setBlockId(x, y, z, 5);
                 }
             }
         }
 
         const width = this.chunkSize.width;
-        for (let x = width - 20; x < width - 15; x++) {
-            for (let z = 9 + width - x; z < 11 + width - x; z++) {
+        for (let x = width - 19; x <= width - 15; x++) {
+            for (let z = 10 + width - x; z < 12 + width - x; z++) {
                 for (let y = height; y < height + 2; y++) {
-                    chunk.setBlockId(x, y, z, 3);
+                    chunk.setBlockId(x, y, z, 5);
                 }
             }
         }
@@ -299,6 +300,9 @@ export class World extends THREE.Group {
         }
         chunk.setBlockId(20, height + 1, 1, 4);
         chunk.setBlockId(this.chunkSize.width - 20, height + 1, 1, 4);
+
+        chunk.disposeInstances();
+        chunk.generateMeshes();
     }
 
     /**
@@ -324,8 +328,5 @@ export class World extends THREE.Group {
                 chunk.setBlockId(x, height + 1, z, 3);
             }
         }
-
-        chunk.disposeInstances();
-        chunk.generateMeshes();
     }
 }

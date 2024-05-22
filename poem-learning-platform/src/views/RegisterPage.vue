@@ -15,55 +15,23 @@
             </div>
             <div class="q-pa-md" style="max-width: 400px">
               <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
-                <q-input
-                  filled
-                  v-model="name"
-                  label="Your name *"
-                  hint="Name and surname"
-                  lazy-rules
-                  :rules="[
-                    (val) => (val && val.length > 0) || 'Please type something',
-                  ]"
-                />
+                <q-input filled v-model="registerName" label="Your name *" hint="Name and surname" lazy-rules :rules="[
+                (val) => (val !=null) || 'Please type something',
+              ]" />
 
-                <q-input
-                  filled
-                  type="number"
-                  v-model="age"
-                  label="Your age *"
-                  lazy-rules
-                  :rules="[
-                    (val) =>
-                      (val !== null && val !== '') || 'Please type your age',
-                    (val) => (val > 0 && val < 100) || 'Please type a real age',
-                  ]"
-                />
+                <q-input filled type="number" v-model="age" label="Your age *" lazy-rules :rules="[
+                (val) =>
+                  (val !== null && val !== '') || 'Please type your age',
+                (val) => (val > 0 && val < 100) || 'Please type a real age',
+              ]" />
 
-                <!-- <q-avatar>
-                  <img src="../assets/img/流萤.png">
-                </q-avatar> -->
+                <q-option-group v-model="group" :options="options" color="primary" inline />
 
-                <q-option-group
-                  v-model="group"
-                  :options="options"
-                  color="primary"
-                  inline
-                />
-
-                <q-toggle
-                  v-model="accept"
-                  label="I accept the license and terms"
-                />
+                <q-toggle v-model="accept" label="I accept the license and terms" />
 
                 <div>
                   <q-btn label="Submit" type="submit" color="primary" />
-                  <q-btn
-                    label="Reset"
-                    type="reset"
-                    color="primary"
-                    flat
-                    class="q-ml-sm"
-                  />
+                  <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm" />
                 </div>
               </q-form>
             </div>
@@ -81,6 +49,24 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader.js";
 import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
+import axios from "axios";
+
+// 2d
+const registerName = ref(null);
+const age = ref(0);
+const accept = ref(false);
+
+function onSubmit() {
+  console.log("Submitted");
+}
+
+function onReset() {
+  console.log("Reset");
+  registerName.value = null;
+  age.value = 0;
+  accept.value = false;
+}
+
 
 // 3d
 let clock, loader, helper, gui, camera, scene;
@@ -224,7 +210,7 @@ function loadMMDwithAnimation(
   animate();
 }
 
-function init() {}
+function init() { }
 
 // 场景渲染和动画
 function animate() {

@@ -15,13 +15,7 @@ const router = createRouter({
     routes: [
         {
             path: '/',
-            redirect: {
-                name: 'Scene',
-                params: {
-                    role: role,
-                    room: room
-                },
-            }
+            component: () => import('../views/OpenView.vue')
         },
         {
             path: '/scene/:role/:room',
@@ -34,11 +28,12 @@ const router = createRouter({
         },
         {
             // 减少冲突，先另开一个文件（
-            path: '/audience/:role',
+            path: '/audience/:role/:room',
             name: 'Audience',
             component: Audience,
             params: {
-                role: role
+                role: role,
+                room: room,
             }
         },
         {
@@ -60,6 +55,10 @@ const router = createRouter({
         {
             path: '/register',
             component: ()=> import('../views/RegisterPage.vue')
+        },
+        {
+            path: '/test',
+            component: ()=> import('../views/testPage.vue')
         }
     ]
 });

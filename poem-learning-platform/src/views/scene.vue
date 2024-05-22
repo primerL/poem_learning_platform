@@ -5,6 +5,24 @@
             <div id="player-position"></div>
         </div>
     </div>
+
+    <div id="videoArea"></div>
+    <button id="connectBtn">
+        <img id="connectIcon" src="../assets/img/语音通话2.png"/>
+        加入音视频通讯
+    </button>
+
+    <div id="bubble">进行交互</div>
+
+    <div id="chatAI">
+        <input id="chatAIInput" type="text" placeholder="请输入消息">
+        <button id="chatAIBtn">[Enter]发送</button>
+    </div>
+    <div id="chatPlayer">
+        <input id="chatPlayerInput" type="text" placeholder="请输入消息">
+        <button id="chatPlayerBtn">[Enter]发送</button>
+    </div>
+    <div id="chatOutput"></div>
 </template>
 
 <script>
@@ -21,6 +39,9 @@
 
     import { mapActions, mapState } from 'vuex';
 
+    import { startWebRTC } from '../scripts/webrtc.js'
+    import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader.js";
+    import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper.js";
 
     export default {
         name: "Scene",
@@ -56,6 +77,9 @@
             let loseNum = 0; // 记录失败次数
             let isStill = true; // 是否静止
 
+            let nearPlayerID; // 最近的玩家
+            let mySocketID;
+
             // 显示性能监控（FPS）
             const stats = new Stats();
             document.body.appendChild(stats.dom);
@@ -88,7 +112,7 @@
     
             // Scene
             const scene = new THREE.Scene();
-            const world = new World();
+            const world = new World(room);
             world.generate();
             // 将生成的方块添加到场景中
             scene.add(world);
@@ -176,6 +200,7 @@
                     });
                     // 显示状态
                     screen.showState(scene, message.role, message.name, false);
+                    // TODO: 如果房间内初始有花
                 }
                 else if (message.type == "position") {
                     const position = JSON.parse(message.position);
@@ -315,6 +340,55 @@
                         playerMap.set(message.socketId, -1);
                     }
                 }
+                else if(message.type == "flower") {
+                    // TODO: 给所有人种花
+                    let flowerPaths = ['../../src/assets/model/原神-风车菊/风车菊.pmx',
+                        '../../src/assets/model/原神-琉璃百合/琉璃百合.pmx',
+                        '../../src/assets/model/原神-琉璃百合/琉璃百合-夜晚.pmx',
+                        '../../src/assets/model/原神-清心/清心.pmx',
+                        '../../src/assets/model/原神-塞西莉亚花/塞西莉亚花.pmx',
+                    ]
+                    // console.log(message.flower);
+                    // console.log(JSON.parse(message.flower));
+                    let newFlower = JSON.parse(message.flower);
+                    let newFlowerInfo = newFlower[newFlower.length - 1];
+                    let pos_X = newFlowerInfo[0];
+                    let pos_Z = newFlowerInfo[1];
+                    let flowerType = newFlowerInfo[2];
+                    let flowerPath = flowerPaths[flowerType];
+                    loader2.load(
+                        flowerPath,
+                        function (object) {
+                            // console.log('模型加载成功:', object);
+                            object.scale.set(0.15, 0.15, 0.15);
+                            object.position.set(pos_X, 0.5, pos_Z);
+                            object.rotation.set(0, Math.PI*(pos_X+pos_Z), 0);
+                            object.castShadow = true;
+                            object.receiveShadow = true;
+                            scene.add(object);
+                        },
+                    );
+                }
+                else if(message.type == "chat") {
+                    let content = JSON.parse(message.content);
+                    // console.log("sid:", message.socketId) // 发送的人
+                    let to = message.to;
+                    let receiveFlag = true;
+                    playerMap.forEach((value, key) => {
+                        if(key == to) {// 看得见的玩家有要被发送消息的
+                            // console.log("key=to,no")
+                            receiveFlag = false;
+                        }
+                    });
+                    if(receiveFlag == true) {
+                        console.log("receive message!!!")
+                        let output = document.getElementById('chatOutput');
+                        output.innerHTML = `玩家${message.socketId}:<br>`;
+                        output.innerHTML += content;
+                        output.style.display = 'block';
+                        // console.log(data)
+                    }
+                }
             };
     
             // Render loop
@@ -387,10 +461,83 @@
                     if (player.model && player.model.mesh.visible == true) {
                         player.model.mesh.visible = false;
                     }
+
+                    // npc相关
+                    let npcPosFlower = new THREE.Vector3(20, 0.5, 0);
+                    let npcPosAI = new THREE.Vector3(44, 0.5, 0);
+                    let bubble = document.getElementById('bubble');
+
+                    let distanceFlo = player.position.distanceTo(npcPosFlower);
+                    let distanceAI = player.position.distanceTo(npcPosAI);
+
+                    let nearPlayer = findNearestPlayer();
+                    // let nearPlayerID;
+                    
+                    bubble.style.display = 'block';
+                    if(distanceAI <= 4) {
+                        bubble.style.display = 'block';
+                        bubble.innerHTML = '[N]与Kimi交谈';
+                        if(player.input.npcChat == true) {
+                            bubble.innerHTML = '[↑↓←→]退出交谈';
+                            
+                            startChatWithNPC();
+                            // player.input.npcChat = false;
+                        }
+                    } else if(nearPlayer[0] == true) {
+                        // console.log("near::", nearPlayer[1]);
+                        nearPlayerID = nearPlayer[1];
+                        bubble.style.display = 'block';
+                        bubble.innerHTML = `[N]与玩家${nearPlayerID}交谈`;
+                        if(player.input.npcChat == true) {// TODO: 
+                            bubble.innerHTML = '[↑↓←→]退出交谈';                            
+                            startChatWithPlayer();
+                        }
+                    } else if(hasFlower == true) {
+                        if(player.position.x < 32) {
+                            bubble.innerHTML = '[X]献花给p1';
+                            // TODO-ok: 记录花数量；接模型；传递后端
+                            if(player.input.sendFlo == true) {
+                                // alert("已献花给p1！");
+                                hasFlower = false;
+                                playerFlowerNum[0] ++;
+                                addFlower(1);
+                                // console.log(playerFlowerNum); // FIXME: if 有用的话
+                                player.input.sendFlo = false;
+                                player.input.npcFlo = false;
+                            }
+                        } else {
+                            bubble.innerHTML = '[X]献花给p2';
+                            if(player.input.sendFlo == true) {
+                                // alert("已献花给p2！");
+                                hasFlower = false;
+                                playerFlowerNum[1] ++;
+                                addFlower(2);
+
+                                player.input.sendFlo = false;
+                                player.input.npcFlo = false;
+                            }
+                        }
+                    } else if(hasFlower == false && distanceFlo <= 4) {
+                        bubble.style.display = 'block';
+                        bubble.innerHTML = '[M]向阮·梅买花';
+                        player.input.sendFlo = false;
+                        if(player.input.npcFlo == true) {
+                            bubble.innerHTML = '去献花吧！';
+                            // 记录花状态
+                            hasFlower = true;
+                        }
+                    } else {
+                        bubble.style.display = 'none';
+                    }
+
+
                 } else {
                     if (player.model && player.model.mesh.visible == false) {
                         player.model.mesh.visible = true;
                     }
+                    bubble.style.display = 'none';
+                    let chatOutput = document.getElementById('chatOutput');
+                    // chatOutput.style.display = 'none'; // FIXME: 玩家消息可能太容易被清除
                 }
 
                 if (player.role != 0) {
@@ -454,6 +601,7 @@
                                     loseNum: loseNum,
                                     room: room
                                 }));
+                                // TODO: 结束清空花的数量
                             }
                             if (player.input.cont == true) {
                                 ws.send(JSON.stringify({
@@ -509,6 +657,157 @@
                     this.stopLoading();
                 }
             }
+
+            function startChatWithNPC() {
+                // const container = document.createElement('div');
+                const container = document.getElementById('chatAI');
+                container.style.display = 'flex';
+                const inputElement = document.getElementById('chatAIInput');
+                inputElement.focus();
+            }
+            function startChatWithPlayer() {
+                const container = document.getElementById('chatPlayer');
+                container.style.display = 'flex';
+                const inputElement = document.getElementById('chatPlayerInput');
+                inputElement.focus();
+            }
+
+            function findNearestPlayer() {
+                // console.log(playerMap)
+                let playerPosMap = [];
+                let nearFlag = false;
+                let nearstID = null;
+                playerMap.forEach((value, key) => {
+                    // console.log(key, value);
+                    playerPosMap.push([key, value.model.mesh.position]);
+                    // console.log(playerPosMap);
+                });
+                let minDistance = Number.MAX_SAFE_INTEGER;
+                // 计算距离，找最近的
+                playerPosMap.forEach((arr) => {
+                    let pID = arr[0];
+                    let distanceP = player.position.distanceTo(arr[1]);
+                    if(distanceP < minDistance) {
+                        nearstID = pID;
+                        minDistance = distanceP;
+                    }
+                })
+                // 如果小于定值，展示
+                if(minDistance <= 4) {
+                    nearFlag = true;
+                }
+
+                // console.log([nearFlag, nearstID]);
+                return [nearFlag, nearstID];
+            }
+
+            // 连接ai
+            document.getElementById("chatAIBtn").addEventListener("click", function() {
+                sendMessageToAI();
+            });
+            document.getElementById("chatAIInput").addEventListener("keydown", function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    sendMessageToAI();
+                } else if(event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'ArrowLeft' || event.key === 'ArrowRight') {// 方向键
+                    event.preventDefault();
+                    
+                    const container = document.getElementById('chatAI');
+                    container.style.display = 'none';
+                    const output = document.getElementById('chatOutput');
+                    output.style.display = 'none';
+                    player.input.npcChat = false;
+                }
+            });
+            function sendMessageToAI() {
+                const inputElement = document.getElementById('chatAIInput');
+                const message = inputElement.value;
+                console.log(message);
+                // TODO: 直接接api，不经过后端
+                const url = "http://localhost:2345/api/chat?message=" + encodeURIComponent(message);
+                fetch(url)
+                    .then(response => response.text())
+                    .then(data => {
+                        // 展示返回内容
+                        let output = document.getElementById('chatOutput');
+                        output.innerHTML = data;
+                        output.style.display = 'block';
+                        console.log(data)
+                    })
+                    .catch(error => console.error('Error:', error));
+                
+                inputElement.value = '';
+            }
+
+            // 与其他玩家交流
+            document.getElementById("chatPlayerBtn").addEventListener("click", function() {
+                // sendMessageToAI();
+                sendMessageToPlayer();
+            });
+            document.getElementById("chatPlayerInput").addEventListener("keydown", function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    // sendMessageToAI();
+                    sendMessageToPlayer();
+                } else if(event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'ArrowLeft' || event.key === 'ArrowRight') {// 方向键
+                    event.preventDefault();
+                    
+                    const container = document.getElementById('chatPlayer');
+                    container.style.display = 'none';
+                    const output = document.getElementById('chatOutput');
+                    output.style.display = 'none';
+                    player.input.npcChat = false;
+                }
+            });
+            function sendMessageToPlayer() {
+                // TODO-ok: 
+                const inputElement = document.getElementById('chatPlayerInput');
+                const message = inputElement.value;
+                console.log(message);
+                ws.send(JSON.stringify({
+                    type: "chat",
+                    content: JSON.stringify(message),
+                    // from: userId,
+                    to: nearPlayerID,
+                    room: room
+                }));
+                
+                inputElement.value = '';
+            }
+
+            // 献花
+            let hasFlower = false;
+            let playerFlowerNum = [0,0];
+            let flowerInfo = []; // TODO-ok: 传给ws
+            function addFlower(playerID) {
+                console.log('add flower')
+                // 划定区域
+                let pos_X;
+                let pos_Z = 10;
+                if(playerID === 1) {
+                    pos_X = 18;
+                } else {
+                    pos_X = 36;
+                }
+                pos_X += Math.random() * 10;
+                pos_Z += Math.random() * 10;
+                // 随机model
+                let flowerType = Math.floor(Math.random() * 5);
+
+                // 记录
+                flowerInfo.push([pos_X, pos_Z, flowerType])
+                // console.log(flowerInfo)
+
+                ws.send(JSON.stringify({
+                    type: "flower",
+                    flower: JSON.stringify(flowerInfo),
+                    room: room
+                }));
+                // 加载到场景
+                // 有一堆err：WebGL: INVALID_VALUE: uniform1fv: no array
+                // 不影响实际效果，但是为什么orz
+                // TODO-ok: 所有人接收
+            }
     
             // 窗口大小变化，重新渲染
             window.addEventListener("resize", () => {
@@ -522,6 +821,60 @@
             // createGUI(scene, world, player);
     
             animate();
+
+            document.getElementById("connectBtn").addEventListener("click", function() {
+                startWebRTC();
+                this.style.display = 'none';
+            });
+
+            let loader2 = new MMDLoader();
+            let helper2 = new MMDAnimationHelper();
+            function loadNPC() {
+                
+                loader2.loadWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/待机动作整理.vmd',(mmd) => {
+                    mmd.mesh.scale.set(0.15, 0.15, 0.15);
+                    helper2.add(mmd.mesh, {
+                        animation: mmd.animation,
+                        physics: false // 是否添加物理效果
+                    });
+                    // 返回加载的模型
+                    // resolve({mmd, helper2});
+                    mmd.mesh.position.set(20, 0.5, 0);
+                    mmd.mesh.rotation.set(0, Math.PI/2, 0);
+                    mmd.mesh.castShadow = true;
+                    mmd.mesh.receiveShadow = true;
+                    scene.add(mmd.mesh);
+                });
+                loader2.loadWithAnimation('../../src/assets/model/螺丝咕姆20231219/螺丝咕姆1.0.pmx', '../../src/assets/animation/待机动作公子.vmd',(mmd) => {
+                    mmd.mesh.scale.set(0.15, 0.15, 0.15);
+                    helper2.add(mmd.mesh, {
+                        animation: mmd.animation,
+                        physics: false // 是否添加物理效果
+                    });
+                    // 返回加载的模型
+                    // resolve({mmd, helper2});
+                    mmd.mesh.position.set(44, 0.5, 0);
+                    mmd.mesh.rotation.set(0, -Math.PI/2, 0);
+                    mmd.mesh.castShadow = true;
+                    mmd.mesh.receiveShadow = true;
+                    scene.add(mmd.mesh);
+                });
+
+            }
+            let clock = new THREE.Clock();
+
+
+            loadNPC();
+            const animate2 = () => {
+                helper2.update(clock.getDelta());
+                requestAnimationFrame(animate2);
+                renderer.render(
+                    scene,
+                    player.controls.isLocked ? player.camera : orbitCamera
+                );
+                // renderer.render(scene, camera);
+            }
+            animate2();
         },
     };
     </script>
@@ -540,4 +893,107 @@
         color: white;
         margin: 8px;
     }
+
+    #videoArea {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        right: 10px;
+        top: 10px;
+        /* width: 120px; */
+    }
+    #connectIcon {
+        width: 30px;
+    }
+    #connectBtn {
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        width: 160px;
+        height: 30px;
+        border: 0;
+        border-radius: 15px;
+
+        background-image: linear-gradient(to right, rgba(30, 144, 255, 0.9), rgba(65, 105, 225, 0.9));
+        color: aliceblue;
+    }
+
+    #bubble {
+        display: none;
+
+        position: absolute;
+        bottom: 35%;
+        left: 55%;
+        width: 150px;
+        height: 30px;
+        line-height: 30px;
+        border: 0;
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
+
+        background-image: linear-gradient(to right, rgba(159, 214, 235, 0.664), rgba(175, 190, 233, 0));
+        color: aliceblue;
+        font-weight: bold;
+        /* text-align: center; */
+        padding-left: 30px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    #chatOutput {
+        display: none;
+        position: absolute;
+        bottom: 40%;
+        left: 55%;
+        width: 35%;
+        word-break: break-all;
+        /* height: 30px; */
+        line-height: 20px;
+        border: 0;
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
+
+        background-image: linear-gradient(to right, rgba(159, 214, 235, 0.664), rgba(175, 190, 233, 0));
+        color: aliceblue;
+        font-weight: bold;
+        /* text-align: center; */
+        padding-left: 30px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    #chatAI,#chatPlayer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 30px;
+        background-color: #f0f0f0;
+        /* display: flex; */
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #chatAI input[type="text"],#chatPlayer input[type="text"] {
+        height: 100%;
+        flex: 1;
+        margin-right: 10px;
+        padding: 0 10px;
+        border: none;
+        outline: none;
+    }
+
+    #chatAI button,#chatPlayer button {
+        width: 100px;
+        height: 100%;
+        border: none;
+        /* background-color: #4CAF50; */
+        background-image: linear-gradient(to right, rgba(30, 144, 255, 0.9), rgba(65, 105, 225, 0.9));
+        color: white;
+        cursor: pointer;
+    }
+
 </style>

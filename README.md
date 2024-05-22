@@ -1,4 +1,6 @@
 ## 包管理提醒
+因为使用的源不一样，在package-lock.json中可能会有冲突，保证package.json中的包是最新的，然后删除package-lock.json，重新npm install
+
 已经重新做了删减和合并，保证了运行不会有包报错，如果有冲突优先选择相信远程（
 包环境乱了可以删除重新npm install
 

@@ -147,6 +147,16 @@ public class EchoChannel implements ApplicationContextAware {
                     data.put("flower", jsonNode.get("flower").asText());
                     broadcast(objectMapper.writeValueAsString(data), "", jsonNode.get("room").asInt());
                 }
+                else if("chat".equals(type)) {
+                    //
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("type", "chat");
+                    data.put("socketId", this.session.getId());
+                    data.put("content", jsonNode.get("content").asText());
+//                    data.put("from", jsonNode.get("from").asText());
+                    data.put("to", jsonNode.get("to").asText());
+                    broadcast(objectMapper.writeValueAsString(data), "", jsonNode.get("room").asInt());
+                }
                 else {
                     LOGGER.warn("[websocket] Unknown message type: {}", type);
                 }

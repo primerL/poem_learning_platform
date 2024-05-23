@@ -50,6 +50,12 @@ request body:
  "username": "newuser",
  "password": "password123",
 }
+response:
+{
+    "userId": 1,
+    "username": "newuser",
+    "model": 1
+}
 ```
 
 #### 过去一周的比赛场数
@@ -87,9 +93,38 @@ request body:(list)
 #### 总胜率(放中间的)
 
 ```
-GET http://localhost:2345/api/users/win/rate/total/1
+GET http://localhost:2345/api/users/win/rate/total/{userId}
 response: (double)
 0.4391025641025641
+```
+
+#### AI解析题目：
+
+```
+GET http://localhost:2345/api/review/explain?message=题目是“不识庐山真面目，只缘身在此山中。”“缘”的意思是(  )。”，答案是“因为”。请帮我解释为什么
+# 把题目和正确答案拼接一个字符串给后端
+response:(string)
+这句诗出自宋代文学家苏轼的《题西林壁》，全句是：“横看成岭侧成峰，远近高低各不同。不识庐山真面目，只缘身在此山中。”这句诗通过描写庐山的景色，表达了诗人对于事物认识的深刻哲理。
+
+在这句诗中，“缘”字的意思是“因为”，用来表达原因和结果的关系。整句诗的意思是说，由于诗人身处庐山之中，所以无法看到庐山的全貌。这里的“真面目”指的是庐山的真正面貌或本质。诗人通过这种表达，暗示了人们在认识事物时往往因为局限在事物之中，而难以全面地认识和理解它。
+
+所以，答案是“因为”，它解释了为什么诗人不能识别庐山的真面目，即因为诗人自己就处在这座山中，受到了位置和视角的限制。
+```
+
+#### 获取错题
+
+```
+GET http://localhost:2345/api/question/review/{userId}
+response:
+{	"questionId":214,
+	"question":"下列诗句中，有错别字的一项是 (       )",
+	"answer":3,
+	"options":["候蛩凄断，人语西风岸。",
+	"月落沙平江似练，望尽芦花无雁。",
+	"黯教愁损兰成，可怜夜夜关情。", #answer=3表示答案
+	"只有一枝梧叶，不知多少秋声。"],
+	"type":"review"
+}
 ```
 
 

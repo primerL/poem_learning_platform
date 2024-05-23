@@ -1,24 +1,17 @@
 package edu.fudan.poetryconference.service.impl;
 
-import edu.fudan.poetryconference.dto.UserContestNumDTO;
 import edu.fudan.poetryconference.dto.UserContestResultDTO;
-import edu.fudan.poetryconference.dto.UserWinRateDTO;
 import edu.fudan.poetryconference.model.ContestResult;
 import edu.fudan.poetryconference.repository.ContestResultRepository;
 import edu.fudan.poetryconference.service.ContestResultService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 

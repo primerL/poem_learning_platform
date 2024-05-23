@@ -13,7 +13,9 @@ public class AnswersServiceImpl implements AnswersService {
 
     @Override
     public boolean saveAnswers(Answers answers) {
-        answersRepository.save(answers);
+        if(!answers.getCorrect()) {
+            answersRepository.save(answers);
+        }
         return true;
     }
 }

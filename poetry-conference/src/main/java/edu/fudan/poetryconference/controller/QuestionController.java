@@ -13,5 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/question")
 public class QuestionController {
+    @Autowired
+    private QuestionService questionService;
 
+    @GetMapping("/review/{userId}")
+    public ResponseEntity<String> getReviewQuestion(@PathVariable("userId") Long userId) {
+        String questionInfo = questionService.getReviewQuestion(userId);
+        return ResponseEntity.ok(questionInfo);
+    }
 }

@@ -18,4 +18,10 @@ public class AIChatController {
     public Mono<String> chatWithAI(@RequestParam String message) {
         return aiChatService.getCompletion(message);
     }
+
+    @CrossOrigin
+    @GetMapping("/api/review/explain")
+    public Mono<String> explainQuestion(@RequestParam String message) {
+        return aiChatService.explainQuestion(message);
+    }
 }

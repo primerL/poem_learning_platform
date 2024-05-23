@@ -1,11 +1,10 @@
 package edu.fudan.poetryconference.controller;
 
-import edu.fudan.poetryconference.dto.UserContestNumDTO;
 import edu.fudan.poetryconference.dto.UserContestResultDTO;
-import edu.fudan.poetryconference.dto.UserWinRateDTO;
 import edu.fudan.poetryconference.model.User;
 import edu.fudan.poetryconference.service.ContestResultService;
 import edu.fudan.poetryconference.service.UserService;
+import edu.fudan.poetryconference.vo.UserLoginVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,11 +32,10 @@ public class UserController {
 
     @CrossOrigin
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody User user) {
-            System.out.println("Login request: " + user.getUsername() + " " + user.getPassword());
-        if (userService.checkLogin(user.getUsername(),  user.getPassword())) {
-            System.out.println("Login successful");
-            return ResponseEntity.ok("Login successful");
+    public ResponseEntity<?> loginUser(@RequestBody User user) {
+        UserLoginVo userLoginVo = userService.checkLogin(user.getUsername(), user.getPassword());
+        if (userLoginVo != null) {
+            return ResponseEntity.ok(userLoginVo);
         } else {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
@@ -49,12 +47,6 @@ public class UserController {
         List<UserContestResultDTO> results = contestResultService.getUserContestResults(userId);
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
-
-//    @GetMapping("/personal/contest/win/rate/{userId}")
-//    public ResponseEntity<List<UserWinRateDTO>> getUserContestWinRate(@PathVariable Integer userId){
-//        List<UserWinRateDTO> winRate = contestResultService.getUserContestWinRate(userId);
-//        return new ResponseEntity<>(winRate, HttpStatus.OK);
-//    }
 
     @CrossOrigin
     @GetMapping("/{userId}")

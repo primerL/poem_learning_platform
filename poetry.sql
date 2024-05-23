@@ -1134,6 +1134,7 @@ CREATE TABLE `answers` (
   `question_id` int NOT NULL,
   `correct` tinyint(1) DEFAULT NULL,
   `answer_date` datetime NOT NULL,
+	`review_times` int DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE,
   KEY `user_id` (`user_id`) USING BTREE,
   KEY `question_id` (`question_id`) USING BTREE,

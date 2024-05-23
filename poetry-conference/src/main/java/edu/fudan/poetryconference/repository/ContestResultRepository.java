@@ -1,6 +1,5 @@
 package edu.fudan.poetryconference.repository;
 
-import edu.fudan.poetryconference.dto.UserWinRateDTO;
 import edu.fudan.poetryconference.model.ContestResult;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;

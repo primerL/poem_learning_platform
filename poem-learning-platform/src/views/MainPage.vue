@@ -12,18 +12,18 @@
         <div class="news-slider">
             <div class="news-slider__wrp swiper-wrapper">
                 <div class="news-slider__item swiper-slide" v-for="(newsItem, index) in newsItems" :key="index">
-                    <div href="#" class="news__item a">
+                    <a href="#" class="news__item">
                         <div class="news-date">
                             <span class="news-date__title">{{ newsItem.date.day }}</span>
                             <span class="news-date__txt">{{ newsItem.date.month }}</span>
                         </div>
                         <div class="news__title">{{ newsItem.title }}</div>
-                        <div class="news__txt">{{ newsItem.text }}</div>
+                        <p class="news__txt">{{ newsItem.text }}</p>
                         <q-btn color="teal-4">
-                            <q-icon left size="3xs" name="map" />
+                            <q-icon left size="3xs" name="map" @click="toScene(newsItem)"/>
                             <div>参赛</div>
                         </q-btn>
-                    </div>
+                    </a>
                 </div>
             </div>
 
@@ -130,6 +130,18 @@ function toPerson() {
     router.push('/person')
 }
 
+function toScene(newsItem)
+{
+    console.log('toScene')
+    console.log(newsItem)
+    let roomId = newsItem.date.day 
+    // roomid从01 转为 1
+    if (roomId[0] == '0') {
+        roomId = roomId[1]
+    }
+    router.push('/scene/' + '1/' +roomId)
+}
+
 onMounted(() => {
     swiper = new Swiper('.news-slider', {
         effect: 'coverflow',
@@ -225,15 +237,13 @@ onMounted(() => {
 });
 </script>
 
-<style>
-.wrapper {
+<style scoped>
+html {
     position: relative;
     overflow-x: hidden !important;
-    width: 100%;
-    height: 100%;
 }
 
-.wrapper {
+body {
     font-family: "Quicksand", sans-serif;
 }
 

@@ -60,9 +60,9 @@
 
             const userInfoString = localStorage.getItem("userInfo");
             const userInfo = JSON.parse(userInfoString);
-            const name = userInfo.name;
-            const userId = userInfo.userId;
-            const modelId = userInfo.modelId;
+            const name = localStorage.getItem("name");
+            const userId = localStorage.getItem("userId");
+            const modelId = localStorage.getItem("modelId");
 
             let preNum = 0; // 记录准备状态的人数
             let topicNum = 0; // 记录已答的题目数

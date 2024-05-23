@@ -398,7 +398,7 @@ onMounted(() => {
 });
 </script>
 
-<style>
+<style scoped>
 .bg {
   background-image: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/756881/textured_paper_%402X.png);
   background-blend-mode: multiply;

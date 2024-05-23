@@ -3,7 +3,7 @@
         <img src="../assets/img/bg4.png" class="side-image left-image" />
         <img src="../assets/img/bg5.png" class="side-image right-image" />
         <div>
-            <q-btn color="orange" label="错题复习" class="button-on-bg" @click="layout = true" />
+            <q-btn color="orange" label="错题复习" class="button-on-bg" @click="toReview()" />
         </div>
         <q-card class="my-card" id="report">
             <q-card-section class="text-container">
@@ -72,9 +72,7 @@
                 <q-layout view="Lhh lpR fff" container class="bg-white">
                     <q-header class="bg-teal">
                         <q-toolbar>
-                            <q-btn flat @click="drawer = !drawer" round dense icon="menu" />
                             <q-toolbar-title>错题复习</q-toolbar-title>
-                            <q-btn flat @click="drawerR = !drawerR" round dense icon="menu" />
                             <q-btn flat v-close-popup round dense icon="close" />
                         </q-toolbar>
                     </q-header>
@@ -85,23 +83,27 @@
                         </q-toolbar>
                     </q-footer>
 
-                    <q-drawer bordered v-model="drawer" :width="200" :breakpoint="600" class="bg-grey-3 q-pa-sm">
-                        <div v-for="n in 50" :key="n">Drawer {{ n }} / 50</div>
-                    </q-drawer>
-
-                    <q-drawer side="right" bordered v-model="drawerR" :width="200" :breakpoint="300"
-                        class="bg-grey-3 q-pa-sm">
-                        <div v-for="n in 50" :key="n">Drawer {{ n }} / 50</div>
-                    </q-drawer>
-
                     <q-page-container>
                         <q-page padding>
-                            <p v-for="n in contentSize" :key="n">
-                                {{ lorem }}
-                            </p>
+
                         </q-page>
                     </q-page-container>
                 </q-layout>
+            </q-dialog>
+        </div>
+
+        <div class="q-pa-md q-gutter-sm">
+            <q-dialog v-model="carousel">
+                <q-carousel transition-prev="slide-right" transition-next="slide-left" swipeable animated
+                    v-model="slide" control-color="primary" navigation-icon="radio_button_unchecked" navigation padding
+                    height="200px" class="bg-white shadow-1 rounded-borders">
+                    <q-carousel-slide :name="1" class="column no-wrap flex-center">
+                        <q-icon name="style" color="primary" size="56px" />
+                        <div class="q-mt-md text-center">
+                            {{ lorem }}
+                        </div>
+                    </q-carousel-slide>
+                </q-carousel>
             </q-dialog>
         </div>
     </div>
@@ -110,11 +112,37 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import * as echarts from 'echarts';
+import axios from 'axios';
 
 const value = ref('81%')
 const layout = ref(false)
+axios.defaults.baseURL = "http://localhost:2345";
+const userId = localStorage.getItem('userId')
+const carousel = ref(false)
+const slide = ref(1)
+const lorem = ref('恭喜你没有错题需要复习，再接再厉吧')
+
+function toReview() {
+    // layout.value = true
+
+    axios.get(`/api/question/review/${userId}`).then(res => {
+        console.log(res.data)
+        let data = res.data
+        if (data['questionId'] == null) {
+            carousel.value = true
+        }
+        else{
+            layout.value = true
+        }
+    }).catch(err => {
+        console.log(err)
+    })
+
+}
 
 onMounted(() => {
+
+
     // 折线图
     const chartDom = document.getElementById('chart')
     const myChart = echarts.init(chartDom)
@@ -157,7 +185,7 @@ onMounted(() => {
 })
 </script>
 
-<style>
+<style scoped>
 .bg-container {
     background-color: rgba(237, 253, 250, 0.9);
     display: flex;
@@ -182,7 +210,7 @@ onMounted(() => {
 
 .right-image {
     right: 0;
-    width: 22%;
+    width: 23%;
 }
 
 .content-image {

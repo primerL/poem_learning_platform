@@ -96,9 +96,14 @@ const onSubmit = () => {
         }).then(res => {
             console.log('login success')
             console.log(res)
-            router.push('/main')
+            let userId = res.data['userId']
+            let modelId = res.data['model']
             localStorage.setItem('name', login_name.value)
-            // TODO: 返回userId, modelId
+            localStorage.setItem('userId', userId)
+            localStorage.setItem('modelId', modelId)
+            console.log('userId:', userId)
+            console.log('modelId:', modelId)
+            router.push('/main')
 
         }).catch(err => {
             console.log('login failed')
@@ -113,7 +118,7 @@ const onReset = () => {
 
 </script>
 
-<style>
+<style scoped>
 .bg {
     background-image: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/756881/textured_paper_%402X.png);
     background-blend-mode: multiply;

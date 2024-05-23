@@ -75,7 +75,9 @@
 <script setup>
 import axios from 'axios';
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const tab = ref('login')
 const login_name = ref(null)
 const login_password = ref(null)
@@ -85,16 +87,24 @@ axios.defaults.baseURL = 'http://localhost:2345'
 
 const onSubmit = () => {
     console.log('submit')
-    axios.post('/api/users/login', {
-        user_id: null,
-        username: login_name.value.toString(),
-        password: login_password.value.toString(),
-        model: null
-    }).then(res => {
-        console.log(res)
-    }).catch(err => {
-        console.log(err)
-    })
+    axios.post('/api/users/login',
+        {
+            user_id: 12,
+            username: login_name.value.toString(),
+            password: login_password.value.toString(),
+            model: 12
+        }).then(res => {
+            console.log('login success')
+            console.log(res)
+            router.push('/main')
+            localStorage.setItem('name', login_name.value)
+            // TODO: 返回userId, modelId
+
+        }).catch(err => {
+            console.log('login failed')
+            console.log(err)
+            alert('login failed')
+        })
 }
 
 const onReset = () => {

@@ -34,7 +34,9 @@ public class UserController {
     @CrossOrigin
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody User user) {
+            System.out.println("Login request: " + user.getUsername() + " " + user.getPassword());
         if (userService.checkLogin(user.getUsername(),  user.getPassword())) {
+            System.out.println("Login successful");
             return ResponseEntity.ok("Login successful");
         } else {
             return ResponseEntity.status(401).body("Invalid credentials");

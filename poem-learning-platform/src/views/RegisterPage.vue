@@ -16,14 +16,17 @@
             <div class="q-pa-md" style="max-width: 400px">
               <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
                 <q-input filled v-model="registerName" label="Your name *" hint="Name and surname" lazy-rules :rules="[
-                (val) => (val !=null) || 'Please type something',
+                (val) => (val != null) || 'Please type something',
               ]" />
 
-                <q-input filled type="number" v-model="age" label="Your age *" lazy-rules :rules="[
-                (val) =>
-                  (val !== null && val !== '') || 'Please type your age',
-                (val) => (val > 0 && val < 100) || 'Please type a real age',
-              ]" />
+                <q-input ref="nameField" name="password" v-model="password" filled :type="isPwd ? 'password' : 'text'"
+                  label="密码 *" hint="Your password *" lazy-rules :rules="[
+                (val) => (val && val.length > 0)]">
+                  <template v-slot:append>
+                    <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer"
+                      @click="isPwd = !isPwd" />
+                  </template>
+                </q-input>
 
                 <q-option-group v-model="group" :options="options" color="primary" inline />
 
@@ -50,15 +53,17 @@ import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader.js";
 import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import axios from "axios";
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 // 2d
 const registerName = ref(null);
-const age = ref(0);
+const password = ref(null);
 const accept = ref(false);
-
-function onSubmit() {
-  console.log("Submitted");
-}
+const isPwd = ref(true);
+axios.defaults.baseURL = "http://localhost:2345";
+const modelId = ref(1);
 
 function onReset() {
   console.log("Reset");
@@ -66,7 +71,6 @@ function onReset() {
   age.value = 0;
   accept.value = false;
 }
-
 
 // 3d
 let clock, loader, helper, gui, camera, scene;
@@ -114,6 +118,7 @@ watch(group, (newValue, oldValue) => {
       position = { x: 6.2, y: -16, z: 1 };
       localStorage.setItem("selectModelId", 1);
       loadMMDwithAnimation(pmxfile, vmdfile, position, 3);
+      modelId.value = 1;
       break;
     case "luocha":
       pmxfile = "../../src/assets/model/星穹铁道-罗刹/罗刹.pmx";
@@ -121,6 +126,7 @@ watch(group, (newValue, oldValue) => {
       position = { x: 6.2, y: -18, z: 1 };
       localStorage.setItem("selectModelId", 2);
       loadMMDwithAnimation(pmxfile, vmdfile, position, 6);
+      modelId.value = 2;
       break;
     case "suchang":
       pmxfile = "../../src/assets/model/星穹铁道—李素裳/李素裳1.0.pmx";
@@ -128,6 +134,7 @@ watch(group, (newValue, oldValue) => {
       position = { x: 6.2, y: -16, z: 1 };
       localStorage.setItem("selectModelId", 3);
       loadMMDwithAnimation(pmxfile, vmdfile, position, 3);
+      modelId.value = 3;
       break;
     case "yukong":
       pmxfile = "../../src/assets/model/星穹铁道—驭空/星穹铁道—驭空（改5）.pmx";
@@ -135,6 +142,7 @@ watch(group, (newValue, oldValue) => {
       position = { x: 6.2, y: -16, z: 1 };
       localStorage.setItem("selectModelId", 4);
       loadMMDwithAnimation(pmxfile, vmdfile, position, 3);
+      modelId.value = 4;
       break;
     case "yinyue":
       pmxfile =
@@ -143,6 +151,7 @@ watch(group, (newValue, oldValue) => {
       localStorage.setItem("selectModelId", 5);
       position = { x: 6.2, y: -16, z: 1 };
       loadMMDwithAnimation(pmxfile, vmdfile, position, 3.2);
+      modelId.value = 5;
       break;
     default:
       pmxfile = "../../src/assets/model/星穹铁道—流萤无武器/流萤3.0.pmx";
@@ -217,6 +226,30 @@ function animate() {
   helper.update(clock.getDelta());
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
+}
+
+function onSubmit() {
+  console.log("Submitted");
+  axios.post("/api/users/register",
+    {
+      "password": password.value,
+      "model": modelId.value,
+      "username": registerName.value,
+      "user_id": 100
+    }).then((res) => {
+      console.log("register success");
+      console.log(res.data);
+      let userId = res.data["user_id"];
+      localStorage.setItem("name", registerName.value);
+      localStorage.setItem("modelId", modelId.value);
+      localStorage.setItem("userId", userId);
+      console.log("userId: ", userId);
+      router.push("/main");
+    }).catch((err) => {
+      console.log("register failed");
+      console.log(err);
+      alert("register failed");
+    });
 }
 
 onMounted(() => {

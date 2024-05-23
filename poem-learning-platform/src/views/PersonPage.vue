@@ -116,7 +116,7 @@
                                     </q-avatar>
                                     螺丝咕姆解析
                                 </q-chip>
-
+                                <q-btn color="secondary" label="下一题" @click="toReview()"/>
                             </div>
 
                         </q-page>
@@ -168,8 +168,10 @@ function toReview() {
         let data = res.data
         if (data['questionId'] == null) {
             carousel.value = true
+            layout.value = false
         }
         else {
+            carousel.value = false
             layout.value = true
             question.value = data['question']
             options.value = data['options']
@@ -178,12 +180,12 @@ function toReview() {
             let message = "题目是"+ question.value.toString() + "正确选项是" + ans.toString()
             let m = "你好"
             console.log(message)
-            axios.get(`/api/review/explain?message=${message}`).then(res => {
-                explanation.value = res.data
-                console.log(explanation.value)
-            }).catch(err => {
-                console.log(err)
-            })
+            // axios.get(`/api/review/explain?message=${message}`).then(res => {
+            //     explanation.value = res.data
+            //     console.log(explanation.value)
+            // }).catch(err => {
+            //     console.log(err)
+            // })
         }
     }).catch(err => {
         console.log(err)

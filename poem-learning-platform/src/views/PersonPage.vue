@@ -85,6 +85,39 @@
 
                     <q-page-container>
                         <q-page padding>
+                            <q-chip>
+                                <q-avatar icon="bookmark" color="red" text-color="white" />
+                                题目
+                            </q-chip>
+                            <div class="q-mt-md text-center">
+                                {{ question }}
+                            </div>
+
+                            <div class="q-mt-md" v-for="option in options" :key="option">
+                                <q-chip class="glossy" color="orange" text-color="white" icon-right="star">
+                                    选项 {{ options.indexOf(option) + 1 }}
+                                </q-chip>
+                                {{ option }}
+                            </div>
+
+                            <q-splitter />
+
+                            <div class="q-mt-md">
+                                <q-chip>
+                                    <q-avatar icon="bookmark" color="red" text-color="white" />
+                                    正确答案为 {{ answer }}
+                                </q-chip>
+                            </div>
+
+                            <div class="q-mt-md">
+                                <q-chip>
+                                    <q-avatar>
+                                        <img src="https://cdn.quasar.dev/img/avatar5.jpg">
+                                    </q-avatar>
+                                    螺丝咕姆解析
+                                </q-chip>
+
+                            </div>
 
                         </q-page>
                     </q-page-container>
@@ -121,6 +154,11 @@ const userId = localStorage.getItem('userId')
 const carousel = ref(false)
 const slide = ref(1)
 const lorem = ref('恭喜你没有错题需要复习，再接再厉吧')
+const question = ref(null)
+const options = ref([])
+const answer = ref(null)
+const explanation = ref(null)
+axios.defaults.baseURL = 'http://localhost:2345'
 
 function toReview() {
     // layout.value = true
@@ -131,8 +169,21 @@ function toReview() {
         if (data['questionId'] == null) {
             carousel.value = true
         }
-        else{
+        else {
             layout.value = true
+            question.value = data['question']
+            options.value = data['options']
+            answer.value = data['answer']
+            let ans = options.value[answer.value-1]
+            let message = "题目是"+ question.value.toString() + "正确选项是" + ans.toString()
+            let m = "你好"
+            console.log(message)
+            axios.get(`/api/review/explain?message=${message}`).then(res => {
+                explanation.value = res.data
+                console.log(explanation.value)
+            }).catch(err => {
+                console.log(err)
+            })
         }
     }).catch(err => {
         console.log(err)

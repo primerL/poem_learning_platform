@@ -153,6 +153,9 @@ export class Screen {
 
     // state: false 未准备 true 准备
     async showState(scene, role, name, state) {
+        if (role != 1 && role != 2) {
+            return;
+        }
         this.isState[role - 1] = true;
         await this.loadFontAsync();
         if (this.stateMesh[role - 1]) {

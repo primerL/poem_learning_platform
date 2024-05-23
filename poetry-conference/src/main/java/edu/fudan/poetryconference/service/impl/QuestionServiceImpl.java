@@ -29,8 +29,7 @@ public class QuestionServiceImpl implements QuestionService {
     private OptionRepository optionsRepository;
     public String getQuestion() {
         // 在225个题目中随机选取一个题目
-//        int questionId = (int) (Math.random() * 225) + 1;
-        int questionId = 122;
+        int questionId = (int) (Math.random() * 225) + 1;
 
         Questions questions = questionRepository.findById(questionId).orElse(null);
 //        System.out.println(questions.getContent());

@@ -18,6 +18,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -42,7 +43,19 @@ public class EchoChannel implements ApplicationContextAware {
 
     private Session session;
 
-    private static boolean topicSent = false;
+    private static Map<Integer, LocalDateTime> topicSent = Collections.synchronizedMap(new HashMap<Integer, LocalDateTime>() {{
+        put(1, LocalDateTime.now());
+        put(2, LocalDateTime.now());
+        put(3, LocalDateTime.now());
+        put(4, LocalDateTime.now());
+    }});
+
+    private static Map<Integer, Boolean> endSent = Collections.synchronizedMap(new HashMap<Integer, Boolean>() {{
+        put(1, false);
+        put(2, false);
+        put(3, false);
+        put(4, false);
+    }});
 
     @OnMessage
     public void onMessage(String message) throws IOException {
@@ -100,13 +113,14 @@ public class EchoChannel implements ApplicationContextAware {
                     broadcast(objectMapper.writeValueAsString(data), this.session.getId(), jsonNode.get("room").asInt());
                 }
                 else if ("topic".equals(type)) {
-                    if (topicSent) {
+                    // 两次发送题目间隔至少 5 秒
+                    LocalDateTime lastSent = topicSent.get(jsonNode.get("room").asInt());
+                    if (LocalDateTime.now().isBefore(lastSent.plusSeconds(5))) {
                         return;
                     }
-                    topicSent = true;
+                    topicSent.put(jsonNode.get("room").asInt(), LocalDateTime.now());
                     QuestionService questionService = EchoChannel.applicationContext.getBean(QuestionService.class);
                     broadcast(questionService.getQuestion(), "", jsonNode.get("room").asInt());
-                    topicSent = false;
                 }
                 else if ("result".equals(type)) {
                     Map<String, Object> data = new HashMap<>();
@@ -131,6 +145,14 @@ public class EchoChannel implements ApplicationContextAware {
                             jsonNode.get("user2Id").asLong(), jsonNode.get("winNum").asLong(), jsonNode.get("loseNum").asLong());
                     ContestResultService contestResultService = EchoChannel.applicationContext.getBean(ContestResultService.class);
                     contestResultService.saveContestResult(contestResult);
+                    if (endSent.get(jsonNode.get("room").asInt())) {
+                        return;
+                    }
+                    endSent.put(jsonNode.get("room").asInt(), true);
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("type", "end");
+                    broadcast(objectMapper.writeValueAsString(data), this.session.getId(), jsonNode.get("room").asInt());
+                    endSent.put(jsonNode.get("room").asInt(), false);
                 }
                 else if ("logout".equals(type)) {
                     Map<String, Object> data = new HashMap<>();

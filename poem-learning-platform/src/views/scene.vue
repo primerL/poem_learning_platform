@@ -172,6 +172,9 @@
                 // console.log("Received message: ", event.data);
                 const message = JSON.parse(event.data);
                 if (message.type == "login") {
+                    if (role == 0) {
+                        screen.showWarmText(scene);
+                    }
                     // 导入模型
                     loader.loadModelWithNumber(message.modelId, 1).then((mmd) => {
                         if (message.role == 0) {
@@ -283,6 +286,7 @@
                             console.log("Time out");
                             showTopic = false;
                         }, 15000);
+                        console.log("Set time out");
                         answer = message.answer;
                         queationId = message.questionId;
                         sendTopicRequest = false;
@@ -308,22 +312,30 @@
                     }
                 }
                 else if (message.type == "cont") {
-                    screen.deleteEnd(scene);
-                    screen = new Screen(scene);
+                    screen.showWarmText(scene);
                     screen.showState(scene, message.role, message.name, false);
                     // 初始化参数
-                    preNum = 0;
+                    if (preNum >= 2) {
+                        preNum -= 2;
+                    } 
                     topicNum = 0;
                     showTopic = false;
                     showEnd = false;
                     player.pre = false;
                     player.input.pre = false;
                     player.input.cont = false;
+                    player.input.exit = false;
                     clearTimeout(countdownTimer);
+                }
+                else if (message.type == "end") {
+                    if (role == 0 && showEnd == false) {
+                        showEnd == true;
+                        screen.showEnd(scene);
+                    }
                 }
                 else if (message.type == "logout") {
                     if (playerMap.get(message.socketId) != undefined && playerMap.get(message.socketId) != 0 && playerMap.get(message.socketId) != -1){
-                        // 删除 state
+                         // 删除 state
                         let position = playerMap.get(message.socketId).model.mesh.position.clone();
                         if (position.z > 4 && position.z < 60) {
                             if (position.x > 4 && position.x < 32) {
@@ -356,6 +368,7 @@
                     let pos_Z = newFlowerInfo[1];
                     let flowerType = newFlowerInfo[2];
                     let flowerPath = flowerPaths[flowerType];
+                    const loader2 = new MMDLoader();
                     loader2.load(
                         flowerPath,
                         function (object) {
@@ -570,17 +583,17 @@
                                 }));
                             }
                         }
-                        if (preNum != 2 || showEnd) {
-                            if (player.input.exit == true) {
-                                // TODO：退出现在跳转到main页面
-                                router.push('/main').then(() => {
-                                    window.location.reload(); // 强制刷新页面
-                                });
-                            }
+                    }
+                    // 比赛尚未开始或已结束
+                    if (preNum != 2 || showEnd) {
+                        if (player.input.exit == true) {
+                            router.push('/main').then(() => {
+                                window.location.reload(); // 强制刷新页面
+                            });
                         }
                     }
-                    if (preNum == 2 && !showTopic) {  // 两人都准备好了再开始游戏
-                        if (topicNum < 2) {
+                    if (preNum >= 2 && !showTopic) {  // 两人都准备好了再开始游戏
+                        if (topicNum < 3) {
                             if (!sendTopicRequest) {
                                 player.input.answer = null;
                                 ws.send(JSON.stringify({
@@ -632,6 +645,7 @@
                     player.input.answer = null
                     player.input.cont = undefined;
                     player.input.pre = undefined;
+                    player.input.exit = undefined;
                 }
     
                 renderer.render(
@@ -652,6 +666,13 @@
                             value.model.helper.update(deltaTime);
                         }
                     }
+                }
+                if (scene.npc) {
+                    scene.npc.forEach((npc) => {
+                        if (npc.helper) {
+                            npc.helper.update(deltaTime);
+                        }
+                    });
                 }
                 if (this.isLoading && screen.warmtextMesh) {
                     this.stopLoading();
@@ -678,6 +699,9 @@
                 let nearFlag = false;
                 let nearstID = null;
                 playerMap.forEach((value, key) => {
+                    if (value == 0 || value == -1) {
+                        return;
+                    }
                     // console.log(key, value);
                     playerPosMap.push([key, value.model.mesh.position]);
                     // console.log(playerPosMap);
@@ -827,54 +851,33 @@
                 this.style.display = 'none';
             });
 
-            let loader2 = new MMDLoader();
-            let helper2 = new MMDAnimationHelper();
             function loadNPC() {
-                
-                loader2.loadWithAnimation('../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx', '../../src/assets/animation/待机动作整理.vmd',(mmd) => {
-                    mmd.mesh.scale.set(0.15, 0.15, 0.15);
-                    helper2.add(mmd.mesh, {
-                        animation: mmd.animation,
-                        physics: false // 是否添加物理效果
-                    });
-                    // 返回加载的模型
-                    // resolve({mmd, helper2});
+                loader.loadModelWithNumber(6, 1).then((mmd) => {
                     mmd.mesh.position.set(20, 0.5, 0);
                     mmd.mesh.rotation.set(0, Math.PI/2, 0);
                     mmd.mesh.castShadow = true;
                     mmd.mesh.receiveShadow = true;
                     scene.add(mmd.mesh);
+                    if (scene.npc == undefined) {
+                        scene.npc = [mmd];
+                    } else {
+                        scene.npc.push(mmd);
+                    }
                 });
-                loader2.loadWithAnimation('../../src/assets/model/螺丝咕姆20231219/螺丝咕姆1.0.pmx', '../../src/assets/animation/待机动作公子.vmd',(mmd) => {
-                    mmd.mesh.scale.set(0.15, 0.15, 0.15);
-                    helper2.add(mmd.mesh, {
-                        animation: mmd.animation,
-                        physics: false // 是否添加物理效果
-                    });
-                    // 返回加载的模型
-                    // resolve({mmd, helper2});
+                loader.loadModelWithNumber(7, 1).then((mmd) => {
                     mmd.mesh.position.set(44, 0.5, 0);
                     mmd.mesh.rotation.set(0, -Math.PI/2, 0);
                     mmd.mesh.castShadow = true;
                     mmd.mesh.receiveShadow = true;
                     scene.add(mmd.mesh);
+                    if (scene.npc == undefined) {
+                        scene.npc = [mmd];
+                    } else {
+                        scene.npc.push(mmd);
+                    }
                 });
-
             }
-            let clock = new THREE.Clock();
-
-
             loadNPC();
-            const animate2 = () => {
-                helper2.update(clock.getDelta());
-                requestAnimationFrame(animate2);
-                renderer.render(
-                    scene,
-                    player.controls.isLocked ? player.camera : orbitCamera
-                );
-                // renderer.render(scene, camera);
-            }
-            animate2();
         },
     };
     </script>

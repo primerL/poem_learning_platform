@@ -3,6 +3,7 @@ package edu.fudan.poetryconference.service.impl;
 import edu.fudan.poetryconference.model.User;
 import edu.fudan.poetryconference.repository.UserRepository;
 import edu.fudan.poetryconference.service.UserService;
+import edu.fudan.poetryconference.vo.UserLoginVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,9 +24,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean checkLogin(String username, String password) {
+    public UserLoginVo checkLogin(String username, String password) {
         User user = userRepository.findByUsername(username);
-        return user != null && passwordEncoder.matches(password, user.getPassword());
+        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+            UserLoginVo userLoginVo = new UserLoginVo();
+            userLoginVo.setUserId(user.getUser_id());
+            userLoginVo.setUsername(user.getUsername());
+            userLoginVo.setModel(user.getModel());
+            return userLoginVo;
+        }
+        return null; // or throw an exception if preferred
     }
 
     @Override

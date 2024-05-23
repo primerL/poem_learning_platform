@@ -50,6 +50,12 @@ request body:
  "username": "newuser",
  "password": "password123",
 }
+response:
+{
+    "userId": 1,
+    "username": "newuser",
+    "model": 1
+}
 ```
 
 #### 过去一周的比赛场数

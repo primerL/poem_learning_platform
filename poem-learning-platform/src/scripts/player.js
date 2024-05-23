@@ -57,7 +57,7 @@ export class Player {
             scene.add(this.model.mesh);
 
             const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
-            this.height = boundingBox.max.y - boundingBox.min.y;
+            this.height = boundingBox.max.y - boundingBox.min.y - 0.2;
         });
 
         this.cameraHelper.visible = false;

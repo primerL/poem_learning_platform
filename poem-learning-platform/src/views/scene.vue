@@ -186,7 +186,7 @@
                         mmd.mesh.rotation.set(0, Math.PI, 0);
                         scene.add(mmd.mesh);
                         const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
-                        const height = boundingBox.max.y - boundingBox.min.y;
+                        const height = boundingBox.max.y - boundingBox.min.y - 0.2;
                         playerMap.set(message.socketId, {model: mmd, modelStill: mmd,height: height});
 
                         loader.loadModelWithNumber(message.modelId, 2).then((mmd) => {
@@ -211,7 +211,7 @@
                         playerMap.set(message.socketId, 0);
                         loader.loadModelWithNumber(message.modelId, 2).then((mmd) => {
                             const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
-                            const height = boundingBox.max.y - boundingBox.min.y;
+                            const height = boundingBox.max.y - boundingBox.min.y - 0.2;
 
                             mmd.mesh.position.set(position.x, position.y - height, position.z);
                             mmd.mesh.rotation.set(rotation.x, rotation.y, rotation.z);

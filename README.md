@@ -127,6 +127,24 @@ response:
 }
 ```
 
+#### 房间相关
+
+roomID以字符串的形式给：room1, room2, room3, room4
+
+```
+进入房间，增加人数
+POST http://localhost:2345/rooms/{roomID}/increment
+response:200 success
+
+离开房间，减少人数
+POST http://localhost:2345/rooms/{roomID}/decrement
+response:200 success
+
+进入前的查询人数：
+GET http://localhost:2345/rooms/{roomID}/count
+response: int
+```
+
 
 
 ### 3D 相关
@@ -155,3 +173,6 @@ response:(string)
  answers: 回答情况
  ```
 
+### Redis
+
+启动了就行

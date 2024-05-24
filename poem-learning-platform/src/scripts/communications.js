@@ -19,7 +19,6 @@ export class Communications {
     this.userDefinedCallbacks = {
       peerJoined: [],
       peerLeft: [],
-      positions: [],
       data: [],
     };
   }
@@ -139,7 +138,7 @@ export class Communications {
         if (id != this.id && !(id in this.peers)) {
           this.peers[id] = {};
           createPeerDOMElements(id);
-          this.callEventCallback("peerJoined", id);
+          this.callEventCallback("peerConnection peerJoined", id);
         }
       } else if (type === "peerDisconnection") {
         if (data != this.id) {

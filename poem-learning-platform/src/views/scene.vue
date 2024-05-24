@@ -174,7 +174,39 @@
                 if (message.type == "login") {
                     if (role == 0) {
                         screen.showWarmText(scene);
+                    } else {
+                        if (message.role != 0 && preNum == 1) {
+                            ws.send(JSON.stringify({
+                                type: "pre",
+                                role: role,
+                                name: name,
+                                room: room
+                            }));
+                        }
                     }
+                    ws.send(JSON.stringify({
+                        type: "position",
+                        position: JSON.stringify(player.position.clone()),
+                        rotation: JSON.stringify(player.model.mesh.rotation.clone()),
+                        role: role,
+                        name: name,
+                        userId: userId,
+                        modelId: modelId,
+                        room: room
+                    }));
+                    // 隔10秒再次发送位置信息
+                    setTimeout(() => {
+                        ws.send(JSON.stringify({
+                            type: "position",
+                            position: JSON.stringify(player.position.clone()),
+                            rotation: JSON.stringify(player.model.mesh.rotation.clone()),
+                            role: role,
+                            name: name,
+                            userId: userId,
+                            modelId: modelId,
+                            room: room
+                        }));
+                    }, 10000);
                     // 导入模型
                     loader.loadModelWithNumber(message.modelId, 1).then((mmd) => {
                         if (message.role == 0) {
@@ -210,7 +242,9 @@
                     const rotation = JSON.parse(message.rotation);
                     
                     if (playerMap.get(message.socketId) == undefined) {
-                        opponentId = message.userId;
+                        if (message.role != 0) {
+                            opponentId = message.userId;
+                        }
                         playerMap.set(message.socketId, 0);
                         loader.loadModelWithNumber(message.modelId, 2).then((mmd) => {
                             const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
@@ -350,6 +384,12 @@
                         
                         scene.remove(playerMap.get(message.socketId).model.mesh);
                         playerMap.set(message.socketId, -1);
+
+                        if (player.pre && !showEnd) {
+                            preNum = 1;
+                        } else {
+                            preNum = 0;
+                        }
                     }
                 }
                 else if(message.type == "flower") {
@@ -616,16 +656,18 @@
                                 }));
                                 // TODO: 结束清空花的数量
                             }
-                            if (player.input.cont == true) {
-                                ws.send(JSON.stringify({
-                                    type: "cont",
-                                    role: role,
-                                    name: name,
-                                    room: room
-                                }));
-                            }
                         }
                     } 
+                    if (showEnd) {
+                        if (player.input.cont == true) {
+                            ws.send(JSON.stringify({
+                                type: "cont",
+                                role: role,
+                                name: name,
+                                room: room
+                            }));
+                        }
+                    }
                     // 接收到答题结果
                     if (preNum == 2) {
                         if (player.input.answer) {

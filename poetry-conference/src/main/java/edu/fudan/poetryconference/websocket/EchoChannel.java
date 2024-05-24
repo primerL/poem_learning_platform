@@ -86,7 +86,7 @@ public class EchoChannel implements ApplicationContextAware {
                     data.put("socketId", this.session.getId());
                     data.put("position", jsonNode.get("position").asText());
                     data.put("rotation", jsonNode.get("rotation").asText());
-                    data.put("role", jsonNode.get("role").asText());
+                    data.put("role", jsonNode.get("role").asLong());
                     data.put("name", jsonNode.get("name").asText());
                     data.put("userId", jsonNode.get("userId").asLong());
                     data.put("modelId", jsonNode.get("modelId").asLong());

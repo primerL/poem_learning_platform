@@ -239,8 +239,7 @@
                     clearTimeout(countdownTimer);
                 }
                 else if (message.type == "cont") {
-                    screen.deleteEnd(scene);
-                    screen = new Screen(scene);
+                    screen.showWarmText(scene);
                     screen.showState(scene, message.role, message.name, false);
                     // 初始化参数
                     preNum = 0;

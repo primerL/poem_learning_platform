@@ -13,22 +13,7 @@ export class Screen {
         this.isState = [false, false];
 
         this.font = new Font();
-        this.loadFontAsync().then(() => {
-            const warmtextGeometry = new TextGeometry('欢迎进入诗词比赛平台，\n等待双方准备完毕后开始比赛！', {
-                font: this.font.font,
-                size: 1.5,
-                depth: 0.001,
-                curveSegments: 12,
-                bevelEnabled: false
-            });
-            const warmtextMesh = new THREE.Mesh(warmtextGeometry, textMaterial);
-            warmtextMesh.position.set(50, 22, 53.5);
-            warmtextMesh.rotation.y = Math.PI;
-            scene.add(warmtextMesh);
-            this.warmtextMesh = warmtextMesh;
-        }).catch(error => {
-            console.error('Failed to load font:', error);
-        });
+        this.showWarmText(scene);
     }
 
     async loadFontAsync() {
@@ -39,14 +24,37 @@ export class Screen {
         }
     }
 
+    async showWarmText(scene) {
+        this.deleteEnd(scene);
+        if (!this.font || !this.font.font) {
+            await this.loadFontAsync();
+        }
+
+        const warmtextGeometry = new TextGeometry('欢迎进入诗词比赛平台，\n等待双方准备完毕后开始比赛！', {
+            font: this.font.font,
+            size: 1.5,
+            depth: 0.001,
+            curveSegments: 12,
+            bevelEnabled: false
+        });
+        const warmtextMesh = new THREE.Mesh(warmtextGeometry, textMaterial);
+        warmtextMesh.position.set(50, 22, 53.5);
+        warmtextMesh.rotation.y = Math.PI;
+        if (!this.warmtextMesh) {
+            scene.add(warmtextMesh);
+            this.warmtextMesh = warmtextMesh;
+        }
+    }
+
     deleteWarmText(scene) {
         scene.remove(this.warmtextMesh);
         this.warmtextMesh = null;
     }
 
     async showTopic(scene, topic) {
-        await this.loadFontAsync();
-
+        if (!this.font || !this.font.font) {
+            await this.loadFontAsync();
+        }
         // 去除所有的'\n'
         topic = topic.map(item => item.replace(/\n/g, ''));
         let topicArray = [];
@@ -157,7 +165,9 @@ export class Screen {
             return;
         }
         this.isState[role - 1] = true;
-        await this.loadFontAsync();
+        if (!this.font || !this.font.font) {
+            await this.loadFontAsync();
+        }
         if (this.stateMesh[role - 1]) {
             scene.remove(this.stateMesh[role - 1]);
         }
@@ -201,12 +211,10 @@ export class Screen {
 
     // 显示一个倒计时
     async showCountDown(scene, countdownTime, topic) {
-        await this.loadFontAsync();
-
         if (this.warmtextMesh) {
             this.deleteWarmText(scene);
             this.deleteState(scene);
-        }
+        } 
         if (this.resultMesh) {
             await this.sleep(3000);
             this.deleteResult(scene);
@@ -214,6 +222,10 @@ export class Screen {
         if (this.topicMesh) {
             this.deleteTopic(scene);
         }
+        if (!this.font || !this.font.font) {
+            await this.loadFontAsync();
+        }
+    
 
         // 循环倒计时
         while (countdownTime >= 0) {
@@ -243,8 +255,9 @@ export class Screen {
     }
 
     async showResult(scene, name, result) {
-        await this.loadFontAsync();
-
+        if (!this.font || !this.font.font) {
+            await this.loadFontAsync();
+        }
         if (this.topicMesh) {
             this.deleteTopic(scene);
         }
@@ -282,11 +295,12 @@ export class Screen {
     }
 
     async showEnd(scene) {
-        await this.loadFontAsync();
-
         if (this.resultMesh) {
             await this.sleep(3000);
             this.deleteResult(scene);
+        }
+        if (!this.font || !this.font.font) {
+            await this.loadFontAsync();
         }
         if (this.topicMesh) {
             this.deleteTopic(scene);
@@ -301,14 +315,16 @@ export class Screen {
         const endMesh = new THREE.Mesh(endGeometry, textMaterial);
         endMesh.position.set(41, 19, 53.5);
         endMesh.rotation.y = Math.PI;
-        scene.add(endMesh);
-        this.endMesh = endMesh;
+        if (!this.endMesh) {
+            this.endMesh = endMesh;
+            scene.add(endMesh);
+        }
     }
 
     deleteEnd(scene) {
         if (this.endMesh) {
             scene.remove(this.endMesh);
             this.endMesh = null;
-        }
+        }        
     }
 }

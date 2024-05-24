@@ -14,6 +14,7 @@ public class WebSocketConfiguration {
 
         // 手动注册 WebSocket 端点
         exporter.setAnnotatedEndpointClasses(EchoChannel.class);
+        exporter.setAnnotatedEndpointClasses(WebRtcChannel.class);
 
         return exporter;
     }

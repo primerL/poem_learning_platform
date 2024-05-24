@@ -8,6 +8,8 @@ export const modelAnimationMapping = [
     ["../../src/assets/animation/待机动作转圈.vmd", "../../src/assets/animation/走路(0-39为一组循环).vmd"],
     ["../../src/assets/animation/待机动作云堇.vmd", "../../src/assets/animation/走路(0-39为一组循环).vmd"],
     ["../../src/assets/animation/待机动作公子.vmd", "../../src/assets/animation/走路(0-39为一组循环).vmd"],
+    ["../../src/assets/animation/待机动作公子.vmd"],  // 这个动作会报错unknown char code 245.
+    ["../../src/assets/animation/待机动作公子.vmd"],
 ]
 
 export const modelPath = [
@@ -15,7 +17,9 @@ export const modelPath = [
     "../../src/assets/model/星穹铁道-罗刹/罗刹.pmx",
     "../../src/assets/model/星穹铁道—李素裳/李素裳1.0.pmx",
     "../../src/assets/model/星穹铁道—驭空/星穹铁道—驭空（改5）.pmx",
-    "../../src/assets/model/星穹铁道—饮月君/星穹铁道—饮月君1708.pmx"
+    "../../src/assets/model/星穹铁道—饮月君/星穹铁道—饮月君1708.pmx",
+    "../../src/assets/model/星穹铁道—阮·梅/阮·梅1.0.pmx",
+    "../../src/assets/model/螺丝咕姆20231219/螺丝咕姆1.0.pmx",
 ]
 
 export class Loader {

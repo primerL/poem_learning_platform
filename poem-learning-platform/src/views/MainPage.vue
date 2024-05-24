@@ -1,8 +1,8 @@
 <template>
     <div class="wrapper">
         <img src="../assets/img/bg2.jpeg" class="side-image right-image" />
-        <div> 
-            <q-btn class="report" style="background: teal; color: white" label="查看学习报告" @click="toPerson()"/>
+        <div>
+            <q-btn class="report" style="background: teal; color: white" label="查看学习报告" @click="toPerson()" />
         </div>
         <div class="background">
             <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/756881/textured_paper_%402X.png" alt="" />
@@ -18,11 +18,22 @@
                             <span class="news-date__txt">{{ newsItem.date.month }}</span>
                         </div>
                         <div class="news__title">{{ newsItem.title }}</div>
-                        <p class="news__txt">{{ newsItem.text }}</p>
-                        <q-btn color="teal-4">
-                            <q-icon left size="3xs" name="map" @click="toScene(newsItem)"/>
-                            <div>参赛</div>
-                        </q-btn>
+                        <!-- <p class="news__txt">{{ newsItem.text }}</p> -->
+                        <div class="news__img">
+                            <img :src="newsItem.image" alt="news" />
+                        </div>
+
+                        <div class="q-pa-md row">
+                            <q-btn color="teal-4">
+                                <q-icon left size="3xs" name="map" @click="toScene(newsItem)" />
+                                <div>参赛</div>
+                            </q-btn>
+                            <q-btn color="white">
+                                <q-icon left size="3xs" name="local_florist" color="teal-4" @click="toAudience(newsItem)"/>
+                                <div class="text-black">观赛</div>
+                            </q-btn>
+                        </div>
+
                     </a>
                 </div>
             </div>
@@ -82,33 +93,27 @@ let swiper;
 const newsItems = ref([
     {
         date: { day: '01', month: 'ROOM' },
-        title: 'Lorem Ipsum Dolor Sit Amed',
+        title: '绿野天穹',
         text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s...",
-        //   image: 'https://res.cloudinary.com/muhammederdem/image/upload/q_60/v1537132205/news-slider/item-2.webp',
+        image: '../../src/assets/img/1.webp'
     },
     {
         date: { day: '02', month: 'ROOM' },
-        title: 'Lorem Ipsum Dolor Sit Amed',
+        title: '烈焰流沙',
         text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s...",
-        //   image: 'https://res.cloudinary.com/muhammederdem/image/upload/q_60/v1537132205/news-slider/item-3.webp',
+        image: '../../src/assets/img/2.webp',
     },
     {
         date: { day: '03', month: 'ROOM' },
-        title: 'Lorem Ipsum Dolor Sit Amed',
+        title: '蓝晶幻境',
         text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s...",
-        //   image: 'https://res.cloudinary.com/muhammederdem/image/upload/q_60/v1537132205/news-slider/item-3.webp',
+        image: '../../src/assets/img/3.webp'
     },
     {
         date: { day: '04', month: 'ROOM' },
-        title: 'Lorem Ipsum Dolor Sit Amed',
+        title: '危机之地',
         text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s...",
-        //   image: 'https://res.cloudinary.com/muhammederdem/image/upload/q_60/v1537132205/news-slider/item-3.webp',
-    },
-    {
-        date: { day: '05', month: 'ROOM' },
-        title: 'Lorem Ipsum Dolor Sit Amed',
-        text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s...",
-        //   image: 'https://res.cloudinary.com/muhammederdem/image/upload/q_60/v1537132205/news-slider/item-3.webp',
+        image: '../../src/assets/img/4.webp'
     },
     // 继续添加其他newsItems...
 ]);
@@ -130,16 +135,20 @@ function toPerson() {
     router.push('/person')
 }
 
-function toScene(newsItem)
-{
+function toScene(newsItem) {
     console.log('toScene')
     console.log(newsItem)
-    let roomId = newsItem.date.day 
+    let roomId = newsItem.date.day
     // roomid从01 转为 1
-    if (roomId[0] == '0') {
-        roomId = roomId[1]
-    }
-    router.push('/scene/' + '1/' +roomId)
+    // if (roomId[0] == '0') {
+    //     roomId = roomId[1]
+    // }
+    // router.push('/scene/' + '1/' + roomId)
+}
+
+function toAudience(newsItem) {
+    console.log('toAudience')
+    // router.push('/audience')
 }
 
 onMounted(() => {
@@ -150,7 +159,7 @@ onMounted(() => {
         centeredSlides: true,
         keyboard: true,
         spaceBetween: 0,
-        slidesPerView: 'auto',
+        slidesPerView: '3',
         speed: 300,
         coverflowEffect: {
             rotate: 0,
@@ -262,7 +271,7 @@ a:hover {
 }
 
 .background {
-    position:fixed;
+    position: fixed;
     width: 100%;
     height: 100%;
     left: 0;
@@ -322,16 +331,16 @@ a:hover {
 
 .report {
     position: absolute;
-    top: 90%;
-    right: 11%;
+    top: 96%;
+    right: 20%;
     transform: translateY(-50%);
     z-index: 20;
 }
 
 .report:after {
     position: absolute;
-    top: 90%;
-    right: 11%;
+    top: 92%;
+    right: 20%;
     transform: translateY(-50%);
     z-index: 20;
 }
@@ -592,7 +601,7 @@ a:hover {
     box-shadow: 0 6px 26px 6px rgba(0, 0, 0, 0.25);
     height: 200px;
     margin-top: 30px;
-    width: 100%;
+    width: 90%;
     transition: all 0.3s;
     transform-origin: 0% 0%;
 }

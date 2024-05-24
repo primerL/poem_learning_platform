@@ -1,18 +1,17 @@
-/*
- *
- * This file exports a class which sets up the Websocket and WebRTC communications for our peer.
- *
- */
 
 export class Communications {
   constructor() {
-    // socket.io
-    this.socket;
+    // WebSocket
+    this.socket = null;
+    this.id = null;
 
-    // array of connected peers
+    // WebSocket 连接状态
+    this.isConnected = false;
+
+    // 已连接的对等方数组
     this.peers = {};
 
-    // Our local media stream (i.e. webcam and microphone stream)
+    // 本地媒体流（即摄像头和麦克风流）
     this.localMediaStream = null;
 
     this.initialize();
@@ -26,29 +25,33 @@ export class Communications {
   }
 
   async initialize() {
-    // first get user media
+    // 首先获取用户媒体
     this.localMediaStream = await this.getLocalMedia();
 
-    // createLocalVideoElement();
+    // 创建本地视频元素
     createPeerDOMElements("local");
     updatePeerDOMElements("local", this.localMediaStream);
 
-    // then initialize socket connection
+    // 初始化 WebSocket 连接
     this.initSocketConnection();
   }
 
-  // add a callback for a given event
+  // 为给定事件添加回调
   on(event, callback) {
-    console.log(`Setting ${event} callback.`);
+    console.log(`设置 ${event} 回调函数.`);
     this.userDefinedCallbacks[event].push(callback);
   }
 
   sendPosition(position) {
-    this.socket?.emit("move", position);
+    // if (this.isConnected) {
+    //   this.socket.send(JSON.stringify({ type: "move", position }));
+    // }
   }
 
   sendData(data) {
-    this.socket?.emit("data", data);
+    if (this.isConnected) {
+      this.socket.send(JSON.stringify({ type: "data", data }));
+    }
   }
 
   callEventCallback(event, data) {
@@ -75,20 +78,21 @@ export class Communications {
     try {
       stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     } catch (err) {
-      console.log("Failed to get user media!");
+      console.log("获取用户媒体失败!");
       console.warn(err);
     }
 
     return stream;
   }
 
-  // temporarily pause the outgoing stream
+  // 暂时暂停外发流
   disableOutgoingStream() {
     this.localMediaStream.getTracks().forEach((track) => {
       track.enabled = false;
     });
   }
-  // enable the outgoing stream
+
+  // 启用外发流
   enableOutgoingStream() {
     this.localMediaStream.getTracks().forEach((track) => {
       track.enabled = true;
@@ -96,112 +100,127 @@ export class Communications {
   }
 
   initSocketConnection() {
-    console.log("Initializing socket.io...");
-    this.socket = io();
+    console.log("初始化 WebSocket...");
+    this.socket = new WebSocket("ws://localhost:2345/rtc?room=1");
 
-    this.socket.on("connect", () => {
-      console.log("My socket ID:", this.socket.id);
-    });
+    this.socket.onopen = () => {
+      console.log("WebSocket 连接已建立.");
+      this.isConnected = true;
+    };
 
-    this.socket.on("data", (data) => {
-      this.callEventCallback("data", data);
-    });
+    this.socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      const { type, data, to, from } = message;
+      console.log("收到消息:", message);
+      console.log("类型:", type);
+      console.log("数据:", data);
 
+      if (type === "data") {
+        this.callEventCallback("data", data);
+      } else if (type === "introduction") {
+        const otherPeerIds = message['peers'];
+        console.log(data)
+        for (let i = 0; i < otherPeerIds.length; i++) {
+          if (otherPeerIds[i] != this.id) {
+            let theirId = otherPeerIds[i];
 
-    this.socket.on("introduction", (otherPeerIds) => {
-      for (let i = 0; i < otherPeerIds.length; i++) {
-        if (otherPeerIds[i] != this.socket.id) {
-          let theirId = otherPeerIds[i];
+            console.log("添加对等方，ID 为 " + theirId);
+            this.peers[theirId] = {};
 
-          console.log("Adding peer with id " + theirId);
-          this.peers[theirId] = {};
+            let pc = this.createPeerConnection(theirId, true);
+            this.peers[theirId].peerConnection = pc;
 
-          let pc = this.createPeerConnection(theirId, true);
-          this.peers[theirId].peerConnection = pc;
-
-          createPeerDOMElements(theirId);
-          this.callEventCallback("peerJoined", theirId);
+            createPeerDOMElements(theirId);
+            this.callEventCallback("peerJoined", theirId);
+          }
         }
+      } else if (type === "peerConnection") {
+        let id = message['id'];
+        if (id != this.id && !(id in this.peers)) {
+          this.peers[id] = {};
+          createPeerDOMElements(id);
+          this.callEventCallback("peerJoined", id);
+        }
+      } else if (type === "peerDisconnection") {
+        if (data != this.id) {
+          this.callEventCallback("peerLeft", data);
+          cleanupPeerDomElements(data);
+          delete this.peers[data];
+        }
+      } else if (type === "signal") {
+        if (to != this.id) {
+          console.log("Socket ID 不匹配");
+        }
+
+        console.log("收到信号，来自", from);
+        console.log("peers:", this.peers);
+
+        let peer = this.peers[from];
+        if (peer.peerConnection) {
+          peer.peerConnection.signal(data);
+        } else {
+          console.log("没有找到正确的 simplepeer 对象");
+          let peerConnection = this.createPeerConnection(from, false);
+
+          this.peers[from].peerConnection = peerConnection;
+
+          peerConnection.signal(data);
+        }
+      } else if (type === "positions") {
+        this.callEventCallback("positions", data);
+      } else if (type === "yourId") {
+        this.id = message['id'];
+        console.log("id:", this.id);
       }
-    });
+    };
 
-    // when a new user has entered the server
-    this.socket.on("peerConnection", (theirId) => {
-      if (theirId != this.socket.id && !(theirId in this.peers)) {
-        this.peers[theirId] = {};
-        createPeerDOMElements(theirId);
-        this.callEventCallback("peerJoined", theirId);
-      }
-    });
+    this.socket.onclose = () => {
+      console.log("WebSocket 连接已关闭.");
+      this.isConnected = false;
+      // 在延迟后尝试重连
+      setTimeout(() => this.initSocketConnection(), 1000);
+    };
 
-    this.socket.on("peerDisconnection", (_id) => {
-      if (_id != this.socket.id) {
-        this.callEventCallback("peerLeft", _id);
-        cleanupPeerDomElements(_id);
-        delete this.peers[_id];
-      }
-    });
-
-    this.socket.on("signal", (to, from, data) => {
-      // console.log("Got a signal from the server: ", to, from, data);
-
-      // to should be us
-      if (to != this.socket.id) {
-        console.log("Socket IDs don't match");
-      }
-
-      // Look for the right simplepeer in our array
-      let peer = this.peers[from];
-      if (peer.peerConnection) {
-        peer.peerConnection.signal(data);
-      } else {
-        console.log("Never found right simplepeer object");
-        // Let's create it then, we won't be the "initiator"
-        // let theirSocketId = from;
-        let peerConnection = this.createPeerConnection(from, false);
-
-        this.peers[from].peerConnection = peerConnection;
-
-        // Tell the new simplepeer that signal
-        peerConnection.signal(data);
-      }
-    });
-
-    // Update when one of the users moves in space
-    this.socket.on("positions", (positions) => {
-      this.callEventCallback("positions", positions);
-    });
+    this.socket.onerror = (error) => {
+      console.log("WebSocket 错误:", error);
+    };
   }
 
-  // this function sets up a peer connection and corresponding DOM elements for a specific peer
+  // 此函数设置对等方连接及相应的 DOM 元素
   createPeerConnection(theirSocketId, isInitiator = false) {
-    console.log("Connecting to peer with ID", theirSocketId);
-    console.log("initiating?", isInitiator);
+    console.log("连接对等方，ID 为", theirSocketId);
+    console.log("是否发起?", isInitiator);
 
+    
     let peerConnection = new SimplePeer({ initiator: isInitiator });
-    // simplepeer generates signals which need to be sent across socket
+    // simplepeer 生成需要通过 socket 发送的信号
     peerConnection.on("signal", (data) => {
-      // console.log('signal');
-      this.socket.emit("signal", theirSocketId, this.socket.id, data);
+      console.log("发送信号")
+      if (this.isConnected) {
+        this.socket.send(JSON.stringify({
+          type: "signal",
+          to: theirSocketId,
+          from: this.id,
+          data
+        }));
+      }
     });
 
-    // When we have a connection, send our stream
+    // 当我们有连接时，发送我们的流
     peerConnection.on("connect", () => {
-      // Let's give them our stream
       peerConnection.addStream(this.localMediaStream);
-      console.log("Send our stream");
+      console.log("发送我们的流");
     });
 
-    // Stream coming in to us
+    // 接收流
     peerConnection.on("stream", (stream) => {
-      console.log("Incoming Stream");
-
+      console.log("接收流");
       updatePeerDOMElements(theirSocketId, stream);
     });
 
     peerConnection.on("close", () => {
-      console.log("Got close event");
-      // Should probably remove from the array of peers
+      console.log("接收到关闭事件");
+      delete this.peers[theirSocketId];
     });
 
     peerConnection.on("error", (err) => {
@@ -212,35 +231,27 @@ export class Communications {
   }
 }
 
-// Utilities 🚂
+// 工具 🚂
 
 function createPeerDOMElements(_id) {
   const videoElement = document.createElement("video");
   videoElement.id = _id + "_video";
   videoElement.autoplay = true;
   videoElement.muted = true;
-  // videoElement.style = "visibility: hidden;";
 
-  // 修改样式
   videoElement.style.width = '120px';
   videoElement.style.height = '90px';
 
-  // document.body.appendChild(videoElement);
   document.getElementById("videoArea").appendChild(videoElement);
 
   let audioEl = document.createElement("audio");
   audioEl.setAttribute("id", _id + "_audio");
   audioEl.controls = "controls";
-  audioEl.volume = 0; // initialize at 0 volume.  This will be set by 3D scene.
+  audioEl.volume = 0; // 初始音量为 0，将由 3D 场景设置
 
-  // 修改样式
   audioEl.style.display = 'none';
 
-  // document.body.appendChild(audioEl);
   document.getElementById("videoArea").appendChild(audioEl);
-
-  // TODO: 挂断
-  // TODO: check多人
 
   audioEl.addEventListener("loadeddata", () => {
     audioEl.play();
@@ -267,7 +278,7 @@ function cleanupPeerDomElements(_id) {
     videoEl.remove();
   }
 
-  let audioEl = document.getElementById(_id + "audio");
+  let audioEl = document.getElementById(_id + "_audio");
   if (audioEl != null) {
     audioEl.remove();
   }

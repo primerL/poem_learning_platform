@@ -1,12 +1,5 @@
-/*
- *
- * This file sets up our web app with 3D scene and communications.
- *
- */
-
 import * as THREE from "three";
 import { Communications } from "./communications.js";
-
 
 // lerp value to be used when interpolating positions and rotations
 let lerpValue = 0;
@@ -20,13 +13,16 @@ let frameCount = 0;
 let peers = {};
 
 function init() {
+  console.log("Initializing WebRTC");
   scene = new THREE.Scene();
 
   communications = new Communications();
 
   communications.on("peerJoined", (id) => {
+    console.log("Peer joined:", id);
     addPeer(id);
   });
+  
   communications.on("peerLeft", (id) => {
     removePeer(id);
   });
@@ -36,7 +32,7 @@ function init() {
   // deal with incoming data
   communications.on("data", (msg) => {
     console.log("Received message:", msg);
-    if (msg.type == "box") {
+    if (msg.type === "box") {
       onNewBox(msg);
     }
   });
@@ -54,13 +50,13 @@ function init() {
 
   //THREE WebGL renderer
   renderer = new THREE.WebGLRenderer({
-    antialiasing: true,
+    antialias: true,
   });
   renderer.setClearColor(new THREE.Color("lightblue"));
   renderer.setSize(width, height);
 
   // add controls:
-//   controls = new FirstPersonControls(scene, camera, renderer);
+  // controls = new FirstPersonControls(scene, camera, renderer);
 
   // add controls for adding boxes on a key press
   // window.addEventListener("keyup", (ev) => {
@@ -105,7 +101,7 @@ function addLights() {
 // Clients 👫
 //////////////////////////////////////////////////////////////////////
 
-// add a client meshes, a video element and  canvas for three.js video texture
+// add a client meshes, a video element and canvas for three.js video texture
 function addPeer(id) {
   let videoElement = document.getElementById(id + "_video");
   let videoTexture = new THREE.VideoTexture(videoElement);
@@ -237,7 +233,7 @@ function update() {
 
   interpolatePositions();
 
-//   controls.update();
+  // controls.update();
 
   renderer.render(scene, camera);
 }

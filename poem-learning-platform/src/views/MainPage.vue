@@ -84,11 +84,13 @@ import Swiper from 'swiper';
 import 'swiper/swiper-bundle.css';
 import $ from 'jquery';
 import { useRouter } from 'vue-router'
+import axios from 'axios';
 
 const router = useRouter()
 
 const itemBg = ref(null);
 let swiper;
+axios.defaults.baseURL = 'http://localhost:2345'
 
 const newsItems = ref([
     {
@@ -137,18 +139,51 @@ function toPerson() {
 
 function toScene(newsItem) {
     console.log('toScene')
-    console.log(newsItem)
+    // console.log(newsItem)
     let roomId = newsItem.date.day
     // roomid从01 转为 1
-    // if (roomId[0] == '0') {
-    //     roomId = roomId[1]
-    // }
+    if (roomId[0] == '0') {
+        roomId = roomId[1]
+    }
     // router.push('/scene/' + '1/' + roomId)
+    console.log('roomId:' ,roomId)
+    axios.get(`/api/rooms/${roomId}/count`).then(res => {
+        console.log(res)
+        let count = res.data
+        if (count == 0)
+        {
+            axios.post(`/api/rooms/${roomId}/increment`).then(res => {
+                console.log(res)
+                router.push('/scene/' + '1/' + roomId)
+            }).catch(err => {
+                console.log(err)
+            })
+        }
+        else if(count == 1)
+        {
+            axios.post(`/api/rooms/${roomId}/increment`).then(res => {
+                console.log(res)
+                router.push('/scene/' + '2/' + roomId)
+            }).catch(err => {
+                console.log(err)
+            })
+        }
+        else if(count == 2)
+            alert('房间已满')
+
+    }).catch(err => {
+        console.log(err)
+    })
 }
 
 function toAudience(newsItem) {
+    let roomId = newsItem.date.day
+    // roomid从01 转为 1
+    if (roomId[0] == '0') {
+        roomId = roomId[1]
+    }
     console.log('toAudience')
-    // router.push('/audience')
+    router.push('/scene/' + '0/' + roomId)
 }
 
 onMounted(() => {

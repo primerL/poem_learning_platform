@@ -38,10 +38,7 @@ public class WebRtcChannel implements ApplicationContextAware {
     }});
 
     private Session session;
-    private static final List<Integer> peers =new ArrayList<>();
-
-
-
+    private static final List<String> peers = Collections.synchronizedList(new ArrayList<>());
 
     private static Map<Integer, LocalDateTime> topicSent = Collections.synchronizedMap(new HashMap<Integer, LocalDateTime>() {{
         put(1, LocalDateTime.now());
@@ -66,14 +63,11 @@ public class WebRtcChannel implements ApplicationContextAware {
         sessions.get(room).add(session);
         LOGGER.info("[webrtc] New session opened: id={}", session.getId());
 
-        peers.add(Integer.parseInt(session.getId()));
+        peers.add(session.getId());
         // 广播新客户端加入
-//        broadcastToRoom(room, createMessage("peerJoined", session.getId()))
         sendToSession(session, createMessage("yourId", session.getId()));
-        broadcastToRoom(room, createMessage("introduction", peers));
-        broadcastToRoom(room, createMessage("peerConnection", session.getId()));
-
-
+        sendToSession(session, createMessage("introduction", peers));
+        broadcastToRoomExceptSender(room, session, createMessage("peerConnection", session.getId()));
     }
 
     @OnMessage
@@ -92,10 +86,6 @@ public class WebRtcChannel implements ApplicationContextAware {
                     String data = jsonNode.get("data").toString();
                     sendSignalMessage(targetId, fromId, data);
                     break;
-//                case "move":
-//                    // 处理位置信息更新
-//                    broadcastToRoom(getRoomId(), message);
-//                    break;
                 case "topic":
                     Integer room = getRoomId();
                     if (room != null) {
@@ -125,7 +115,7 @@ public class WebRtcChannel implements ApplicationContextAware {
             sessions.get(room).remove(this.session);
             LOGGER.info("[webrtc] Session closed: id={}, reason={}", this.session.getId(), closeReason);
             // 在peers中删除离开的客户端
-            peers.remove(Integer.parseInt(this.session.getId()));
+            peers.remove(this.session.getId());
             broadcastToRoom(room, createMessage("peerLeft", this.session.getId()));
         }
     }
@@ -160,8 +150,8 @@ public class WebRtcChannel implements ApplicationContextAware {
         return String.format("{\"type\": \"%s\", \"from\": \"%s\", \"data\": %s}", type, from, data);
     }
 
-    private String createMessage(String type, List<Integer> peers) {
-        return String.format("{\"type\": \"%s\", \"peers\": %s}", type, peers);
+    private String createMessage(String type, List<String> peers) {
+        return String.format("{\"type\": \"%s\", \"peers\": %s}", type, peers.toString());
     }
 
     private String createMessage(String type, String id) {
@@ -182,6 +172,18 @@ public class WebRtcChannel implements ApplicationContextAware {
                 session.getBasicRemote().sendText(message);
             } catch (IOException e) {
                 LOGGER.error("Error broadcasting message to session {}", session.getId(), e);
+            }
+        }
+    }
+
+    private void broadcastToRoomExceptSender(Integer room, Session sender, String message) {
+        for (Session session : sessions.get(room)) {
+            if (!session.getId().equals(sender.getId())) {
+                try {
+                    session.getBasicRemote().sendText(message);
+                } catch (IOException e) {
+                    LOGGER.error("Error broadcasting message to session {}", session.getId(), e);
+                }
             }
         }
     }

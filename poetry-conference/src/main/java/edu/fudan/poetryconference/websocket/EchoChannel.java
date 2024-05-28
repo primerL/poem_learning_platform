@@ -8,6 +8,7 @@ import edu.fudan.poetryconference.model.ContestResult;
 import edu.fudan.poetryconference.service.AnswersService;
 import edu.fudan.poetryconference.service.ContestResultService;
 import edu.fudan.poetryconference.service.QuestionService;
+import edu.fudan.poetryconference.service.RoomService;
 import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
@@ -159,6 +160,8 @@ public class EchoChannel implements ApplicationContextAware {
                     data.put("type", "logout");
                     data.put("socketId", this.session.getId());
                     Integer room = jsonNode.get("room").asInt();
+                    RoomService roomService = EchoChannel.applicationContext.getBean(RoomService.class);
+                    roomService.decrementRoomCount("room" + jsonNode.get("room").asInt());
                     broadcast(objectMapper.writeValueAsString(data), this.session.getId(), room);
                     sessions.get(room).remove(this.session);
                 }
@@ -215,9 +218,13 @@ public class EchoChannel implements ApplicationContextAware {
                 break;
             }
         }
+
+        RoomService roomService = EchoChannel.applicationContext.getBean(RoomService.class);
+        roomService.decrementRoomCount("room" + room);
         try {
             broadcast(objectMapper.writeValueAsString(data), this.session.getId(), room);
         } catch (IOException e) {
+
             throw new RuntimeException(e);
         }
         sessions.get(room).remove(this.session);

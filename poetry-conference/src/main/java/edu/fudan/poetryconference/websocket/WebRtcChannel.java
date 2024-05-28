@@ -117,6 +117,7 @@ public class WebRtcChannel implements ApplicationContextAware {
             // 在peers中删除离开的客户端
             peers.remove(this.session.getId());
             broadcastToRoom(room, createMessage("peerLeft", this.session.getId()));
+
         }
     }
 

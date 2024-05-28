@@ -146,13 +146,15 @@ function toScene(newsItem) {
         roomId = roomId[1]
     }
     // router.push('/scene/' + '1/' + roomId)
+    let room = 'room' + roomId
+    // room = 'room' + roomId
     console.log('roomId:' ,roomId)
-    axios.get(`/api/rooms/${roomId}/count`).then(res => {
+    axios.get(`/api/rooms/${room}/count`).then(res => {
         console.log(res)
         let count = res.data
         if (count == 0)
         {
-            axios.post(`/api/rooms/${roomId}/increment`).then(res => {
+            axios.post(`/api/rooms/${room}/increment`).then(res => {
                 console.log(res)
                 router.push('/scene/' + '1/' + roomId)
             }).catch(err => {
@@ -161,7 +163,7 @@ function toScene(newsItem) {
         }
         else if(count == 1)
         {
-            axios.post(`/api/rooms/${roomId}/increment`).then(res => {
+            axios.post(`/api/rooms/${room}/increment`).then(res => {
                 console.log(res)
                 router.push('/scene/' + '2/' + roomId)
             }).catch(err => {

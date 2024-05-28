@@ -116,8 +116,7 @@ public class WebRtcChannel implements ApplicationContextAware {
             LOGGER.info("[webrtc] Session closed: id={}, reason={}", this.session.getId(), closeReason);
             // 在peers中删除离开的客户端
             peers.remove(this.session.getId());
-            broadcastToRoom(room, createMessage("peerLeft", this.session.getId()));
-
+            broadcastToRoom(room, createMessage("peerDisconnection", this.session.getId()));
         }
     }
 
@@ -152,7 +151,14 @@ public class WebRtcChannel implements ApplicationContextAware {
     }
 
     private String createMessage(String type, List<String> peers) {
-        return String.format("{\"type\": \"%s\", \"peers\": %s}", type, peers.toString());
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String peersJson = objectMapper.writeValueAsString(peers);
+            return String.format("{\"type\": \"%s\", \"peers\": %s}", type, peersJson);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("创建 JSON 消息时出错", e);
+            return null;
+        }
     }
 
     private String createMessage(String type, String id) {

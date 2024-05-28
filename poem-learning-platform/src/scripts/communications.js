@@ -18,6 +18,7 @@ export class Communications {
 
     this.userDefinedCallbacks = {
       peerJoined: [],
+      positions: [],
       peerLeft: [],
       data: [],
     };
@@ -54,15 +55,17 @@ export class Communications {
   }
 
   callEventCallback(event, data) {
+    console.log(data)
+    console.log(event)
     this.userDefinedCallbacks[event].forEach((callback) => {
       callback(data);
     });
   }
 
   async getLocalMedia() {
-    const videoWidth = 80;
-    const videoHeight = 60;
-    const videoFrameRate = 15;
+    const videoWidth = 180;
+    const videoHeight = 160;
+    const videoFrameRate = 50;
     let mediaConstraints = {
       audio: true,
       video: {
@@ -141,10 +144,12 @@ export class Communications {
           this.callEventCallback("peerConnection peerJoined", id);
         }
       } else if (type === "peerDisconnection") {
-        if (data != this.id) {
-          this.callEventCallback("peerLeft", data);
-          cleanupPeerDomElements(data);
-          delete this.peers[data];
+        console.log("对等方断开连接");
+        let id = message['id'];
+        if (id != this.id) {
+          this.callEventCallback("peerLeft", id);
+          cleanupPeerDomElements(id);
+          delete this.peers[id];
         }
       } else if (type === "signal") {
         if (to != this.id) {

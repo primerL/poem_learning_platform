@@ -895,7 +895,7 @@
 
             function loadNPC() {
                 loader.loadModelWithNumber(6, 1).then((mmd) => {
-                    mmd.mesh.position.set(20, 0.5, 0);
+                    mmd.mesh.position.set(20, 0.5, 1);
                     mmd.mesh.rotation.set(0, Math.PI/2, 0);
                     mmd.mesh.castShadow = true;
                     mmd.mesh.receiveShadow = true;
@@ -907,7 +907,7 @@
                     }
                 });
                 loader.loadModelWithNumber(7, 1).then((mmd) => {
-                    mmd.mesh.position.set(44, 0.5, 0);
+                    mmd.mesh.position.set(44, 0.5, 1);
                     mmd.mesh.rotation.set(0, -Math.PI/2, 0);
                     mmd.mesh.castShadow = true;
                     mmd.mesh.receiveShadow = true;

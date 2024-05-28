@@ -149,7 +149,9 @@ const grassMaterial = [grassMaterial1, grassMaterial4, grassMaterial3, grassMate
 const airWallMaterial = new THREE.MeshBasicMaterial({ wireframe: true });
 const screenMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
 const npcGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1.75, 16);
-const npcMaterial = new THREE.MeshBasicMaterial({ wireframe: true });
+const npcMaterial = new THREE.MeshBasicMaterial({
+    visible: false,
+});
 const arenaMaterial1 = [
     new THREE.MeshLambertMaterial({map: textures.grey}),
     new THREE.MeshLambertMaterial({map: textures.grey}),

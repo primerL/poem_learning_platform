@@ -256,7 +256,7 @@ onMounted(() => {
   clock = new THREE.Clock();
   loader = new MMDLoader();
   helper = new MMDAnimationHelper();
-  gui = new GUI();
+//   gui = new GUI();
   camera = new THREE.PerspectiveCamera(
     45,
     window.innerWidth / window.innerHeight,
@@ -330,17 +330,17 @@ onMounted(() => {
     floor.position.z = -200;
     floor.rotation.x = floor.position.y;
     scene.add(floor);
-    const modelFolder = gui.addFolder("背景");
-    const modelParams = { x: 0, y: 0, z: 0 };
-    modelFolder.add(modelParams, "x", -2000, 2000).onChange(() => {
-      floor.position.x = modelParams.x;
-    });
-    modelFolder.add(modelParams, "y", -2000, 2000).onChange(() => {
-      floor.position.y = modelParams.y;
-    });
-    modelFolder.add(modelParams, "z", -2000, 2000).onChange(() => {
-      floor.position.z = modelParams.z;
-    });
+    // const modelFolder = gui.addFolder("背景");
+    // const modelParams = { x: 0, y: 0, z: 0 };
+    // modelFolder.add(modelParams, "x", -2000, 2000).onChange(() => {
+    //   floor.position.x = modelParams.x;
+    // });
+    // modelFolder.add(modelParams, "y", -2000, 2000).onChange(() => {
+    //   floor.position.y = modelParams.y;
+    // });
+    // modelFolder.add(modelParams, "z", -2000, 2000).onChange(() => {
+    //   floor.position.z = modelParams.z;
+    // });
   });
 
   loader.loadWithAnimation(
@@ -356,17 +356,17 @@ onMounted(() => {
         animation: mmd.animation,
         physics: false,
       });
-      const modelFolder = gui.addFolder("人物");
-      const modelParams = { x: 0, y: 0, z: 0 };
-      modelFolder.add(modelParams, "x", -200, 200).onChange(() => {
-        mesh.position.x = modelParams.x;
-      });
-      modelFolder.add(modelParams, "y", -200, 200).onChange(() => {
-        mesh.position.y = modelParams.y;
-      });
-      modelFolder.add(modelParams, "z", -200, 200).onChange(() => {
-        mesh.position.z = modelParams.z;
-      });
+    //   const modelFolder = gui.addFolder("人物");
+    //   const modelParams = { x: 0, y: 0, z: 0 };
+    //   modelFolder.add(modelParams, "x", -200, 200).onChange(() => {
+    //     mesh.position.x = modelParams.x;
+    //   });
+    //   modelFolder.add(modelParams, "y", -200, 200).onChange(() => {
+    //     mesh.position.y = modelParams.y;
+    //   });
+    //   modelFolder.add(modelParams, "z", -200, 200).onChange(() => {
+    //     mesh.position.z = modelParams.z;
+    //   });
     },
     (xhr) => {
       console.log((xhr.loaded / xhr.total) * 100 + "% loaded");

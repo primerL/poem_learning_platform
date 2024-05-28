@@ -8,10 +8,12 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface AnswersRepository extends JpaRepository<Answers, Integer> {
-    @Query(value = "SELECT * FROM Answers a WHERE a.user_id = :userId AND " +
-            "a.review_times = (SELECT MIN(subA.review_times) FROM Answers subA WHERE subA.question_id = a.question_id AND subA.user_id = :userId) AND " +
-            "a.answer_date = (SELECT MAX(subA.answer_date) FROM Answers subA WHERE subA.question_id = a.question_id AND subA.user_id = :userId AND subA.review_times = a.review_times) " +
-            "LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT * FROM Answers a WHERE a.id = ( " +
+            "SELECT subA.id FROM Answers subA " +
+            "WHERE subA.user_id = :userId " +
+            "ORDER BY subA.review_times ASC " +
+            "LIMIT 1) ",
+            nativeQuery = true)
     Answers findLeastReviewedQuestionForUser(@Param("userId") Long userId);
 
     @Modifying

@@ -78,7 +78,7 @@
             let isStill = true; // 是否静止
 
             let nearPlayerID; // 最近的玩家
-            let mySocketID;
+            let socketId = "";
 
             // 显示性能监控（FPS）
             const stats = new Stats();
@@ -155,7 +155,7 @@
 
             // 存储玩家 socketid和模型的映射
             const playerMap = new Map();
-            const ws = new WebSocket(`ws://localhost:2345/ws?room=${room}`);
+            let ws = new WebSocket(`ws://localhost:2345/ws?room=${room}`);
             let isSending = false; // 用于标记是否正在发送消息
             ws.onopen = function(event) {
                 const loginObject = {
@@ -164,38 +164,30 @@
                     name: name,
                     userId: userId,
                     modelId: modelId,
-                    room: room
+                    room: room,
                 }
                 ws.send(JSON.stringify(loginObject));                
             };
             ws.onmessage = function(event) {
                 // console.log("Received message: ", event.data);
                 const message = JSON.parse(event.data);
-                if (message.type == "login") {
-                    if (role == 0) {
-                        screen.showWarmText(scene);
-                    } else {
-                        if (message.role != 0 && preNum == 1) {
-                            ws.send(JSON.stringify({
-                                type: "pre",
-                                role: role,
-                                name: name,
-                                room: room
-                            }));
+                if (message.type == "socketId") {
+                    socketId = message.socketId;
+                }
+                else if (message.type == "login") {
+                    {
+                        if (role == 0) {
+                            screen.showWarmText(scene);
+                        } else {
+                            if (message.role != 0 && preNum == 1) {
+                                ws.send(JSON.stringify({
+                                    type: "pre",
+                                    role: role,
+                                    name: name,
+                                    room: room
+                                }));
+                            }
                         }
-                    }
-                    ws.send(JSON.stringify({
-                        type: "position",
-                        position: JSON.stringify(player.position.clone()),
-                        rotation: JSON.stringify(player.model.mesh.rotation.clone()),
-                        role: role,
-                        name: name,
-                        userId: userId,
-                        modelId: modelId,
-                        room: room
-                    }));
-                    // 隔10秒再次发送位置信息
-                    setTimeout(() => {
                         ws.send(JSON.stringify({
                             type: "position",
                             position: JSON.stringify(player.position.clone()),
@@ -206,36 +198,49 @@
                             modelId: modelId,
                             room: room
                         }));
-                    }, 10000);
-                    // 导入模型
-                    loader.loadModelWithNumber(message.modelId, 1).then((mmd) => {
-                        if (message.role == 0) {
-                            mmd.mesh.position.set(32, 16, 60);
-                        } else if (message.role == 1) {
-                            mmd.mesh.position.set(17, 16, 60);
-                            opponentId = message.userId;
-                        } else if (message.role == 2) {
-                            mmd.mesh.position.set(46, 16, 60);
-                            opponentId = message.userId;
-                        }
-                        mmd.mesh.rotation.set(0, Math.PI, 0);
-                        scene.add(mmd.mesh);
-                        const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
-                        const height = boundingBox.max.y - boundingBox.min.y - 0.2;
-                        playerMap.set(message.socketId, {model: mmd, modelStill: mmd,height: height});
-
-                        loader.loadModelWithNumber(message.modelId, 2).then((mmd) => {
-                            let data = playerMap.get(message.socketId);
-                            if (data == -1) {
-                                return;
+                        // 隔20秒再次发送位置信息（xby:: 在我的电脑上现在不会报错）
+                        setTimeout(() => {
+                            ws.send(JSON.stringify({
+                                type: "position",
+                                position: JSON.stringify(player.position.clone()),
+                                rotation: JSON.stringify(player.model.mesh.rotation.clone()),
+                                role: role,
+                                name: name,
+                                userId: userId,
+                                modelId: modelId,
+                                room: room
+                            }));
+                        }, 20000);
+                        // 导入模型
+                        loader.loadModelWithNumber(message.modelId, 1).then((mmd) => {
+                            if (message.role == 0) {
+                                mmd.mesh.position.set(32, 16, 60);
+                            } else if (message.role == 1) {
+                                mmd.mesh.position.set(17, 16, 60);
+                                opponentId = message.userId;
+                            } else if (message.role == 2) {
+                                mmd.mesh.position.set(46, 16, 60);
+                                opponentId = message.userId;
                             }
-                            data.modelWalk = mmd;
-                            playerMap.set(message.socketId, data);
+                            mmd.mesh.rotation.set(0, Math.PI, 0);
+                            scene.add(mmd.mesh);
+                            const boundingBox = new THREE.Box3().setFromObject(mmd.mesh);
+                            const height = boundingBox.max.y - boundingBox.min.y - 0.2;
+                            playerMap.set(message.socketId, {model: mmd, modelStill: mmd,height: height});
+
+                            loader.loadModelWithNumber(message.modelId, 2).then((mmd) => {
+                                let data = playerMap.get(message.socketId);
+                                if (data == -1) {
+                                    return;
+                                }
+                                data.modelWalk = mmd;
+                                playerMap.set(message.socketId, data);
+                            });
                         });
-                    });
-                    // 显示状态
-                    screen.showState(scene, message.role, message.name, false);
-                    // TODO: 如果房间内初始有花
+                        // 显示状态
+                        screen.showState(scene, message.role, message.name, false);
+                        // TODO: 如果房间内初始有花
+                    }
                 }
                 else if (message.type == "position") {
                     const position = JSON.parse(message.position);

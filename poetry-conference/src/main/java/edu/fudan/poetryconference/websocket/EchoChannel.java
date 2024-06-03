@@ -44,19 +44,21 @@ public class EchoChannel implements ApplicationContextAware {
 
     private Session session;
 
-    private static Map<Integer, LocalDateTime> topicSent = Collections.synchronizedMap(new HashMap<Integer, LocalDateTime>() {{
+    private static final Map<Integer, LocalDateTime> topicSent = Collections.synchronizedMap(new HashMap<Integer, LocalDateTime>() {{
         put(1, LocalDateTime.now());
         put(2, LocalDateTime.now());
         put(3, LocalDateTime.now());
         put(4, LocalDateTime.now());
     }});
 
-    private static Map<Integer, Boolean> endSent = Collections.synchronizedMap(new HashMap<Integer, Boolean>() {{
+    private static final Map<Integer, Boolean> endSent = Collections.synchronizedMap(new HashMap<Integer, Boolean>() {{
         put(1, false);
         put(2, false);
         put(3, false);
         put(4, false);
     }});
+
+    private static Map<String, Integer> socketIdToRole = Collections.synchronizedMap(new HashMap<String, Integer>());
 
     @OnMessage
     public void onMessage(String message) throws IOException {
@@ -69,17 +71,32 @@ public class EchoChannel implements ApplicationContextAware {
             JsonNode typeNode = jsonNode.get("type");
             if (typeNode != null) {
                 String type = typeNode.asText();
-                LOGGER.info("{} [websocket] Received message type: {}", this.session.getId(), type);
+                if (!Objects.equals(type, "position")) {
+                    LOGGER.info("{} [websocket] Received message type: {}", this.session.getId(), type);
+                }
 
                 if ("login".equals(type)) {
+                    Integer role = jsonNode.get("role").asInt();
+                    String socketId = this.session.getId();
+                    if (role != 0) {
+                        socketIdToRole.put(socketId, role);
+                        RoomService roomService = EchoChannel.applicationContext.getBean(RoomService.class);
+                        roomService.incrementRoomCount("room" + jsonNode.get("room").asInt(), role);
+                    }
+
                     Map<String, Object> data = new HashMap<>();
                     data.put("type", "login");
-                    data.put("socketId", this.session.getId());
-                    data.put("role", jsonNode.get("role").asText());
+                    data.put("socketId", socketId);
+                    data.put("role", role);
                     data.put("name", jsonNode.get("name").asText());
                     data.put("userId", jsonNode.get("userId").asLong());
                     data.put("modelId", jsonNode.get("modelId").asLong());
                     broadcast(objectMapper.writeValueAsString(data), this.session.getId(), jsonNode.get("room").asInt());
+                    // 单独传一个socketId给新登录的用户
+                    Map<String, Object> data2 = new HashMap<>();
+                    data2.put("type", "socketId");
+                    data2.put("socketId", socketId);
+                    this.session.getBasicRemote().sendText(objectMapper.writeValueAsString(data2));
                 }
                 else if ("position".equals(type)) {
                     Map<String, Object> data = new HashMap<>();
@@ -114,12 +131,18 @@ public class EchoChannel implements ApplicationContextAware {
                     broadcast(objectMapper.writeValueAsString(data), this.session.getId(), jsonNode.get("room").asInt());
                 }
                 else if ("topic".equals(type)) {
+                    int roomId = jsonNode.get("room").asInt();
                     // 两次发送题目间隔至少 5 秒
-                    LocalDateTime lastSent = topicSent.get(jsonNode.get("room").asInt());
-                    if (LocalDateTime.now().isBefore(lastSent.plusSeconds(5))) {
-                        return;
+                    synchronized (topicSent) {
+                        LocalDateTime lastSent = topicSent.get(roomId);
+
+                        if (lastSent != null && LocalDateTime.now().isBefore(lastSent.plusSeconds(5))) {
+                            return;
+                        }
+
+                        topicSent.put(roomId, LocalDateTime.now());
                     }
-                    topicSent.put(jsonNode.get("room").asInt(), LocalDateTime.now());
+                    topicSent.put(roomId, LocalDateTime.now());
                     QuestionService questionService = EchoChannel.applicationContext.getBean(QuestionService.class);
                     broadcast(questionService.getQuestion(), "", jsonNode.get("room").asInt());
                 }
@@ -155,16 +178,16 @@ public class EchoChannel implements ApplicationContextAware {
                     broadcast(objectMapper.writeValueAsString(data), this.session.getId(), jsonNode.get("room").asInt());
                     endSent.put(jsonNode.get("room").asInt(), false);
                 }
-                else if ("logout".equals(type)) {
-                    Map<String, Object> data = new HashMap<>();
-                    data.put("type", "logout");
-                    data.put("socketId", this.session.getId());
-                    Integer room = jsonNode.get("room").asInt();
-                    RoomService roomService = EchoChannel.applicationContext.getBean(RoomService.class);
-                    roomService.decrementRoomCount("room" + jsonNode.get("room").asInt());
-                    broadcast(objectMapper.writeValueAsString(data), this.session.getId(), room);
-                    sessions.get(room).remove(this.session);
-                }
+//                else if ("logout".equals(type)) {
+//                    Map<String, Object> data = new HashMap<>();
+//                    data.put("type", "logout");
+//                    data.put("socketId", this.session.getId());
+//                    Integer room = jsonNode.get("room").asInt();
+//                    RoomService roomService = EchoChannel.applicationContext.getBean(RoomService.class);
+//                    roomService.decrementRoomCount("room" + jsonNode.get("room").asInt());
+//                    broadcast(objectMapper.writeValueAsString(data), this.session.getId(), room);
+//                    sessions.get(room).remove(this.session);
+//                }
                 else if("flower".equals(type)) {
                     //
                     Map<String, Object> data = new HashMap<>();
@@ -205,9 +228,10 @@ public class EchoChannel implements ApplicationContextAware {
 
     @OnClose
     public void onClose(CloseReason closeReason) {
+        String socketId = this.session.getId();
         Map<String, Object> data = new HashMap<>();
         data.put("type", "logout");
-        data.put("socketId", this.session.getId());
+        data.put("socketId", socketId);
         ObjectMapper objectMapper = new ObjectMapper();
         Integer room = 0;
         // 遍历所有房间，找到并删除当前会话
@@ -220,15 +244,15 @@ public class EchoChannel implements ApplicationContextAware {
         }
 
         RoomService roomService = EchoChannel.applicationContext.getBean(RoomService.class);
-        roomService.decrementRoomCount("room" + room);
+        roomService.decrementRoomCount("room" + room, socketIdToRole.get(socketId));
+        socketIdToRole.remove(this.session.getId());
         try {
-            broadcast(objectMapper.writeValueAsString(data), this.session.getId(), room);
+            broadcast(objectMapper.writeValueAsString(data), socketId, room);
         } catch (IOException e) {
-
             throw new RuntimeException(e);
         }
         sessions.get(room).remove(this.session);
-        LOGGER.info("[websocket] Session closed: id={}, reason={}", this.session.getId(), closeReason);
+        LOGGER.info("[websocket] Session closed: id={}, reason={}", socketId, closeReason);
     }
 
     @OnError

@@ -203,7 +203,7 @@ function loadMMDwithAnimation(
     }
   );
 
-  directionalLight.intensity = directionalLight_intensity;
+  // directionalLight.intensity = directionalLight_intensity;
 
   directionalLight.target.updateMatrixWorld();
   helper.update();

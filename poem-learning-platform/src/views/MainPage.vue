@@ -154,21 +154,11 @@ function toScene(newsItem) {
         let count = res.data
         if (count == 0)
         {
-            axios.post(`/api/rooms/${room}/increment`).then(res => {
-                console.log(res)
-                router.push('/scene/' + '1/' + roomId)
-            }).catch(err => {
-                console.log(err)
-            })
+            router.push('/scene/' + '1/' + roomId)
         }
         else if(count == 1)
         {
-            axios.post(`/api/rooms/${room}/increment`).then(res => {
-                console.log(res)
-                router.push('/scene/' + '2/' + roomId)
-            }).catch(err => {
-                console.log(err)
-            })
+            router.push('/scene/' + '2/' + roomId)
         }
         else if(count == 2)
             alert('房间已满')

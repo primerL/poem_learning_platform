@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Service
 public class RoomServiceImpl implements RoomService {
     @Autowired
@@ -22,21 +25,42 @@ public class RoomServiceImpl implements RoomService {
     }
 
     public void clearRoomCounts() {
+        List<Boolean> initialState = Arrays.asList(false, false);
         for (String roomId : ROOM_IDS) {
-            redisTemplate.opsForValue().set(ROOM_COUNT_PREFIX + roomId, 0);
+            redisTemplate.opsForValue().set(ROOM_COUNT_PREFIX + roomId, initialState);
         }
     }
 
-    public void incrementRoomCount(String roomId) {
-        redisTemplate.opsForValue().increment(ROOM_COUNT_PREFIX + roomId);
+    public void incrementRoomCount(String roomId, int role) {
+        String key = ROOM_COUNT_PREFIX + roomId;
+        List<Boolean> roomCount = (List<Boolean>) redisTemplate.opsForValue().get(key);
+        if (roomCount != null) {
+            roomCount.set(role - 1, true);
+            redisTemplate.opsForValue().set(key, roomCount);
+        }
     }
 
-    public void decrementRoomCount(String roomId) {
-        redisTemplate.opsForValue().decrement(ROOM_COUNT_PREFIX + roomId);
+    public void decrementRoomCount(String roomId, int role) {
+        String key = ROOM_COUNT_PREFIX + roomId;
+        List<Boolean> roomCount = (List<Boolean>) redisTemplate.opsForValue().get(key);
+        if (roomCount != null) {
+            roomCount.set(role - 1, false);
+            redisTemplate.opsForValue().set(key, roomCount);
+        }
     }
 
     public int getRoomCount(String roomId) {
-        Integer count = (Integer) redisTemplate.opsForValue().get(ROOM_COUNT_PREFIX + roomId);
-        return count == null ? 0 : count;
+        String key = ROOM_COUNT_PREFIX + roomId;
+        List<Boolean> roomCount = (List<Boolean>) redisTemplate.opsForValue().get(key);
+        if (roomCount != null) {
+            if (!roomCount.get(0)){
+                return 0;
+            }
+            if (!roomCount.get(1)){
+                return 1;
+            }
+            return 2;
+        }
+        return 0;
     }
 }

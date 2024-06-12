@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: ai-chat-service
+
+server:
+  port: 8085
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.springframework.boot.autoconfigure.logging: INFO
+    com.netflix.discovery: DEBUG
+    org.springframework.cloud: DEBUG

@@ -1,0 +1,37 @@
+server:
+  port: 2345
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/users/**
+        - id: poem-service-route
+          uri: lb://POEM-SERVICE
+          predicates:
+            - Path=/api/poem/**, /ws/**
+        - id: ai-chat-service
+          uri: lb://AI-CHAT-SERVICE
+          predicates:
+            - Path=/api/chat/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: DEBUG

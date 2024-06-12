@@ -90,7 +90,7 @@ const router = useRouter()
 
 const itemBg = ref(null);
 let swiper;
-axios.defaults.baseURL = 'http://localhost:2345'
+axios.defaults.baseURL = 'http://localhost:2346'
 
 const newsItems = ref([
     {
@@ -149,7 +149,7 @@ function toScene(newsItem) {
     let room = 'room' + roomId
     // room = 'room' + roomId
     console.log('roomId:' ,roomId)
-    axios.get(`/api/rooms/${room}/count`).then(res => {
+    axios.get(`/api/poem/${room}/count`).then(res => {
         console.log(res)
         let count = res.data
         if (count == 0)

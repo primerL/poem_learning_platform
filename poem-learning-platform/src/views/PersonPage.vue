@@ -153,7 +153,7 @@ import axios from 'axios';
 
 const value = ref('81%')
 const layout = ref(false)
-axios.defaults.baseURL = "http://localhost:2345";
+axios.defaults.baseURL = "http://localhost:2346";
 const userId = localStorage.getItem('userId')
 const carousel = ref(false)
 const slide = ref(1)
@@ -162,12 +162,12 @@ const question = ref(null)
 const options = ref([])
 const answer = ref(null)
 const explanation = ref(null)
-axios.defaults.baseURL = 'http://localhost:2345'
+axios.defaults.baseURL = 'http://localhost:2346'
 
 function toReview() {
     // layout.value = true
 
-    axios.get(`/api/question/review/${userId}`).then(res => {
+    axios.get(`/api/poem/review/${userId}`).then(res => {
         console.log(res.data)
         let data = res.data
         if (data['questionId'] == null) {
@@ -185,7 +185,7 @@ function toReview() {
             let message = "题目是"+ question.value.toString() + "正确选项是" + ans.toString()
             let m = "你好"
             console.log(message)
-            axios.get(`/api/review/explain?message=${message}`).then(res => {
+            axios.get(`/api/chat/review/explain?message=${message}`).then(res => {
                 explanation.value = res.data
                 console.log(explanation.value)
              }).catch(err => {

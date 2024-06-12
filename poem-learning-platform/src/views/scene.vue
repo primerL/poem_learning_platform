@@ -155,7 +155,7 @@
 
             // 存储玩家 socketid和模型的映射
             const playerMap = new Map();
-            let ws = new WebSocket(`ws://localhost:2345/ws?room=${room}`);
+            let ws = new WebSocket(`ws://localhost:2346/ws?room=${room}`);
             let isSending = false; // 用于标记是否正在发送消息
             ws.onopen = function(event) {
                 const loginObject = {
@@ -795,7 +795,7 @@
                 const message = inputElement.value;
                 console.log(message);
                 // TODO: 直接接api，不经过后端
-                const url = "http://localhost:2345/api/chat?message=" + encodeURIComponent(message);
+                const url = "http://localhost:2346/api/chat?message=" + encodeURIComponent(message);
                 fetch(url)
                     .then(response => response.text())
                     .then(data => {

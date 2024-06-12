@@ -18,7 +18,7 @@ spring:
         - id: poem-service-route
           uri: lb://POEM-SERVICE
           predicates:
-            - Path=/api/poem/**, /ws/**
+            - Path=/api/poem/**, /ws/**, /rtc/**
         - id: ai-chat-service
           uri: lb://AI-CHAT-SERVICE
           predicates:

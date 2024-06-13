@@ -167,7 +167,7 @@ axios.defaults.baseURL = 'http://localhost:2345'
 function toReview() {
     // layout.value = true
 
-    axios.get(`/api/question/review/${userId}`).then(res => {
+    axios.get(`/api/poem/review/${userId}`).then(res => {
         console.log(res.data)
         let data = res.data
         if (data['questionId'] == null) {

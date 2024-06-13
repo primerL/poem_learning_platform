@@ -80,8 +80,8 @@ public class EchoChannel implements ApplicationContextAware {
                     String socketId = this.session.getId();
                     if (role != 0) {
                         socketIdToRole.put(socketId, role);
-                        RoomService roomService = EchoChannel.applicationContext.getBean(RoomService.class);
-                        roomService.incrementRoomCount("room" + jsonNode.get("room").asInt(), role);
+                        //RoomService roomService = EchoChannel.applicationContext.getBean(RoomService.class);
+                        //roomService.incrementRoomCount("room" + jsonNode.get("room").asInt(), role);
                     }
 
                     Map<String, Object> data = new HashMap<>();

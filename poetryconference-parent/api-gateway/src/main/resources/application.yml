@@ -13,8 +13,6 @@ spring:
             allowedOrigins: "*"
             allowedHeaders: "*"
             allowedMethods: "*"
-      default-filters:
-      - DedupeResponseHeader=Vary Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
       discovery:
         locator:
           enabled: true
@@ -23,14 +21,24 @@ spring:
           uri: lb://USER-SERVICE
           predicates:
             - Path=/api/users/**
+          filters:
+            - DedupeResponseHeader=Vary Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
         - id: poem-service-route
           uri: lb://POEM-SERVICE
           predicates:
-            - Path=/api/poem/**, /ws/**, /rtc/**
+            - Path=/api/poem/**
+          filters:
+            - DedupeResponseHeader=Vary Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+        - id: ws-service-route
+          uri: lb:ws://POEM-SERVICE
+          predicates:
+            - Path=/ws/**, /rtc/**
         - id: ai-chat-service
           uri: lb://AI-CHAT-SERVICE
           predicates:
             - Path=/api/chat/**
+          filters:
+            - DedupeResponseHeader=Vary Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
 
 eureka:
   client:

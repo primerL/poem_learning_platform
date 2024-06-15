@@ -795,7 +795,7 @@
                 const message = inputElement.value;
                 console.log(message);
                 // TODO: 直接接api，不经过后端
-                const url = "http://localhost:2345/api/chat?message=" + encodeURIComponent(message);
+                const url = "http://localhost:2345/api/chat/for/help?message=" + encodeURIComponent(message);
                 fetch(url)
                     .then(response => response.text())
                     .then(data => {

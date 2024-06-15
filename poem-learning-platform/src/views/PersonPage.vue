@@ -185,7 +185,7 @@ function toReview() {
             let message = "题目是"+ question.value.toString() + "正确选项是" + ans.toString()
             let m = "你好"
             console.log(message)
-            axios.get(`/api/review/explain?message=${message}`).then(res => {
+            axios.get(`/api/chat/review/explain?message=${message}`).then(res => {
                 explanation.value = res.data
                 console.log(explanation.value)
              }).catch(err => {

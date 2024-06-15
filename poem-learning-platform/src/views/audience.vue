@@ -489,7 +489,7 @@
                 const inputElement = document.getElementById('chatAIInput');
                 const message = inputElement.value;
                 console.log(message);
-                const url = "http://localhost:2345/api/chat?message=" + encodeURIComponent(message);
+                const url = "http://localhost:2345/api/chat/for/help?message=" + encodeURIComponent(message);
                 fetch(url)
                     .then(response => response.text())
                     .then(data => {

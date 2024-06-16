@@ -1,3 +1,12 @@
+## 前端镜像打包
+
+已经重新修改了打包的命令
+
+```
+npm run build
+```
+再编写运行dockerfile即可
+
 ## 包管理提醒
 因为使用的源不一样，在package-lock.json中可能会有冲突，保证package.json中的包是最新的，然后删除package-lock.json，重新npm install
 

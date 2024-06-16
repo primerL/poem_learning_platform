@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-@ServerEndpoint(value = "/ws")
+@ServerEndpoint(value = "/ws",subprotocols = {"protocol"})
 @Component
 public class EchoChannel implements ApplicationContextAware {
     private static ApplicationContext applicationContext;

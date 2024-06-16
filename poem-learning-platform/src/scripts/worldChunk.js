@@ -94,8 +94,13 @@ async function loadOWL(owlFilePath) {
     }
 }
 const owlFilePath = 'http://127.0.0.1:5173/src/assets/owl/block.owl';
-loadOWL(owlFilePath);
-await loadOWL(owlFilePath);
+// loadOWL(owlFilePath);
+// await loadOWL(owlFilePath);
+async function loadOwlFile() {
+    await loadOWL(owlFilePath);
+}
+  
+loadOwlFile();
 
 // 中心点在原点
 const geometry = new THREE.BoxGeometry();

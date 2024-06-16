@@ -153,7 +153,7 @@ import axios from 'axios';
 
 const value = ref('81%')
 const layout = ref(false)
-axios.defaults.baseURL = "http://localhost:2346";
+axios.defaults.baseURL = "http://localhost:2347";
 const userId = localStorage.getItem('userId')
 const carousel = ref(false)
 const slide = ref(1)
@@ -162,7 +162,7 @@ const question = ref(null)
 const options = ref([])
 const answer = ref(null)
 const explanation = ref(null)
-axios.defaults.baseURL = 'http://localhost:2346'
+axios.defaults.baseURL = 'http://localhost:2347'
 
 function toReview() {
     // layout.value = true

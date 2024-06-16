@@ -83,7 +83,7 @@ const login_name = ref(null)
 const login_password = ref(null)
 const isPwd = ref(true)
 const accept = ref(false)
-axios.defaults.baseURL = 'http://localhost:2346'
+axios.defaults.baseURL = ''
 
 const onSubmit = () => {
     console.log('submit')

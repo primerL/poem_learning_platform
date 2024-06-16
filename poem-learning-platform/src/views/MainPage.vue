@@ -90,7 +90,7 @@ const router = useRouter()
 
 const itemBg = ref(null);
 let swiper;
-axios.defaults.baseURL = 'http://localhost:2346'
+// axios.defaults.baseURL = 'http://localhost:2347'
 
 const newsItems = ref([
     {

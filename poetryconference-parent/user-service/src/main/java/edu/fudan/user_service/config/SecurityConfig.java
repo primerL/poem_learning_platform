@@ -18,11 +18,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)  // 使用Lambda表达式禁用CSRF保护
                 .authorizeRequests(authorize -> authorize
-//                        .requestMatchers("/api/users/register", "/api/users/login").permitAll()  // 允许无需认证访问注册和登录接口
-//                        .requestMatchers("/api/question/**").permitAll()
-//                        .requestMatchers("/api/chat").permitAll()
-//                        .requestMatchers("/ws").permitAll()
-                                .anyRequest().permitAll()  // 暂时打开所有访问权限
+                        .anyRequest().permitAll() // 允许所有访问
                 );
 
         return http.build();
@@ -33,3 +29,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+

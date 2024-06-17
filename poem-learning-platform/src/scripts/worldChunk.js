@@ -280,61 +280,61 @@ export class WorldChunk extends THREE.Group {
         grassMesh.receiveShadow = true;
         grassMesh.count = 0;
         let information = {};
-        // for (let i = 0; i < relationships["grassBlock"].length; i++) {
-        //     if (information[relationships["grassBlock"][i].predicate]) {
-        //         information[relationships["grassBlock"][i].predicate].push(relationships["grassBlock"][i].object);
-        //     }else {                
-        //         information[relationships["grassBlock"][i].predicate] = [relationships["grassBlock"][i].object]; 
-        //     }
-        // }
+        for (let i = 0; i < relationships["grassBlock"].length; i++) {
+            if (information[relationships["grassBlock"][i].predicate]) {
+                information[relationships["grassBlock"][i].predicate].push(relationships["grassBlock"][i].object);
+            }else {                
+                information[relationships["grassBlock"][i].predicate] = [relationships["grassBlock"][i].object]; 
+            }
+        }
         grassMesh.userData = information;
         information = {};
         meshes[1] = grassMesh;
         const airWallMesh = new THREE.InstancedMesh(geometry, airWallMaterial, maxCount);
         airWallMesh.count = 0;
-        // for (let i = 0; i < relationships["airWallBlock"].length; i++) {
-        //     if (information[relationships["airWallBlock"][i].predicate]) {
-        //         information[relationships["airWallBlock"][i].predicate].push(relationships["airWallBlock"][i].object);
-        //     }else {                
-        //         information[relationships["airWallBlock"][i].predicate] = [relationships["airWallBlock"][i].object]; 
-        //     }
-        // }
+        for (let i = 0; i < relationships["airWallBlock"].length; i++) {
+            if (information[relationships["airWallBlock"][i].predicate]) {
+                information[relationships["airWallBlock"][i].predicate].push(relationships["airWallBlock"][i].object);
+            }else {                
+                information[relationships["airWallBlock"][i].predicate] = [relationships["airWallBlock"][i].object]; 
+            }
+        }
         airWallMesh.userData = information;
         information = {};
         meshes[2] = airWallMesh;
         const screenMesh = new THREE.InstancedMesh(geometry, screenMaterial, maxCount);
         screenMesh.count = 0;
-        // for (let i = 0; i < relationships["screenWallBlock"].length; i++) {
-        //     if (information[relationships["screenWallBlock"][i].predicate]) {
-        //         information[relationships["screenWallBlock"][i].predicate].push(relationships["screenWallBlock"][i].object);
-        //     }else {                
-        //         information[relationships["screenWallBlock"][i].predicate] = [relationships["screenWallBlock"][i].object]; 
-        //     }
-        // }
+        for (let i = 0; i < relationships["screenWallBlock"].length; i++) {
+            if (information[relationships["screenWallBlock"][i].predicate]) {
+                information[relationships["screenWallBlock"][i].predicate].push(relationships["screenWallBlock"][i].object);
+            }else {                
+                information[relationships["screenWallBlock"][i].predicate] = [relationships["screenWallBlock"][i].object]; 
+            }
+        }
         screenMesh.userData = information;
         information = {};
         meshes[3] = screenMesh;
         const npcMesh = new THREE.InstancedMesh(npcGeometry, npcMaterial, maxCount);
         npcMesh.count = 0;
-        // for (let i = 0; i < relationships["npcCharacter"].length; i++) {
-        //     if (information[relationships["npcCharacter"][i].predicate]) {
-        //         information[relationships["npcCharacter"][i].predicate].push(relationships["npcCharacter"][i].object);
-        //     }else {                
-        //         information[relationships["npcCharacter"][i].predicate] = [relationships["npcCharacter"][i].object]; 
-        //     }
-        // }
+        for (let i = 0; i < relationships["npcCharacter"].length; i++) {
+            if (information[relationships["npcCharacter"][i].predicate]) {
+                information[relationships["npcCharacter"][i].predicate].push(relationships["npcCharacter"][i].object);
+            }else {                
+                information[relationships["npcCharacter"][i].predicate] = [relationships["npcCharacter"][i].object]; 
+            }
+        }
         npcMesh.userData = information;
         information = {};
         meshes[4] = npcMesh;
         const arenaMesh = new THREE.InstancedMesh(geometry, arenaMaterial[this.params.room - 1], maxCount);
         arenaMesh.count = 0;
-        // for (let i = 0; i < relationships["arenaBlock"].length; i++) {
-        //     if (information[relationships["arenaBlock"][i].predicate]) {
-        //         information[relationships["arenaBlock"][i].predicate].push(relationships["arenaBlock"][i].object);
-        //     }else {                
-        //         information[relationships["arenaBlock"][i].predicate] = [relationships["arenaBlock"][i].object]; 
-        //     }
-        // }
+        for (let i = 0; i < relationships["arenaBlock"].length; i++) {
+            if (information[relationships["arenaBlock"][i].predicate]) {
+                information[relationships["arenaBlock"][i].predicate].push(relationships["arenaBlock"][i].object);
+            }else {                
+                information[relationships["arenaBlock"][i].predicate] = [relationships["arenaBlock"][i].object]; 
+            }
+        }
         arenaMesh.userData = information;
         information = {};
         meshes[5] = arenaMesh;

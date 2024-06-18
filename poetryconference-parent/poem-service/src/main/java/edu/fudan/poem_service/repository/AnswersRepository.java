@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface AnswersRepository extends JpaRepository<Answers, Integer> {
-    @Query(value = "SELECT * FROM Answers a WHERE a.id = ( " +
-            "SELECT subA.id FROM Answers subA " +
+    @Query(value = "SELECT * FROM answers a WHERE a.id = ( " +
+            "SELECT subA.id FROM answers subA " +
             "WHERE subA.user_id = :userId " +
             "ORDER BY subA.review_times ASC " +
             "LIMIT 1) ",

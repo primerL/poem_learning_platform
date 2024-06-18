@@ -103,7 +103,7 @@ export class Communications {
 
   initSocketConnection() {
     console.log("初始化 WebSocket...");
-    this.socket = new WebSocket("ws://localhost:2345/rtc?room=1");
+    this.socket = new WebSocket("ws://121.196.228.112:2345/rtc?room=1");
 
     this.socket.onopen = () => {
       console.log("WebSocket 连接已建立.");

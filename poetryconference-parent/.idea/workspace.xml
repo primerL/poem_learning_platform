@@ -13,13 +13,6 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="MavenImportPreferences">
-    <option name="generalSettings">
-      <MavenGeneralSettings>
-        <option name="useMavenConfig" value="true" />
-      </MavenGeneralSettings>
-    </option>
-  </component>
   <component name="ProjectId" id="2h1yrXn0YiElJOxcCjHYiBkHCUD" />
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
@@ -28,6 +21,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
     "last_opened_file_path": "D:/AdvancedWeb/poetryconference-parent/api-gateway"
   }
 }]]></component>

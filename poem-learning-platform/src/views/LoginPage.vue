@@ -83,16 +83,16 @@ const login_name = ref(null)
 const login_password = ref(null)
 const isPwd = ref(true)
 const accept = ref(false)
-axios.defaults.baseURL = 'http://localhost:2345'
+axios.defaults.baseURL = "http://localhost:2347";
 
 const onSubmit = () => {
     console.log('submit')
     axios.post('/api/users/login',
         {
-            user_id: 12,
-            username: login_name.value.toString(),
-            password: login_password.value.toString(),
-            model: 12
+            "user_id": 12,
+            "username": login_name.value.toString(),
+            "password": login_password.value.toString(),
+            "model": 12
         }).then(res => {
             console.log('login success')
             console.log(res)

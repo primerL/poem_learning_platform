@@ -93,13 +93,12 @@ async function loadOWL(owlFilePath) {
         console.error('Error loading OWL file:', error);
     }
 }
-const owlFilePath = 'http://127.0.0.1:5173/src/assets/owl/block.owl';
-// loadOWL(owlFilePath);
-// await loadOWL(owlFilePath);
+const owlFilePath = 'http://localhost:8888/src/assets/owl/block.owl';
+
 async function loadOwlFile() {
     await loadOWL(owlFilePath);
 }
-  
+
 loadOwlFile();
 
 // 中心点在原点

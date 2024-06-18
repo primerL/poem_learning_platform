@@ -29,25 +29,21 @@
 
                         <q-timeline-entry title="对战最多的玩家" subtitle="2023-05-22">
                             <div>
-                                你与<strong>玩家A</strong>进行了最多的对战，共进行了<strong>50</strong>次激烈的比赛。在这些比赛中，你们互相切磋，共同进步，形成了良好的竞争关系。希望你们能够继续保持这种积极的竞争，不断提升自己的实力。
+                                你与<strong>玩家A</strong>进行了最多的对战。在这些比赛中，你们互相切磋，共同进步，形成了良好的竞争关系。希望你们能够继续保持这种积极的竞争，不断提升自己的实力。
                             </div>
                         </q-timeline-entry>
 
                         <q-timeline-entry title="参与的诗词大赛次数" subtitle="2023-05-22">
                             <div>
-                                你一共参与了<strong>30</strong>次诗词大赛，每次比赛你都展现出了坚韧不拔的精神和出色的诗词造诣。其中，你获得了<strong>20</strong>次胜利，胜率达到了<strong>66%</strong>。这些成绩离不开你的努力和付出。希望你能继续保持这种良好的状态，在未来的比赛中取得更好的成绩。
+                                过去一周里，你一共参与了<strong>{{ contest_num
+                                    }}</strong>次诗词大赛，每次比赛你都展现出了坚韧不拔的精神和出色的诗词造诣。你的胜率达到了<strong>{{ value
+                                    }}</strong>。这些成绩离不开你的努力和付出。希望你能继续保持这种良好的状态，在未来的比赛中取得更好的成绩。
                             </div>
                         </q-timeline-entry>
 
                         <q-timeline-entry title="最佳表现" subtitle="2023-05-22" color="orange" icon="star">
                             <div>
                                 在一次特别的诗词大赛中，你的表现尤为出色，凭借深厚的诗词积累和出色的临场发挥，获得了满分评价，成为了当月的最佳选手。这不仅是对你过去努力的肯定，更是对你未来继续前行的激励。希望你再接再厉，争取在未来的比赛中取得更好的成绩。
-                            </div>
-                        </q-timeline-entry>
-
-                        <q-timeline-entry title="学习时长" subtitle="2023-05-22">
-                            <div>
-                                你总共学习了<strong>500</strong>个小时，平均每天学习<strong>1.4</strong>个小时。这些时间不仅让你积累了丰富的知识，也培养了你良好的学习习惯。希望你能够继续坚持这种学习态度，不断挑战自己，提高自己的综合能力。
                             </div>
                         </q-timeline-entry>
 
@@ -120,7 +116,7 @@
                                 <div class="q-mt-md">
                                     {{ explanation }}
                                 </div>
-                                <q-btn color="secondary" label="下一题" @click="toReview()"/>
+                                <q-btn color="secondary" label="下一题" @click="toReview()" />
                             </div>
 
                         </q-page>
@@ -153,7 +149,7 @@ import axios from 'axios';
 
 const value = ref('81%')
 const layout = ref(false)
-axios.defaults.baseURL = "http://localhost:2345";
+axios.defaults.baseURL = "http://localhost:2347";
 const userId = localStorage.getItem('userId')
 const carousel = ref(false)
 const slide = ref(1)
@@ -162,7 +158,8 @@ const question = ref(null)
 const options = ref([])
 const answer = ref(null)
 const explanation = ref(null)
-axios.defaults.baseURL = 'http://localhost:2345'
+axios.defaults.baseURL = 'http://localhost:2347'
+const contest_num = ref(0)
 
 function toReview() {
     // layout.value = true
@@ -181,14 +178,14 @@ function toReview() {
             options.value = data['options']
             answer.value = data['answer']
             explanation.value = null
-            let ans = options.value[answer.value-1]
-            let message = "题目是"+ question.value.toString() + "正确选项是" + ans.toString()
+            let ans = options.value[answer.value - 1]
+            let message = "题目是" + question.value.toString() + "正确选项是" + ans.toString()
             let m = "你好"
             console.log(message)
             axios.get(`/api/chat/review/explain?message=${message}`).then(res => {
                 explanation.value = res.data
                 console.log(explanation.value)
-             }).catch(err => {
+            }).catch(err => {
                 console.log(err)
             })
         }
@@ -200,46 +197,67 @@ function toReview() {
 
 onMounted(() => {
 
+    axios.get(`/api/poem/win/rate/total/${userId}`).then(res => {
+        value.value = res.data
+        // 百分比转换
+        value.value = value.value * 100 + '%'
+    }).catch(err => {
+        console.log(err)
+    })
 
-    // 折线图
-    const chartDom = document.getElementById('chart')
-    const myChart = echarts.init(chartDom)
-    const option = {
-        xAxis: {
-            type: 'category',
-            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        },
-        yAxis: {
-            type: 'value'
-        },
-        series: [
-            {
-                data: [820, 932, 901, 934, 1290, 1330, 1320],
-                type: 'line'
-            }
-        ]
-    }
-    myChart.setOption(option)
+    axios.get(`/api/poem/contest/num/${userId}`).then(res => {
+        console.log(res.data)
+        // 折线图
+        const chartDom = document.getElementById('chart')
+        const myChart = echarts.init(chartDom)
+        const option = {
+            xAxis: {
+                type: 'category',
+                data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    data: res.data,
+                    type: 'line'
+                }
+            ]
+        }
+        myChart.setOption(option)
+    }).catch(err => {
+        console.log(err)
+    })
 
-    // 柱状图
-    const barChartDom = document.getElementById('bar-chart')
-    const barChart = echarts.init(barChartDom)
-    const barOption = {
-        xAxis: {
-            type: 'category',
-            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        },
-        yAxis: {
-            type: 'value'
-        },
-        series: [
-            {
-                data: [120, 200, 150, 80, 70, 110, 130],
-                type: 'bar'
-            }
-        ]
-    }
-    barChart.setOption(barOption)
+    axios.get(`/api/poem/contest/win/rate/${userId}`).then(res => {
+        
+        console.log(res.data)
+        // 柱状图
+        const barChartDom = document.getElementById('bar-chart')
+        const barChart = echarts.init(barChartDom)
+        const barOption = {
+            xAxis: {
+                type: 'category',
+                data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    data: res.data,
+                    type: 'bar'
+                }
+            ]
+        }
+        barChart.setOption(barOption)
+    }).catch(err => {
+        console.log(err)
+    })
+
+
+
 })
 </script>
 

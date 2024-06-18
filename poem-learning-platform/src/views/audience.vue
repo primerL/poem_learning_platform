@@ -134,7 +134,7 @@
 
             // 存储玩家 socketid和模型的映射
             const playerMap = new Map();
-            const ws = new WebSocket("ws://localhost:2345/ws");
+            const ws = new WebSocket("ws://localhost:2347/ws");
             let isSending = false; // 用于标记是否正在发送消息
             ws.onopen = function(event) {
                 // TODO：name 应该从localStorage中得到

@@ -93,7 +93,7 @@ async function loadOWL(owlFilePath) {
         console.error('Error loading OWL file:', error);
     }
 }
-const owlFilePath = 'http://localhost:8888/src/assets/owl/block.owl';
+const owlFilePath = 'http://121.196.228.112:8888/src/assets/owl/block.owl';
 
 async function loadOwlFile() {
     await loadOWL(owlFilePath);

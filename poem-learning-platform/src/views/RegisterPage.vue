@@ -62,7 +62,7 @@ const registerName = ref(null);
 const password = ref(null);
 const accept = ref(false);
 const isPwd = ref(true);
-axios.defaults.baseURL = "http://localhost:2347";
+axios.defaults.baseURL = "http://121.196.228.112:2345";
 const modelId = ref(1);
 
 function onReset() {

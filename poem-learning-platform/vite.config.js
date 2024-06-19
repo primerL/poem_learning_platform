@@ -12,18 +12,18 @@ export default defineConfig({
     quasar({
     }),
 
-    viteStaticCopy({
-      targets: [
-        {
-          src: 'src/assets/', // 指定源文件目录
-          dest: 'src/'      // 指定构建输出目录
-        },
-        {
-          src: 'src/scripts/', // 源文件路径
-          dest: 'src/'                      // 目标路径
-        },
-      ]
-    })
+    // viteStaticCopy({
+    //   targets: [
+    //     {
+    //       src: 'src/assets/', // 指定源文件目录
+    //       dest: 'src/'      // 指定构建输出目录
+    //     },
+    //     {
+    //       src: 'src/scripts/', // 源文件路径
+    //       dest: 'src/'                      // 目标路径
+    //     },
+    //   ]
+    // })
   ],
 
   server: {

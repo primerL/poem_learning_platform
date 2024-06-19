@@ -4,7 +4,7 @@
 
 ```
 docker build . -t frontend:demo
-docker run -p 8888:80 frontend:demo # 必须在8888，否则修改owlFilePath
+docker run -p 8888:80 zsq0216/frontend # 必须在8888，否则修改owlFilePath
 ```
 再编写运行dockerfile即可
 

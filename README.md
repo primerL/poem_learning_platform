@@ -3,7 +3,8 @@
 已经重新修改了打包的命令， 目前有问题是无法进入3D界面，但是可以进入2D界面....
 
 ```
-npm run build
+docker build . -t frontend:demo
+docker run -p 8888:80 zsq0216/frontend # 必须在8888，否则修改owlFilePath
 ```
 再编写运行dockerfile即可
 

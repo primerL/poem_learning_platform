@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  my-local-mysql:
+    image: my-local-mysql:latest
+    container_name: my-local-mysql
+    restart: always
+
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: poetry
+    networks:
+      - my-network
+
+  eureka-server:
+    image: eureka-server:0.0.1-SNAPSHOT
+    container_name: eureka-server
+    restart: always
+    ports:
+      - "8761:8761"
+    networks:
+      - my-network
+
+  user-service:
+    image: user-service:0.0.1-SNAPSHOT
+    container_name: user-service
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://my-local-mysql:3306/poetry?serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_DATASOURCE_DRIVERCLASSNAME: com.mysql.cj.jdbc.Driver
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_JPA_HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect  
+    ports:
+      - "8081:8081"
+    networks:
+      - my-network
+    depends_on:
+      - my-local-mysql
+      - eureka-server
+  
+
+  poem-service:
+    image: poem-service:0.0.1-SNAPSHOT
+    container_name: poem-service
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://my-local-mysql:3306/poetry?serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_DATASOURCE_DRIVERCLASSNAME: com.mysql.cj.jdbc.Driver
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_JPA_HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect  
+    ports:
+      - "8082:8082"  
+    networks:
+      - my-network
+    depends_on:
+      - my-local-mysql
+      - eureka-server
+
+
+  ai-chat-service:
+    image: ai-chat-service:0.0.1-SNAPSHOT
+    container_name: ai-chat-service
+    restart: always
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports:
+      - "8085:8085"
+    networks:
+      - my-network
+    depends_on:
+      - eureka-server
+
+  api-gateway:
+    image: api-gateway:0.0.1-SNAPSHOT
+    container_name: api-gateway
+    restart: always
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports:
+      - "2345:2345"
+    networks:
+      - my-network
+    depends_on:
+      - eureka-server
+
+  # frontend:
+  #   image: my-frontend-app:latest
+  #   container_name: frontend
+  #   ports:
+  #     - "5173:80"
+  #   networks:
+  #     - my-network
+
+networks:
+  my-network:
+    driver: bridge

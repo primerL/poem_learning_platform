@@ -27,7 +27,6 @@ public class UserController {
     @CrossOrigin
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User user) {
-        System.out.println("here is the user: ");
         UserLoginVo userLoginVo = userService.checkLogin(user.getUsername(), user.getPassword());
         if (userLoginVo != null) {
             return ResponseEntity.ok(userLoginVo);

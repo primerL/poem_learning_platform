@@ -17,5 +17,5 @@ logging:
     root: INFO
     org.springframework.web: INFO
     org.springframework.boot.autoconfigure.logging: INFO
-    com.netflix.discovery: DEBUG
-    org.springframework.cloud: DEBUG
+    com.netflix.discovery: INFO
+    org.springframework.cloud: INFO

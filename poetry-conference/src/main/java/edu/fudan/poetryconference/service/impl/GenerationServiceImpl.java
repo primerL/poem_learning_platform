@@ -21,7 +21,11 @@ import java.util.Arrays;
 @Service
 public class GenerationServiceImpl implements GenerationService {
     public String generateMessage(String question_content) throws ApiException, NoApiKeyException, InputRequiredException {
-        Constants.apiKey="sk-fb566bdc42984fb78b95cc00e037975a";
+        String apiKey = System.getenv("DASHSCOPE_API_KEY");
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new NoApiKeyException("DASHSCOPE_API_KEY is not configured");
+        }
+        Constants.apiKey = apiKey;
         Generation gen = new Generation();
 
         Message systemMsg = Message.builder()
@@ -43,8 +47,6 @@ public class GenerationServiceImpl implements GenerationService {
 
         GenerationResult result = gen.call(param);
 
-        //输出result
-        System.out.println(result.toString());
         GenerationOutput output = result.getOutput();
         GenerationOutput.Choice choice = output.getChoices().get(0);
         return choice.getMessage().getContent();

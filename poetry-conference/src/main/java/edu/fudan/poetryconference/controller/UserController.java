@@ -58,7 +58,6 @@ public class UserController {
     @CrossOrigin
     @GetMapping("/win/rate/total/{userId}")
     public Double getUserWinRateTotal(@PathVariable Long userId) {
-        System.out.println("controller: "+userId);
         return contestResultService.getUserWinRateTotal(userId);
     }
 

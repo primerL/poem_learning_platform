@@ -32,5 +32,8 @@
     "sass": "^1.32.12",
     "vite": "^5.2.0",
     "vite-plugin-static-copy": "^1.0.5"
+  },
+  "overrides": {
+    "minimatch": "^9.0.5"
   }
 }

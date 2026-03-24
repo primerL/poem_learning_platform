@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 @EnableWebSecurity
@@ -16,13 +17,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)  // 使用Lambda表达式禁用CSRF保护
-                .authorizeRequests(authorize -> authorize
-//                        .requestMatchers("/api/users/register", "/api/users/login").permitAll()  // 允许无需认证访问注册和登录接口
-//                        .requestMatchers("/api/question/**").permitAll()
-//                        .requestMatchers("/api/chat").permitAll()
-//                        .requestMatchers("/ws").permitAll()
-                        .anyRequest().permitAll()  // 暂时打开所有访问权限
+                .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
+                        .frameOptions(frameOptions -> frameOptions.sameOrigin())
+                )
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().permitAll()
                 );
 
         return http.build();
@@ -33,4 +37,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-

@@ -29,7 +29,6 @@ public class ContestResultServiceImpl implements ContestResultService {
     public List<ContestResultVo> getUserContestResults(Long userId) {
         List<ContestResult> contestResults = contestResultRepository.findByUser1Id(userId);
         assert(contestResults.size() > 0);
-        System.out.println(contestResults.size());
         return contestResults.stream().map(this::convertToVo).collect(Collectors.toList());
     }
 
@@ -41,7 +40,6 @@ public class ContestResultServiceImpl implements ContestResultService {
         long countScore1Greater = contestResults.stream()
                 .filter(result -> result.getScore1() > result.getScore2())
                 .count();  // score1 > score2 的比赛数
-        System.out.println("count size: "+countTotal);
         if (countTotal > 0) {
             double ratio = (double) countScore1Greater / countTotal;  // 计算比例
             return ratio;
@@ -55,11 +53,9 @@ public class ContestResultServiceImpl implements ContestResultService {
         LocalDateTime now = LocalDateTime.now();  // 获取当前日期
         LocalDateTime midnight = now.truncatedTo(ChronoUnit.DAYS);
         LocalDateTime lastMonday = midnight.with(ChronoField.DAY_OF_WEEK, 1).minusWeeks(1);
-        System.out.println("lastMondayDateTime: "+lastMonday);
 
         List<ContestResult> contestResults = contestResultRepository.findRecentContestsByUserId(userId,
                 lastMonday);
-        System.out.println("contestResults size: "+contestResults.size());
         List<Integer> numList = convertToNum(contestResults);
         return numList;
     }
@@ -95,8 +91,6 @@ public class ContestResultServiceImpl implements ContestResultService {
         LocalDateTime midnight = now.truncatedTo(ChronoUnit.DAYS);
         LocalDateTime lastMonday = midnight.with(ChronoField.DAY_OF_WEEK, 1).minusWeeks(1); // 上周一
         LocalDateTime nextMonday = lastMonday.plusWeeks(1);
-        System.out.println("lastMonday: "+lastMonday);
-        System.out.println("nextMonday: "+nextMonday);
 
         for (ContestResult contest : contestResults) {
             if (contest.getContestDate().isAfter(lastMonday) && contest.getContestDate().isBefore(nextMonday)) {
